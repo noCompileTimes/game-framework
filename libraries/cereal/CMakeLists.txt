@@ -15,7 +15,6 @@ if(NOT COMPILER_SUPPORT_M32)
     set(SKIP_PORTABILITY_TEST ON CACHE BOOL "Skip portability (32 bit) tests" FORCE)
 endif()
 
-option(BUILD_DOC "Build documentation" ON)
 option(BUILD_SANDBOX "Build sandbox examples" ON)
 option(SKIP_PERFORMANCE_COMPARISON "Skip building performance sandbox comparison (requires boost)" OFF)
 
@@ -135,9 +134,4 @@ endif()
 
 if(BUILD_SANDBOX)
     add_subdirectory(sandbox)
-endif()
-
-
-if(BUILD_DOC)
-    add_subdirectory(doc)
 endif()
