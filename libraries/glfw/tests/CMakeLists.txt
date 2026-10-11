@@ -1,4 +1,3 @@
-
 link_libraries(glfw)
 
 include_directories("${GLFW_SOURCE_DIR}/deps")
@@ -12,7 +11,6 @@ if (MSVC OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
-set(GLAD_GL "${GLFW_SOURCE_DIR}/deps/glad/gl.h")
 set(GLAD_VULKAN "${GLFW_SOURCE_DIR}/deps/glad/vulkan.h")
 set(GETOPT "${GLFW_SOURCE_DIR}/deps/getopt.h"
            "${GLFW_SOURCE_DIR}/deps/getopt.c")
@@ -41,6 +39,8 @@ add_executable(title WIN32 MACOSX_BUNDLE title.c ${GLAD_GL})
 add_executable(triangle-vulkan WIN32 triangle-vulkan.c ${GLAD_VULKAN})
 add_executable(window WIN32 MACOSX_BUNDLE window.c ${GLAD_GL})
 
+target_link_libraries(title PRIVATE glad)
+
 target_link_libraries(empty Threads::Threads)
 target_link_libraries(threads Threads::Threads)
 if (RT_LIBRARY)
@@ -54,7 +54,6 @@ set(CONSOLE_BINARIES allocator clipboard events msaa glfwinfo iconify monitors
     reopen cursor)
 
 set_target_properties(${GUI_ONLY_BINARIES} ${CONSOLE_BINARIES} PROPERTIES
-                      C_STANDARD 99
                       FOLDER "GLFW3/Tests")
 
 if (MSVC)
