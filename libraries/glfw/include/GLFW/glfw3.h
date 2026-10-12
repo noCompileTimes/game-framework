@@ -681,9 +681,6 @@ extern "C" {
 #define GLFW_NOT_INITIALIZED        0x00010001
 /*! @brief No context is current for this thread.
  *
- *  This occurs if a GLFW function was called that needs and operates on the
- *  current OpenGL or OpenGL ES context but no context is current on the calling
- *  thread.  One such function is @ref glfwSwapInterval.
  *
  *  @analysis Application programmer error.  Ensure a context is current before
  *  calling functions that require a current context.
@@ -1166,8 +1163,6 @@ extern "C" {
 #define GLFW_RELEASE_BEHAVIOR_NONE  0x00035002
 
 #define GLFW_NATIVE_CONTEXT_API     0x00036001
-#define GLFW_EGL_CONTEXT_API        0x00036002
-#define GLFW_OSMESA_CONTEXT_API     0x00036003
 
 #define GLFW_ANGLE_PLATFORM_TYPE_NONE    0x00037001
 #define GLFW_ANGLE_PLATFORM_TYPE_OPENGL  0x00037002
@@ -6139,7 +6134,6 @@ GLFWAPI GLFWwindow* glfwGetCurrentContext(void);
  *  @thread_safety This function may be called from any thread.
  *
  *  @sa @ref buffer_swap
- *  @sa @ref glfwSwapInterval
  *
  *  @since Added in version 1.0.
  *  __GLFW 3:__ Added window handle parameter.
@@ -6147,52 +6141,6 @@ GLFWAPI GLFWwindow* glfwGetCurrentContext(void);
  *  @ingroup window
  */
 GLFWAPI void glfwSwapBuffers(GLFWwindow* window);
-
-/*! @brief Sets the swap interval for the current context.
- *
- *  This function sets the swap interval for the current OpenGL or OpenGL ES
- *  context, i.e. the number of screen updates to wait from the time @ref
- *  glfwSwapBuffers was called before swapping the buffers and returning.  This
- *  is sometimes called _vertical synchronization_, _vertical retrace
- *  synchronization_ or just _vsync_.
- *
- *  A context that supports either of the `WGL_EXT_swap_control_tear` and
- *  `GLX_EXT_swap_control_tear` extensions also accepts _negative_ swap
- *  intervals, which allows the driver to swap immediately even if a frame
- *  arrives a little bit late.  You can check for these extensions with @ref
- *  glfwExtensionSupported.
- *
- *  A context must be current on the calling thread.  Calling this function
- *  without a current context will cause a @ref GLFW_NO_CURRENT_CONTEXT error.
- *
- *  This function does not apply to Vulkan.  If you are rendering with Vulkan,
- *  see the present mode of your swapchain instead.
- *
- *  @param[in] interval The minimum number of screen updates to wait for
- *  until the buffers are swapped by @ref glfwSwapBuffers.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED, @ref
- *  GLFW_NO_CURRENT_CONTEXT and @ref GLFW_PLATFORM_ERROR.
- *
- *  @remark This function is not called during context creation, leaving the
- *  swap interval set to whatever is the default for that API.  This is done
- *  because some swap interval extensions used by GLFW do not allow the swap
- *  interval to be reset to zero once it has been set to a non-zero value.
- *
- *  @remark Some GPU drivers do not honor the requested swap interval, either
- *  because of a user setting that overrides the application's request or due to
- *  bugs in the driver.
- *
- *  @thread_safety This function may be called from any thread.
- *
- *  @sa @ref buffer_swap
- *  @sa @ref glfwSwapBuffers
- *
- *  @since Added in version 1.0.
- *
- *  @ingroup context
- */
-GLFWAPI void glfwSwapInterval(int interval);
 
 /*! @brief Returns whether the specified extension is available.
  *

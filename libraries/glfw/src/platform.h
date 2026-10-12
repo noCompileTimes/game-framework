@@ -37,10 +37,6 @@
  #error "You must not define these; define zero or more _GLFW_<platform> macros instead"
 #endif
 
-#include "null_platform.h"
-#define GLFW_EXPOSE_NATIVE_EGL
-#define GLFW_EXPOSE_NATIVE_OSMESA
-
 #if defined(_GLFW_WIN32)
  #include "win32_platform.h"
  #define GLFW_EXPOSE_NATIVE_WIN32
@@ -90,8 +86,6 @@
  #define GLFW_GLX_LIBRARY_CONTEXT_STATE
 #endif
 
-#include "null_joystick.h"
-
 #if defined(_GLFW_WIN32)
  #include "win32_joystick.h"
 #else
@@ -122,21 +116,18 @@
         GLFW_COCOA_WINDOW_STATE \
         GLFW_WAYLAND_WINDOW_STATE \
         GLFW_X11_WINDOW_STATE \
-        GLFW_NULL_WINDOW_STATE \
 
 #define GLFW_PLATFORM_MONITOR_STATE \
         GLFW_WIN32_MONITOR_STATE \
         GLFW_COCOA_MONITOR_STATE \
         GLFW_WAYLAND_MONITOR_STATE \
         GLFW_X11_MONITOR_STATE \
-        GLFW_NULL_MONITOR_STATE \
 
 #define GLFW_PLATFORM_CURSOR_STATE \
         GLFW_WIN32_CURSOR_STATE \
         GLFW_COCOA_CURSOR_STATE \
         GLFW_WAYLAND_CURSOR_STATE \
         GLFW_X11_CURSOR_STATE \
-        GLFW_NULL_CURSOR_STATE \
 
 #define GLFW_PLATFORM_JOYSTICK_STATE \
         GLFW_WIN32_JOYSTICK_STATE \
@@ -148,7 +139,6 @@
         GLFW_COCOA_LIBRARY_WINDOW_STATE \
         GLFW_WAYLAND_LIBRARY_WINDOW_STATE \
         GLFW_X11_LIBRARY_WINDOW_STATE \
-        GLFW_NULL_LIBRARY_WINDOW_STATE \
 
 #define GLFW_PLATFORM_LIBRARY_JOYSTICK_STATE \
         GLFW_WIN32_LIBRARY_JOYSTICK_STATE \

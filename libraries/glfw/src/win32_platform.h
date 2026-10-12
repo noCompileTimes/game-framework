@@ -259,12 +259,10 @@ typedef LONG (WINAPI * PFN_RtlVerifyVersionInfo)(OSVERSIONINFOEXW*,ULONG,ULONGLO
 #define RtlVerifyVersionInfo _glfw.win32.ntdll.RtlVerifyVersionInfo_
 
 // WGL extension pointer typedefs
-typedef BOOL (WINAPI * PFNWGLSWAPINTERVALEXTPROC)(int);
 typedef BOOL (WINAPI * PFNWGLGETPIXELFORMATATTRIBIVARBPROC)(HDC,int,int,UINT,const int*,int*);
 typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGEXTPROC)(void);
 typedef const char* (WINAPI * PFNWGLGETEXTENSIONSSTRINGARBPROC)(HDC);
 typedef HGLRC (WINAPI * PFNWGLCREATECONTEXTATTRIBSARBPROC)(HDC,HGLRC,const int*);
-#define wglSwapIntervalEXT _glfw.wgl.SwapIntervalEXT
 #define wglGetPixelFormatAttribivARB _glfw.wgl.GetPixelFormatAttribivARB
 #define wglGetExtensionsStringEXT _glfw.wgl.GetExtensionsStringEXT
 #define wglGetExtensionsStringARB _glfw.wgl.GetExtensionsStringARB
@@ -331,12 +329,10 @@ typedef struct _GLFWlibraryWGL
     PFN_wglMakeCurrent                  MakeCurrent;
     PFN_wglShareLists                   ShareLists;
 
-    PFNWGLSWAPINTERVALEXTPROC           SwapIntervalEXT;
     PFNWGLGETPIXELFORMATATTRIBIVARBPROC GetPixelFormatAttribivARB;
     PFNWGLGETEXTENSIONSSTRINGEXTPROC    GetExtensionsStringEXT;
     PFNWGLGETEXTENSIONSSTRINGARBPROC    GetExtensionsStringARB;
     PFNWGLCREATECONTEXTATTRIBSARBPROC   CreateContextAttribsARB;
-    bool                                EXT_swap_control;
     bool                                EXT_colorspace;
     bool                                ARB_multisample;
     bool                                ARB_framebuffer_sRGB;
@@ -535,10 +531,6 @@ void _glfwDestroyCursorWin32(_GLFWcursor* cursor);
 void _glfwSetCursorWin32(_GLFWwindow* window, _GLFWcursor* cursor);
 void _glfwSetClipboardStringWin32(const char* string);
 const char* _glfwGetClipboardStringWin32(void);
-
-EGLenum _glfwGetEGLPlatformWin32(EGLint** attribs);
-EGLNativeDisplayType _glfwGetEGLNativeDisplayWin32(void);
-EGLNativeWindowType _glfwGetEGLNativeWindowWin32(_GLFWwindow* window);
 
 void _glfwGetRequiredInstanceExtensionsWin32(char** extensions);
 GLFWbool _glfwGetPhysicalDevicePresentationSupportWin32(VkInstance instance, VkPhysicalDevice device, uint32_t queuefamily);

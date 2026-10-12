@@ -46,13 +46,9 @@
 //
 GLFWbool _glfwIsValidContextConfig(const _GLFWctxconfig* ctxconfig)
 {
-    if (ctxconfig->source != GLFW_NATIVE_CONTEXT_API &&
-        ctxconfig->source != GLFW_EGL_CONTEXT_API &&
-        ctxconfig->source != GLFW_OSMESA_CONTEXT_API)
+    if (ctxconfig->source != GLFW_NATIVE_CONTEXT_API)
     {
-        _glfwInputError(GLFW_INVALID_ENUM,
-                        "Invalid context creation API 0x%08X",
-                        ctxconfig->source);
+        _glfwInputError(GLFW_INVALID_ENUM, "Invalid context creation API 0x%08X", ctxconfig->source);
         return GLFW_FALSE;
     }
 
@@ -665,23 +661,6 @@ GLFWAPI void glfwSwapBuffers(GLFWwindow* handle)
     }
 
     window->context.swapBuffers(window);
-}
-
-GLFWAPI void glfwSwapInterval(int interval)
-{
-    _GLFWwindow* window;
-
-    _GLFW_REQUIRE_INIT();
-
-    window = _glfwPlatformGetTls(&_glfw.contextSlot);
-    if (!window)
-    {
-        _glfwInputError(GLFW_NO_CURRENT_CONTEXT,
-                        "Cannot set swap interval without a current OpenGL or OpenGL ES context");
-        return;
-    }
-
-    window->context.swapInterval(interval);
 }
 
 GLFWAPI int glfwExtensionSupported(const char* extension)
