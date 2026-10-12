@@ -16,7 +16,7 @@ if(NOT COMPILER_SUPPORT_M32)
 endif()
 
 option(BUILD_SANDBOX "Build sandbox examples" ON)
-option(SKIP_PERFORMANCE_COMPARISON "Skip building performance sandbox comparison (requires boost)" OFF)
+option(SKIP_PERFORMANCE_COMPARISON "Skip building performance sandbox comparison (requires boost)" ON)
 
 # TODO: should not be needed! CK
 if(NOT CMAKE_VERSION VERSION_LESS 3.0) # installing cereal requires INTERFACE lib
