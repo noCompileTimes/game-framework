@@ -11,7 +11,7 @@ if (MSVC OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
-set(GLAD_VULKAN "${GLFW_SOURCE_DIR}/deps/glad/vulkan.h")
+set(GLAD_VULKAN "${GLFW_SOURCE_DIR}/deps/vulkan/vulkan.h")
 set(GETOPT "${GLFW_SOURCE_DIR}/deps/getopt.h"
            "${GLFW_SOURCE_DIR}/deps/getopt.c")
 set(TINYCTHREAD "${GLFW_SOURCE_DIR}/deps/tinycthread.h"

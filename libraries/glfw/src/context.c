@@ -53,12 +53,9 @@ GLFWbool _glfwIsValidContextConfig(const _GLFWctxconfig* ctxconfig)
     }
 
     if (ctxconfig->client != GLFW_NO_API &&
-        ctxconfig->client != GLFW_OPENGL_API &&
-        ctxconfig->client != GLFW_OPENGL_ES_API)
+        ctxconfig->client != GLFW_OPENGL_API)
     {
-        _glfwInputError(GLFW_INVALID_ENUM,
-                        "Invalid client API 0x%08X",
-                        ctxconfig->client);
+        _glfwInputError(GLFW_INVALID_ENUM, "Invalid client API 0x%08X",ctxconfig->client);
         return GLFW_FALSE;
     }
 
@@ -126,23 +123,6 @@ GLFWbool _glfwIsValidContextConfig(const _GLFWctxconfig* ctxconfig)
             // Forward-compatible contexts are only defined for OpenGL version 3.0 and above
             _glfwInputError(GLFW_INVALID_VALUE,
                             "Forward-compatibility is only defined for OpenGL version 3.0 and above");
-            return GLFW_FALSE;
-        }
-    }
-    else if (ctxconfig->client == GLFW_OPENGL_ES_API)
-    {
-        if (ctxconfig->major < 1 || ctxconfig->minor < 0 ||
-            (ctxconfig->major == 1 && ctxconfig->minor > 1) ||
-            (ctxconfig->major == 2 && ctxconfig->minor > 0))
-        {
-            // OpenGL ES 1.0 is the smallest valid version
-            // OpenGL ES 1.x series ended with version 1.1
-            // OpenGL ES 2.x series ended with version 2.0
-            // For now, let everything else through
-
-            _glfwInputError(GLFW_INVALID_VALUE,
-                            "Invalid OpenGL ES version %i.%i",
-                            ctxconfig->major, ctxconfig->minor);
             return GLFW_FALSE;
         }
     }
@@ -338,24 +318,12 @@ const _GLFWfbconfig* _glfwChooseFBConfig(const _GLFWfbconfig* desired,
 
 // Retrieves the attributes of the current context
 //
-GLFWbool _glfwRefreshContextAttribs(_GLFWwindow* window,
-                                    const _GLFWctxconfig* ctxconfig)
+GLFWbool _glfwRefreshContextAttribs(_GLFWwindow* window, const _GLFWctxconfig* ctxconfig)
 {
-    int i;
-    _GLFWwindow* previous;
-    const char* version;
-    const char* prefixes[] =
-    {
-        "OpenGL ES-CM ",
-        "OpenGL ES-CL ",
-        "OpenGL ES ",
-        NULL
-    };
-
     window->context.source = ctxconfig->source;
     window->context.client = GLFW_OPENGL_API;
 
-    previous = _glfwPlatformGetTls(&_glfw.contextSlot);
+    _GLFWwindow* previous = _glfwPlatformGetTls(&_glfw.contextSlot);
     glfwMakeContextCurrent((GLFWwindow*) window);
     if (_glfwPlatformGetTls(&_glfw.contextSlot) != window)
         return GLFW_FALSE;
@@ -376,7 +344,7 @@ GLFWbool _glfwRefreshContextAttribs(_GLFWwindow* window,
         return GLFW_FALSE;
     }
 
-    version = (const char*) window->context.GetString(GL_VERSION);
+    const char* version = (const char*)window->context.GetString(GL_VERSION);
     if (!version)
     {
         if (ctxconfig->client == GLFW_OPENGL_API)
@@ -392,18 +360,6 @@ GLFWbool _glfwRefreshContextAttribs(_GLFWwindow* window,
 
         glfwMakeContextCurrent((GLFWwindow*) previous);
         return GLFW_FALSE;
-    }
-
-    for (i = 0;  prefixes[i];  i++)
-    {
-        const size_t length = strlen(prefixes[i]);
-
-        if (strncmp(version, prefixes[i], length) == 0)
-        {
-            version += length;
-            window->context.client = GLFW_OPENGL_ES_API;
-            break;
-        }
     }
 
     if (!sscanf(version, "%d.%d.%d",

@@ -30,10 +30,11 @@ add_executable(offscreen offscreen.c ${ICON} ${GLAD_GL})
 add_executable(particles WIN32 MACOSX_BUNDLE particles.c ${ICON} ${TINYCTHREAD} ${GETOPT} ${GLAD_GL})
 add_executable(sharing WIN32 MACOSX_BUNDLE sharing.c ${ICON} ${GLAD_GL})
 add_executable(splitview WIN32 MACOSX_BUNDLE splitview.c ${ICON} ${GLAD_GL})
-add_executable(triangle-opengl WIN32 MACOSX_BUNDLE triangle-opengl.c ${ICON} ${GLAD_GL})
-add_executable(triangle-opengles WIN32 MACOSX_BUNDLE triangle-opengles.c ${ICON} ${GLAD_GLES2})
+add_executable(triangle-opengl WIN32 MACOSX_BUNDLE triangle-opengl.c ${ICON})
 add_executable(wave WIN32 MACOSX_BUNDLE wave.c ${ICON} ${GLAD_GL})
 add_executable(windows WIN32 MACOSX_BUNDLE windows.c ${ICON} ${GLAD_GL})
+
+target_link_libraries(triangle-opengl PRIVATE glad)
 
 target_link_libraries(offscreen PRIVATE stb)
 
@@ -42,22 +43,17 @@ if (RT_LIBRARY)
     target_link_libraries(particles "${RT_LIBRARY}")
 endif()
 
-set(GUI_ONLY_BINARIES boing gears heightmap particles sharing splitview
-    triangle-opengl triangle-opengles wave windows)
+set(GUI_ONLY_BINARIES boing gears heightmap particles sharing splitview triangle-opengl wave windows)
 set(CONSOLE_BINARIES offscreen)
 
-set_target_properties(${GUI_ONLY_BINARIES} ${CONSOLE_BINARIES} PROPERTIES
-                      C_STANDARD 99
-                      FOLDER "GLFW3/Examples")
+set_target_properties(${GUI_ONLY_BINARIES} ${CONSOLE_BINARIES} PROPERTIES FOLDER "GLFW3/Examples")
 
 if (MSVC)
     # Tell MSVC to use main instead of WinMain
-    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
-                          LINK_FLAGS "/ENTRY:mainCRTStartup")
+    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup")
 elseif (CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
     # Tell Clang using MS CRT to use main instead of WinMain
-    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
-                          LINK_FLAGS "-Wl,/entry:mainCRTStartup")
+    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES  LINK_FLAGS "-Wl,/entry:mainCRTStartup")
 endif()
 
 if (APPLE)
@@ -67,7 +63,6 @@ if (APPLE)
     set_target_properties(particles PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Particles")
     set_target_properties(sharing PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Sharing")
     set_target_properties(triangle-opengl PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "OpenGL Triangle")
-    set_target_properties(triangle-opengles PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "OpenGL ES Triangle")
     set_target_properties(splitview PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "SplitView")
     set_target_properties(wave PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Wave")
     set_target_properties(windows PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Windows")
