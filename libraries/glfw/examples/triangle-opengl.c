@@ -140,7 +140,7 @@ int main(void)
         const float ratio = width / (float) height;
 
         glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT);
+        //glClear(GL_COLOR_BUFFER_BIT);
 
         mat4x4 m, p, mvp;
         mat4x4_identity(m);
