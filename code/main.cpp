@@ -8,6 +8,8 @@
 #include "core/window_manager.hpp"
 
 #include "graphics/opengl/buffer.hpp"
+#include "graphics/opengl/vertex_array.hpp"
+#include "graphics/opengl/commands.hpp"
 
 static const char* vertex_shader_text =
 "#version 330\n"
@@ -36,11 +38,16 @@ struct vertex
     glm::vec3 color;
 };
 
-static const vertex vertices[3] =
+static const vertex geometry_vertices[3]
 {
     { { -0.6f, -0.4f }, { 1.f, 0.f, 0.f } },
     { {  0.6f, -0.4f }, { 0.f, 1.f, 0.f } },
     { {   0.f,  0.6f }, { 0.f, 0.f, 1.f } }
+};
+
+static const uint32_t geometry_elements[3]
+{
+    0, 1, 2
 };
 
 auto main() -> int32_t
@@ -67,36 +74,43 @@ auto main() -> int32_t
 
     gladLoadGL();
 
-    graphics::opengl::Buffer geometry_vbo_new;
-    geometry_vbo_new.create();
-    geometry_vbo_new.bind(GL_ARRAY_BUFFER);
-    geometry_vbo_new.data(GL_ARRAY_BUFFER, vertices, sizeof(vertices));
+    graphics::opengl::Buffer geometry_vbo;
+    geometry_vbo.create();
+    geometry_vbo.bind(GL_ARRAY_BUFFER); // TODO remove this
+    geometry_vbo.data(sizeof(geometry_vertices), geometry_vertices);
 
-    uint32_t geometry_vao;
-    glCreateVertexArrays(1, &geometry_vao);
-    glBindVertexArray(geometry_vao);
+    graphics::opengl::Buffer geometry_ebo;
+    geometry_ebo.create();
+    geometry_ebo.bind(GL_ELEMENT_ARRAY_BUFFER); // TODO remove this
+    geometry_ebo.data(sizeof(geometry_elements), geometry_elements);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, position));
+    graphics::opengl::VertexArray geometry_vao;
+    geometry_vao.create();
+    geometry_vao.bind();
 
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)offsetof(vertex, color));
+    geometry_vao.attach_vertices(geometry_vbo, sizeof(vertex));
+    geometry_vao.attach_elements(geometry_ebo);
 
-    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    geometry_vao.attach_attribute({ 0, offsetof(vertex, position), 2, GL_FLOAT, sizeof(vertex) });
+    geometry_vao.attach_attribute({ 1, offsetof(vertex, color), 3, GL_FLOAT, sizeof(vertex) });
+
+    graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
 
     while (is_closing == false)
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        graphics::opengl::Commands::clear(GL_COLOR_BUFFER_BIT);
 
-        glBindVertexArray(geometry_vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        geometry_vao.bind();
+
+        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, 3);
 
         window_manager.update();
     }
 
-    glDeleteVertexArrays(1, &geometry_vao);
+    geometry_vao.destroy();
+    geometry_ebo.destroy();
 
-    geometry_vbo_new.destroy();
+    geometry_vbo.destroy();
 
     window->destroy();
 
