@@ -20,7 +20,6 @@ set(TINYCTHREAD "${GLFW_SOURCE_DIR}/deps/tinycthread.h"
 add_executable(allocator allocator.c ${GLAD_GL})
 add_executable(clipboard clipboard.c ${GETOPT} ${GLAD_GL})
 add_executable(events events.c ${GETOPT} ${GLAD_GL})
-add_executable(msaa msaa.c ${GETOPT} ${GLAD_GL})
 add_executable(glfwinfo glfwinfo.c ${GETOPT} ${GLAD_GL} ${GLAD_VULKAN})
 add_executable(iconify iconify.c ${GETOPT} ${GLAD_GL})
 add_executable(monitors monitors.c ${GETOPT} ${GLAD_GL})
@@ -46,19 +45,16 @@ if (RT_LIBRARY)
 endif()
 
 set(GUI_ONLY_BINARIES empty gamma icon inputlag joysticks tearing threads timeout triangle-vulkan window)
-set(CONSOLE_BINARIES allocator clipboard events msaa glfwinfo iconify monitors reopen cursor)
+set(CONSOLE_BINARIES allocator clipboard events glfwinfo iconify monitors reopen cursor)
 
-set_target_properties(${GUI_ONLY_BINARIES} ${CONSOLE_BINARIES} PROPERTIES
-                      FOLDER "GLFW3/Tests")
+set_target_properties(${GUI_ONLY_BINARIES} ${CONSOLE_BINARIES} PROPERTIES FOLDER "GLFW3/Tests")
 
 if (MSVC)
     # Tell MSVC to use main instead of WinMain
-    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
-                          LINK_FLAGS "/ENTRY:mainCRTStartup")
+    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup")
 elseif (CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
     # Tell Clang using MS CRT to use main instead of WinMain
-    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
-                          LINK_FLAGS "-Wl,/entry:mainCRTStartup")
+    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES LINK_FLAGS "-Wl,/entry:mainCRTStartup")
 endif()
 
 if (APPLE)
