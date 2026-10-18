@@ -4,3 +4,6 @@
 [submodule "modules/graphics"]
 	path = modules/graphics
 	url = https://github.com/noCompileTimes/graphics-module.git
+[submodule "modules/utilities"]
+	path = modules/utilities
+	url = https://github.com/noCompileTimes/utilities-module.git
