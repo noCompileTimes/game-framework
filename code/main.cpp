@@ -121,3 +121,7 @@ auto main() -> int32_t
 
     return 0;
 }
+
+// TODO - add viewport resize
+// TODO - add uniform buffer objects with perspective and transformation
+// TODO - add textures
