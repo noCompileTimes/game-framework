@@ -6,33 +6,14 @@
 #include "backends/glfw/window_factory.hpp"
 
 #include "core/window_manager.hpp"
+#include "core/file.hpp"
 
 #include "graphics/opengl/buffer.hpp"
 #include "graphics/opengl/vertex_array.hpp"
 #include "graphics/opengl/commands.hpp"
 #include "graphics/opengl/pipeline.hpp"
-
-static const char* vertex_shader_text =
-"#version 430\n"
-//"uniform mat4 MVP;\n"
-"layout (location = 0) in vec2 vPos;\n"
-"layout (location = 1) in vec3 vCol;\n"
-"layout (location = 0) out vec3 color;\n"
-"void main()\n"
-"{\n"
-//"    gl_Position = MVP * vec4(vPos, 0.0, 1.0);\n"
-"    gl_Position = vec4(vPos, 0.0, 1.0);\n"
-"    color = vCol;\n"
-"}\n";
-
-static const char* fragment_shader_text =
-"#version 430\n"
-"layout (location = 0) in vec3 color;\n"
-"layout (location = 0) out vec4 fragment;\n"
-"void main()\n"
-"{\n"
-"    fragment = vec4(color, 1.0);\n"
-"}\n";
+#include "graphics/opengl/shader_stage.hpp"
+#include "graphics/opengl/shader_program.hpp"
 
 struct vertex
 {
@@ -76,18 +57,24 @@ auto main() -> int32_t
 
     gladLoadGL();
 
-    const auto vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, &vertex_shader_text, nullptr);
-    glCompileShader(vertex_shader);
+    graphics::opengl::ShaderStage vertex_shader;
+    vertex_shader.type = GL_VERTEX_SHADER;
+    vertex_shader.create();
+    vertex_shader.source(core::File::read("basic_vert_shader.glsl"));
 
-    const auto fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_shader_text, nullptr);
-    glCompileShader(fragment_shader);
+    graphics::opengl::ShaderStage fragment_shader;
+    fragment_shader.type = GL_FRAGMENT_SHADER;
+    fragment_shader.create();
+    fragment_shader.source(core::File::read("basic_frag_shader.glsl"));
 
-    const auto program_shader = glCreateProgram();
-    glAttachShader(program_shader, vertex_shader);
-    glAttachShader(program_shader, fragment_shader);
-    glLinkProgram(program_shader);
+    graphics::opengl::ShaderProgram program_shader;
+    program_shader.create();
+    program_shader.attach(vertex_shader);
+    program_shader.attach(fragment_shader);
+    program_shader.link();
+
+    vertex_shader.destroy();
+    fragment_shader.destroy();
 
     graphics::opengl::Buffer geometry_vbo;
     geometry_vbo.create();
@@ -114,7 +101,7 @@ auto main() -> int32_t
     {
         graphics::opengl::Commands::clear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(program_shader);
+        program_shader.bind();
 
         geometry_vao.bind();
 
@@ -127,6 +114,8 @@ auto main() -> int32_t
     geometry_ebo.destroy();
 
     geometry_vbo.destroy();
+
+    program_shader.destroy();
 
     window->destroy();
 
