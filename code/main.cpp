@@ -104,8 +104,8 @@ auto main() -> int32_t
         window_width  = width;
         window_height = height;
 
-        camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
-        camera_ubo.data(sizeof(camera_matrices), camera_matrices);
+        const auto projection = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
+        camera_ubo.subdata(sizeof(glm::mat4), sizeof(glm::mat4), &projection);
     };
 
     graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
@@ -129,7 +129,7 @@ auto main() -> int32_t
 
         geometry_vao.bind();
 
-        transform_ubo.data(sizeof(model_matrix), &model_matrix);
+        transform_ubo.subdata(0, sizeof(model_matrix), &model_matrix);
 
         graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, geometry_elements.size());
 
@@ -148,7 +148,5 @@ auto main() -> int32_t
     return 0;
 }
 
-// TODO - add uniform buffer object for transformation
 // TODO - use the range buffer binding
-// TODO - add the subdata function for buffers
 // TODO - add textures
