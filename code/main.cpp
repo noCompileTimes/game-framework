@@ -1,7 +1,8 @@
 #include <glad/glad.h>
-#include <glm/glm.hpp>
+#include <GLFW/glfw3.h>
 
-#include <print>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "backends/glfw/window_factory.hpp"
 
@@ -15,44 +16,31 @@
 #include "graphics/opengl/shader_stage.hpp"
 #include "graphics/opengl/shader_program.hpp"
 
-struct vertex
-{
-    glm::vec2 position;
-    glm::vec3 color;
-};
-
-static const vertex geometry_vertices[3]
-{
-    { { -0.6f, -0.4f }, { 1.f, 0.f, 0.f } },
-    { {  0.6f, -0.4f }, { 0.f, 1.f, 0.f } },
-    { {   0.f,  0.6f }, { 0.f, 0.f, 1.f } }
-};
-
-static const uint32_t geometry_elements[3]
-{
-    0, 1, 2
-};
+#include "geometry.hpp"
 
 auto main() -> int32_t
 {
+    constexpr core::window::configuration window_configuration
+    {
+        "Game Framework", 1024, 768, 4
+    };
+
     const std::unique_ptr<core::base::WindowFactory> window_factory = std::make_unique<backends::glfw::WindowFactory>();
 
     core::WindowManager window_manager;
-    window_manager.init(window_factory);
+    window_manager.init(window_factory, window_configuration);
 
     const auto window = window_manager.window();
     const auto window_events = window_manager.window_events();
 
-    auto is_closing = false;
+    auto window_width = window_configuration.width;
+    auto window_height = window_configuration.height;
+
+    auto window_is_running = true;
 
     window_events->callbacks.on_close = [&]
     {
-        is_closing = true;
-    };
-
-    window_events->callbacks.on_resize = [](uint32_t width, uint32_t height)
-    {
-        std::println("resize {} {}", width, height);
+        window_is_running = false;
     };
 
     gladLoadGL();
@@ -76,13 +64,15 @@ auto main() -> int32_t
     vertex_shader.destroy();
     fragment_shader.destroy();
 
+    const auto [geometry_vertices, geometry_elements] = load_geometry("cube.obj");
+
     graphics::opengl::Buffer geometry_vbo;
     geometry_vbo.create();
-    geometry_vbo.data(sizeof(geometry_vertices), geometry_vertices);
+    geometry_vbo.data(sizeof(vertex) * geometry_vertices.size(), geometry_vertices.data());
 
     graphics::opengl::Buffer geometry_ebo;
     geometry_ebo.create();
-    geometry_ebo.data(sizeof(geometry_elements), geometry_elements);
+    geometry_ebo.data(sizeof(uint32_t) * geometry_elements.size(), geometry_elements.data());
 
     graphics::opengl::VertexArray geometry_vao;
     geometry_vao.create();
@@ -90,22 +80,58 @@ auto main() -> int32_t
     geometry_vao.attach_vertices(geometry_vbo, sizeof(vertex));
     geometry_vao.attach_elements(geometry_ebo);
 
-    geometry_vao.attach_attribute({ 0, offsetof(vertex, position), 2, GL_FLOAT, 0 });
+    geometry_vao.attach_attribute({ 0, offsetof(vertex, position), 3, GL_FLOAT, 0 });
     geometry_vao.attach_attribute({ 1, offsetof(vertex, color), 3, GL_FLOAT, 0 });
+
+    glm::mat4 camera_matrices[2];
+    camera_matrices[0] = glm::lookAt(glm::vec3 { 0.0f, 0.0f, 5.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
+    camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
+
+    graphics::opengl::Buffer camera_ubo;
+    camera_ubo.create();
+    camera_ubo.bind(GL_UNIFORM_BUFFER, 0);
+    camera_ubo.data(sizeof(camera_matrices), camera_matrices);
+
+    glm::mat4 model_matrix { 1.0f };
+
+    graphics::opengl::Buffer transform_ubo;
+    transform_ubo.create();
+    transform_ubo.bind(GL_UNIFORM_BUFFER, 1);
+    transform_ubo.data(sizeof(model_matrix), &model_matrix);
+
+    window_events->callbacks.on_resize = [&](const uint32_t width, const uint32_t height)
+    {
+        window_width  = width;
+        window_height = height;
+
+        camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
+        camera_ubo.data(sizeof(camera_matrices), camera_matrices);
+    };
 
     graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
 
     graphics::opengl::Pipeline::disable(GL_MULTISAMPLE);
 
-    while (is_closing == false)
+    graphics::opengl::Pipeline::enable(GL_DEPTH_TEST);
+
+    while (window_is_running)
     {
-        graphics::opengl::Commands::clear(GL_COLOR_BUFFER_BIT);
+        // update
+
+        model_matrix = glm::rotate(glm::mat4(1.0), static_cast<float>(glfwGetTime()), glm::vec3{ 0.0f, 1.0f, 0.0f });
+
+        // draw
+
+        graphics::opengl::Commands::viewport(0, 0, window_width, window_height);
+        graphics::opengl::Commands::clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         program_shader.bind();
 
         geometry_vao.bind();
 
-        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, 3);
+        transform_ubo.data(sizeof(model_matrix), &model_matrix);
+
+        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, geometry_elements.size());
 
         window_manager.update();
     }
@@ -122,6 +148,7 @@ auto main() -> int32_t
     return 0;
 }
 
-// TODO - add viewport resize
-// TODO - add uniform buffer objects with perspective and transformation
+// TODO - add uniform buffer object for transformation
+// TODO - use the range buffer binding
+// TODO - add the subdata function for buffers
 // TODO - add textures
