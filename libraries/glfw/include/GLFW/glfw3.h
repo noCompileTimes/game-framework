@@ -3590,35 +3590,6 @@ GLFWAPI void glfwSetWindowAspectRatio(GLFWwindow* window, int numer, int denom);
  */
 GLFWAPI void glfwSetWindowSize(GLFWwindow* window, int width, int height);
 
-/*! @brief Retrieves the size of the framebuffer of the specified window.
- *
- *  This function retrieves the size, in pixels, of the framebuffer of the
- *  specified window.  If you wish to retrieve the size of the window in screen
- *  coordinates, see @ref glfwGetWindowSize.
- *
- *  Any or all of the size arguments may be `NULL`.  If an error occurs, all
- *  non-`NULL` size arguments will be set to zero.
- *
- *  @param[in] window The window whose framebuffer to query.
- *  @param[out] width Where to store the width, in pixels, of the framebuffer,
- *  or `NULL`.
- *  @param[out] height Where to store the height, in pixels, of the framebuffer,
- *  or `NULL`.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
- *  GLFW_PLATFORM_ERROR.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref window_fbsize
- *  @sa @ref glfwSetFramebufferSizeCallback
- *
- *  @since Added in version 3.0.
- *
- *  @ingroup window
- */
-GLFWAPI void glfwGetFramebufferSize(GLFWwindow* window, int* width, int* height);
-
 /*! @brief Retrieves the size of the frame of the window.
  *
  *  This function retrieves the size, in screen coordinates, of each edge of the

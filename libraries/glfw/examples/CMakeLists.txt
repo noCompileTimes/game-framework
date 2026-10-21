@@ -30,11 +30,8 @@ add_executable(offscreen offscreen.c ${ICON} ${GLAD_GL})
 add_executable(particles WIN32 MACOSX_BUNDLE particles.c ${ICON} ${TINYCTHREAD} ${GETOPT} ${GLAD_GL})
 add_executable(sharing WIN32 MACOSX_BUNDLE sharing.c ${ICON} ${GLAD_GL})
 add_executable(splitview WIN32 MACOSX_BUNDLE splitview.c ${ICON} ${GLAD_GL})
-add_executable(triangle-opengl WIN32 MACOSX_BUNDLE triangle-opengl.c ${ICON})
 add_executable(wave WIN32 MACOSX_BUNDLE wave.c ${ICON} ${GLAD_GL})
 add_executable(windows WIN32 MACOSX_BUNDLE windows.c ${ICON} ${GLAD_GL})
-
-target_link_libraries(triangle-opengl PRIVATE glad)
 
 target_link_libraries(offscreen PRIVATE stb)
 
@@ -43,7 +40,7 @@ if (RT_LIBRARY)
     target_link_libraries(particles "${RT_LIBRARY}")
 endif()
 
-set(GUI_ONLY_BINARIES boing gears heightmap particles sharing splitview triangle-opengl wave windows)
+set(GUI_ONLY_BINARIES boing gears heightmap particles sharing splitview wave windows)
 set(CONSOLE_BINARIES offscreen)
 
 set_target_properties(${GUI_ONLY_BINARIES} ${CONSOLE_BINARIES} PROPERTIES FOLDER "GLFW3/Examples")
@@ -62,13 +59,11 @@ if (APPLE)
     set_target_properties(heightmap PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Heightmap")
     set_target_properties(particles PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Particles")
     set_target_properties(sharing PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Sharing")
-    set_target_properties(triangle-opengl PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "OpenGL Triangle")
     set_target_properties(splitview PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "SplitView")
     set_target_properties(wave PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Wave")
     set_target_properties(windows PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Windows")
 
-    set_source_files_properties(glfw.icns PROPERTIES
-                                MACOSX_PACKAGE_LOCATION "Resources")
+    set_source_files_properties(glfw.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
                           MACOSX_BUNDLE_SHORT_VERSION_STRING ${GLFW_VERSION}
                           MACOSX_BUNDLE_LONG_VERSION_STRING ${GLFW_VERSION}
