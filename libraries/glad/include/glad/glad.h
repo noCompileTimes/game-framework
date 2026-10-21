@@ -1815,12 +1815,6 @@ GLAPI PFNGLBINDBUFFERPROC glad_glBindBuffer;
 typedef void (APIENTRYP PFNGLDELETEBUFFERSPROC)(GLsizei n, const GLuint *buffers);
 GLAPI PFNGLDELETEBUFFERSPROC glad_glDeleteBuffers;
 #define glDeleteBuffers glad_glDeleteBuffers
-typedef GLboolean (APIENTRYP PFNGLISBUFFERPROC)(GLuint buffer);
-GLAPI PFNGLISBUFFERPROC glad_glIsBuffer;
-#define glIsBuffer glad_glIsBuffer
-typedef void (APIENTRYP PFNGLBUFFERSUBDATAPROC)(GLenum target, GLintptr offset, GLsizeiptr size, const void *data);
-GLAPI PFNGLBUFFERSUBDATAPROC glad_glBufferSubData;
-#define glBufferSubData glad_glBufferSubData
 typedef void (APIENTRYP PFNGLGETBUFFERSUBDATAPROC)(GLenum target, GLintptr offset, GLsizeiptr size, void *data);
 GLAPI PFNGLGETBUFFERSUBDATAPROC glad_glGetBufferSubData;
 #define glGetBufferSubData glad_glGetBufferSubData

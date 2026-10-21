@@ -315,7 +315,6 @@ PFNGLBLENDFUNCIPROC glad_glBlendFunci = NULL;
 PFNGLBLITFRAMEBUFFERPROC glad_glBlitFramebuffer = NULL;
 PFNGLBLITNAMEDFRAMEBUFFERPROC glad_glBlitNamedFramebuffer = NULL;
 PFNGLBUFFERSTORAGEPROC glad_glBufferStorage = NULL;
-PFNGLBUFFERSUBDATAPROC glad_glBufferSubData = NULL;
 PFNGLCHECKFRAMEBUFFERSTATUSPROC glad_glCheckFramebufferStatus = NULL;
 PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glad_glCheckNamedFramebufferStatus = NULL;
 PFNGLCLAMPCOLORPROC glad_glClampColor = NULL;
@@ -603,7 +602,6 @@ PFNGLINVALIDATENAMEDFRAMEBUFFERSUBDATAPROC glad_glInvalidateNamedFramebufferSubD
 PFNGLINVALIDATESUBFRAMEBUFFERPROC glad_glInvalidateSubFramebuffer = NULL;
 PFNGLINVALIDATETEXIMAGEPROC glad_glInvalidateTexImage = NULL;
 PFNGLINVALIDATETEXSUBIMAGEPROC glad_glInvalidateTexSubImage = NULL;
-PFNGLISBUFFERPROC glad_glIsBuffer = NULL;
 PFNGLISENABLEDPROC glad_glIsEnabled = NULL;
 PFNGLISENABLEDIPROC glad_glIsEnabledi = NULL;
 PFNGLISFRAMEBUFFERPROC glad_glIsFramebuffer = NULL;
@@ -1040,8 +1038,6 @@ static void load_GL_VERSION_1_5(GLADloadproc load) {
 	glad_glGetQueryObjectuiv = (PFNGLGETQUERYOBJECTUIVPROC)load("glGetQueryObjectuiv");
 	glad_glBindBuffer = (PFNGLBINDBUFFERPROC)load("glBindBuffer");
 	glad_glDeleteBuffers = (PFNGLDELETEBUFFERSPROC)load("glDeleteBuffers");
-	glad_glIsBuffer = (PFNGLISBUFFERPROC)load("glIsBuffer");
-	glad_glBufferSubData = (PFNGLBUFFERSUBDATAPROC)load("glBufferSubData");
 	glad_glGetBufferSubData = (PFNGLGETBUFFERSUBDATAPROC)load("glGetBufferSubData");
 	glad_glMapBuffer = (PFNGLMAPBUFFERPROC)load("glMapBuffer");
 	glad_glUnmapBuffer = (PFNGLUNMAPBUFFERPROC)load("glUnmapBuffer");
