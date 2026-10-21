@@ -1000,7 +1000,8 @@ static void ImGui_ImplGlfw_GetWindowSizeAndFramebufferScale(GLFWwindow* window, 
     int w, h;
     int display_w, display_h;
     glfwGetWindowSize(window, &w, &h);
-    glfwGetFramebufferSize(window, &display_w, &display_h);
+    // TODO use alternative with our module
+    //glfwGetFramebufferSize(window, &display_w, &display_h);
     float fb_scale_x = (w > 0) ? (float)display_w / (float)w : 1.0f;
     float fb_scale_y = (h > 0) ? (float)display_h / (float)h : 1.0f;
 #if GLFW_HAS_WAYLAND
