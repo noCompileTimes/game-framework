@@ -108,15 +108,18 @@ auto main() -> int32_t
     const auto image_data = stbi_load("brick_wall.jpg", &image_width, &image_height, &image_channels, 0);
 
     uint32_t texture_id;
-    glGenTextures(1, &texture_id);
+    glCreateTextures(GL_TEXTURE_2D, 1, &texture_id);
+
+    glTextureParameteri(texture_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // TODO remove it after sampler was added
+    glTextureParameteri(texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // TODO remove it after sampler was added
+
+    // TODO remove this after added the storage
     glBindTexture(GL_TEXTURE_2D, texture_id);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+    // TODO remove this and all variations after storage is added
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
 
-    //glActiveTexture(texture_id);
+    glBindTextureUnit(0, texture_id);
 
     window_events->callbacks.on_resize = [&](const uint32_t width, const uint32_t height)
     {
@@ -171,3 +174,4 @@ auto main() -> int32_t
 
 // TODO - use the range buffer binding
 // TODO - add textures
+// TODO - add sampler objects
