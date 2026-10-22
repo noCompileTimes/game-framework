@@ -4,6 +4,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <stb_image.h>
+
 #include "backends/glfw/window_factory.hpp"
 
 #include "core/window_manager.hpp"
@@ -48,12 +50,12 @@ auto main() -> int32_t
     graphics::opengl::ShaderStage vertex_shader;
     vertex_shader.type = GL_VERTEX_SHADER;
     vertex_shader.create();
-    vertex_shader.source(core::File::read("basic_vert_shader.glsl"));
+    vertex_shader.source(core::File::read("model_vert_shader.glsl"));
 
     graphics::opengl::ShaderStage fragment_shader;
     fragment_shader.type = GL_FRAGMENT_SHADER;
     fragment_shader.create();
-    fragment_shader.source(core::File::read("basic_frag_shader.glsl"));
+    fragment_shader.source(core::File::read("model_frag_shader.glsl"));
 
     graphics::opengl::ShaderProgram program_shader;
     program_shader.create();
@@ -81,7 +83,7 @@ auto main() -> int32_t
     geometry_vao.attach_elements(geometry_ebo);
 
     geometry_vao.attach_attribute({ 0, offsetof(vertex, position), 3, GL_FLOAT, 0 });
-    geometry_vao.attach_attribute({ 1, offsetof(vertex, color), 3, GL_FLOAT, 0 });
+    geometry_vao.attach_attribute({ 1, offsetof(vertex, texcoord), 2, GL_FLOAT, 0 });
 
     glm::mat4 camera_matrices[2];
     camera_matrices[0] = glm::lookAt(glm::vec3 { 0.0f, 0.0f, 5.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
@@ -98,6 +100,23 @@ auto main() -> int32_t
     transform_ubo.create();
     transform_ubo.bind(GL_UNIFORM_BUFFER, 1);
     transform_ubo.data(sizeof(model_matrix), &model_matrix);
+
+    int32_t image_width;
+    int32_t image_height;
+    int32_t image_channels;
+
+    const auto image_data = stbi_load("brick_wall.jpg", &image_width, &image_height, &image_channels, 0);
+
+    uint32_t texture_id;
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
+
+    //glActiveTexture(texture_id);
 
     window_events->callbacks.on_resize = [&](const uint32_t width, const uint32_t height)
     {
@@ -135,6 +154,8 @@ auto main() -> int32_t
 
         window_manager.update();
     }
+
+    glDeleteTextures(1, &texture_id);
 
     geometry_vao.destroy();
     geometry_ebo.destroy();
