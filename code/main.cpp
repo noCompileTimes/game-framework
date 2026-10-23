@@ -178,3 +178,4 @@ auto main() -> int32_t
 }
 
 // TODO - use the range buffer binding
+// TODO - create a light opengl functions loader
