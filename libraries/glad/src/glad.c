@@ -295,7 +295,6 @@ PFNGLBINDPROGRAMPIPELINEPROC glad_glBindProgramPipeline = NULL;
 PFNGLBINDRENDERBUFFERPROC glad_glBindRenderbuffer = NULL;
 PFNGLBINDSAMPLERPROC glad_glBindSampler = NULL;
 PFNGLBINDSAMPLERSPROC glad_glBindSamplers = NULL;
-PFNGLBINDTEXTUREPROC glad_glBindTexture = NULL;
 PFNGLBINDTEXTUREUNITPROC glad_glBindTextureUnit = NULL;
 PFNGLBINDTEXTURESPROC glad_glBindTextures = NULL;
 PFNGLBINDTRANSFORMFEEDBACKPROC glad_glBindTransformFeedback = NULL;
@@ -712,19 +711,11 @@ PFNGLTEXCOORDP3UIPROC glad_glTexCoordP3ui = NULL;
 PFNGLTEXCOORDP3UIVPROC glad_glTexCoordP3uiv = NULL;
 PFNGLTEXCOORDP4UIPROC glad_glTexCoordP4ui = NULL;
 PFNGLTEXCOORDP4UIVPROC glad_glTexCoordP4uiv = NULL;
-PFNGLTEXIMAGE1DPROC glad_glTexImage1D = NULL;
-PFNGLTEXIMAGE2DPROC glad_glTexImage2D = NULL;
-PFNGLTEXIMAGE2DMULTISAMPLEPROC glad_glTexImage2DMultisample = NULL;
-PFNGLTEXIMAGE3DPROC glad_glTexImage3D = NULL;
-PFNGLTEXIMAGE3DMULTISAMPLEPROC glad_glTexImage3DMultisample = NULL;
 PFNGLTEXSTORAGE1DPROC glad_glTexStorage1D = NULL;
 PFNGLTEXSTORAGE2DPROC glad_glTexStorage2D = NULL;
 PFNGLTEXSTORAGE2DMULTISAMPLEPROC glad_glTexStorage2DMultisample = NULL;
 PFNGLTEXSTORAGE3DPROC glad_glTexStorage3D = NULL;
 PFNGLTEXSTORAGE3DMULTISAMPLEPROC glad_glTexStorage3DMultisample = NULL;
-PFNGLTEXSUBIMAGE1DPROC glad_glTexSubImage1D = NULL;
-PFNGLTEXSUBIMAGE2DPROC glad_glTexSubImage2D = NULL;
-PFNGLTEXSUBIMAGE3DPROC glad_glTexSubImage3D = NULL;
 PFNGLTEXTUREBARRIERPROC glad_glTextureBarrier = NULL;
 PFNGLTEXTUREBUFFERPROC glad_glTextureBuffer = NULL;
 PFNGLTEXTUREBUFFERRANGEPROC glad_glTextureBufferRange = NULL;
@@ -856,8 +847,6 @@ static void load_GL_VERSION_1_0(GLADloadproc load) {
 	glad_glPointSize = (PFNGLPOINTSIZEPROC)load("glPointSize");
 	glad_glPolygonMode = (PFNGLPOLYGONMODEPROC)load("glPolygonMode");
 	glad_glScissor = (PFNGLSCISSORPROC)load("glScissor");
-	glad_glTexImage1D = (PFNGLTEXIMAGE1DPROC)load("glTexImage1D");
-	glad_glTexImage2D = (PFNGLTEXIMAGE2DPROC)load("glTexImage2D");
 	glad_glDrawBuffer = (PFNGLDRAWBUFFERPROC)load("glDrawBuffer");
 	glad_glClear = (PFNGLCLEARPROC)load("glClear");
 	glad_glClearColor = (PFNGLCLEARCOLORPROC)load("glClearColor");
@@ -903,16 +892,11 @@ static void load_GL_VERSION_1_1(GLADloadproc load) {
 	glad_glCopyTexImage2D = (PFNGLCOPYTEXIMAGE2DPROC)load("glCopyTexImage2D");
 	glad_glCopyTexSubImage1D = (PFNGLCOPYTEXSUBIMAGE1DPROC)load("glCopyTexSubImage1D");
 	glad_glCopyTexSubImage2D = (PFNGLCOPYTEXSUBIMAGE2DPROC)load("glCopyTexSubImage2D");
-	glad_glTexSubImage1D = (PFNGLTEXSUBIMAGE1DPROC)load("glTexSubImage1D");
-	glad_glTexSubImage2D = (PFNGLTEXSUBIMAGE2DPROC)load("glTexSubImage2D");
-	glad_glBindTexture = (PFNGLBINDTEXTUREPROC)load("glBindTexture");
 	glad_glDeleteTextures = (PFNGLDELETETEXTURESPROC)load("glDeleteTextures");
 }
 static void load_GL_VERSION_1_2(GLADloadproc load) {
 	if(!GLAD_GL_VERSION_1_2) return;
 	glad_glDrawRangeElements = (PFNGLDRAWRANGEELEMENTSPROC)load("glDrawRangeElements");
-	glad_glTexImage3D = (PFNGLTEXIMAGE3DPROC)load("glTexImage3D");
-	glad_glTexSubImage3D = (PFNGLTEXSUBIMAGE3DPROC)load("glTexSubImage3D");
 	glad_glCopyTexSubImage3D = (PFNGLCOPYTEXSUBIMAGE3DPROC)load("glCopyTexSubImage3D");
 }
 static void load_GL_VERSION_1_3(GLADloadproc load) {
@@ -1140,8 +1124,6 @@ static void load_GL_VERSION_3_2(GLADloadproc load) {
 	glad_glGetInteger64i_v = (PFNGLGETINTEGER64I_VPROC)load("glGetInteger64i_v");
 	glad_glGetBufferParameteri64v = (PFNGLGETBUFFERPARAMETERI64VPROC)load("glGetBufferParameteri64v");
 	glad_glFramebufferTexture = (PFNGLFRAMEBUFFERTEXTUREPROC)load("glFramebufferTexture");
-	glad_glTexImage2DMultisample = (PFNGLTEXIMAGE2DMULTISAMPLEPROC)load("glTexImage2DMultisample");
-	glad_glTexImage3DMultisample = (PFNGLTEXIMAGE3DMULTISAMPLEPROC)load("glTexImage3DMultisample");
 	glad_glGetMultisamplefv = (PFNGLGETMULTISAMPLEFVPROC)load("glGetMultisamplefv");
 	glad_glSampleMaski = (PFNGLSAMPLEMASKIPROC)load("glSampleMaski");
 }
