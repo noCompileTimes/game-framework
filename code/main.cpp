@@ -18,6 +18,7 @@
 #include "graphics/opengl/shader_stage.hpp"
 #include "graphics/opengl/shader_program.hpp"
 #include "graphics/opengl/texture_sampler.hpp"
+#include "graphics/opengl/texture.hpp"
 
 #include "geometry.hpp"
 
@@ -114,16 +115,14 @@ auto main() -> int32_t
 
     const auto image_data = stbi_load("brick_wall.jpg", &image_width, &image_height, &image_channels, 0);
 
-    uint32_t texture_id;
-    glCreateTextures(GL_TEXTURE_2D, 1, &texture_id);
+    graphics::opengl::Texture brick_texture;
+    brick_texture.type = GL_TEXTURE_2D;
+    brick_texture.create();
 
-    // TODO remove this after added the storage
-    glBindTexture(GL_TEXTURE_2D, texture_id);
+    brick_texture.storage(image_width, image_height, GL_RGB8, 1);
+    brick_texture.subdata(image_width, image_height, GL_RGB, 0, image_data);
 
-    // TODO remove this and all variations after storage is added
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
-
-    glBindTextureUnit(0, texture_id);
+    brick_texture.bind(0);
 
     window_events->callbacks.on_resize = [&](const uint32_t width, const uint32_t height)
     {
@@ -162,14 +161,14 @@ auto main() -> int32_t
         window_manager.update();
     }
 
-    glDeleteTextures(1, &texture_id);
+    brick_texture.destroy();
 
     texture_sampler.destroy();
 
     geometry_vao.destroy();
-    geometry_ebo.destroy();
 
     geometry_vbo.destroy();
+    geometry_ebo.destroy();
 
     program_shader.destroy();
 
@@ -179,5 +178,3 @@ auto main() -> int32_t
 }
 
 // TODO - use the range buffer binding
-// TODO - add textures
-// TODO - add sampler objects
