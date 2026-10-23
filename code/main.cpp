@@ -17,6 +17,7 @@
 #include "graphics/opengl/pipeline.hpp"
 #include "graphics/opengl/shader_stage.hpp"
 #include "graphics/opengl/shader_program.hpp"
+#include "graphics/opengl/texture_sampler.hpp"
 
 #include "geometry.hpp"
 
@@ -101,6 +102,12 @@ auto main() -> int32_t
     transform_ubo.bind(GL_UNIFORM_BUFFER, 1);
     transform_ubo.data(sizeof(model_matrix), &model_matrix);
 
+    graphics::opengl::TextureSampler texture_sampler;
+    texture_sampler.create();
+    texture_sampler.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    texture_sampler.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    texture_sampler.bind(0);
+
     int32_t image_width;
     int32_t image_height;
     int32_t image_channels;
@@ -109,9 +116,6 @@ auto main() -> int32_t
 
     uint32_t texture_id;
     glCreateTextures(GL_TEXTURE_2D, 1, &texture_id);
-
-    glTextureParameteri(texture_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // TODO remove it after sampler was added
-    glTextureParameteri(texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // TODO remove it after sampler was added
 
     // TODO remove this after added the storage
     glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -159,6 +163,8 @@ auto main() -> int32_t
     }
 
     glDeleteTextures(1, &texture_id);
+
+    texture_sampler.destroy();
 
     geometry_vao.destroy();
     geometry_ebo.destroy();
