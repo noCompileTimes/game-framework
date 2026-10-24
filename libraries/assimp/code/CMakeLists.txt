@@ -374,13 +374,6 @@ ADD_ASSIMP_IMPORTER( CSM
   AssetLib/CSM/CSMLoader.h
 )
 
-ADD_ASSIMP_IMPORTER( HMP
-  AssetLib/HMP/HMPFileData.h
-  AssetLib/HMP/HMPLoader.cpp
-  AssetLib/HMP/HMPLoader.h
-  AssetLib/HMP/HalfLifeFileData.h
-)
-
 ADD_ASSIMP_IMPORTER( IQM
   AssetLib/IQM/IQMImporter.cpp
   AssetLib/IQM/iqm.h
@@ -408,52 +401,6 @@ if (ASSIMP_BUILD_M3D_IMPORTER)
             AssetLib/M3D/M3DWrapper.cpp
     )
 endif () # if (ASSIMP_BUILD_M3D_IMPORTER)
-
-ADD_ASSIMP_IMPORTER( MD2
-  AssetLib/MD2/MD2FileData.h
-  AssetLib/MD2/MD2Loader.cpp
-  AssetLib/MD2/MD2Loader.h
-  AssetLib/MD2/MD2NormalTable.h
-)
-
-ADD_ASSIMP_IMPORTER( MD3
-  AssetLib/MD3/MD3FileData.h
-  AssetLib/MD3/MD3Loader.cpp
-  AssetLib/MD3/MD3Loader.h
-)
-
-ADD_ASSIMP_IMPORTER( MD5
-  AssetLib/MD5/MD5Loader.cpp
-  AssetLib/MD5/MD5Loader.h
-  AssetLib/MD5/MD5Parser.cpp
-  AssetLib/MD5/MD5Parser.h
-)
-
-ADD_ASSIMP_IMPORTER( MDC
-  AssetLib/MDC/MDCFileData.h
-  AssetLib/MDC/MDCLoader.cpp
-  AssetLib/MDC/MDCLoader.h
-  AssetLib/MDC/MDCNormalTable.h
-)
-
-ADD_ASSIMP_IMPORTER( MDL
-  AssetLib/MDL/MDLDefaultColorMap.h
-  AssetLib/MDL/MDLFileData.h
-  AssetLib/MDL/MDLLoader.cpp
-  AssetLib/MDL/MDLLoader.h
-  AssetLib/MDL/MDLMaterialLoader.cpp
-  AssetLib/MDL/HalfLife/HalfLifeMDLBaseHeader.h
-  AssetLib/MDL/HalfLife/HL1DataBuffer.h
-  AssetLib/MDL/HalfLife/HL1FileData.h
-  AssetLib/MDL/HalfLife/HL1MDLLoader.cpp
-  AssetLib/MDL/HalfLife/HL1MDLLoader.h
-  AssetLib/MDL/HalfLife/HL1ImportDefinitions.h
-  AssetLib/MDL/HalfLife/HL1ImportSettings.h
-  AssetLib/MDL/HalfLife/HL1MeshTrivert.h
-  AssetLib/MDL/HalfLife/LogFunctions.h
-  AssetLib/MDL/HalfLife/UniqueNameGenerator.cpp
-  AssetLib/MDL/HalfLife/UniqueNameGenerator.h
-)
 
 IF(((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND NOT MINGW AND NOT HAIKU) AND CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 13)
   message(STATUS "GCC13 detected disabling \"-Warray-bounds and -Wstringop-overflow\" for"
@@ -632,12 +579,6 @@ if (NOT ASSIMP_NO_EXPORT)
     AssetLib/Assbin/AssbinFileWriter.h
     AssetLib/Assbin/AssbinFileWriter.cpp)
 
-  ADD_ASSIMP_EXPORTER( ASSXML
-    AssetLib/Assxml/AssxmlExporter.h
-    AssetLib/Assxml/AssxmlExporter.cpp
-    AssetLib/Assxml/AssxmlFileWriter.h
-    AssetLib/Assxml/AssxmlFileWriter.cpp)
-
   if ((NOT ASSIMP_NO_EXPORT) AND ASSIMP_BUILD_M3D_EXPORTER)
       ADD_ASSIMP_EXPORTER(M3D
               AssetLib/M3D/M3DExporter.cpp)
@@ -676,13 +617,6 @@ if (NOT ASSIMP_NO_EXPORT)
   ADD_ASSIMP_EXPORTER( PBRT
     Pbrt/PbrtExporter.h
     Pbrt/PbrtExporter.cpp)
-
-  ADD_ASSIMP_EXPORTER( ASSJSON
-    AssetLib/Assjson/cencode.c
-    AssetLib/Assjson/cencode.h
-    AssetLib/Assjson/json_exporter.cpp
-    AssetLib/Assjson/mesh_splitter.cpp
-    AssetLib/Assjson/mesh_splitter.h)
 
   ADD_ASSIMP_EXPORTER( STEP
     AssetLib/Step/StepExporter.h
