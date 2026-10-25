@@ -226,14 +226,6 @@ SET(Geometry_SRCS
 )
 SOURCE_GROUP(Geometry FILES ${Geometry_SRCS})
 
-SET( STEPParser_SRCS
-  AssetLib/STEPParser/STEPFileReader.h
-  AssetLib/STEPParser/STEPFileReader.cpp
-  AssetLib/STEPParser/STEPFileEncoding.cpp
-  AssetLib/STEPParser/STEPFileEncoding.h
-)
-SOURCE_GROUP(STEPParser FILES ${STEPParser_SRCS})
-
 IF ( ASSIMP_BUILD_NONFREE_C4D_IMPORTER )
   SET( C4D_SRCS
     AssetLib/C4D/C4DImporter.cpp
@@ -374,27 +366,6 @@ ADD_ASSIMP_IMPORTER( CSM
   AssetLib/CSM/CSMLoader.h
 )
 
-ADD_ASSIMP_IMPORTER( IQM
-  AssetLib/IQM/IQMImporter.cpp
-  AssetLib/IQM/iqm.h
-  AssetLib/IQM/IQMImporter.h
-)
-
-ADD_ASSIMP_IMPORTER( LWO
-  AssetLib/LWO/LWOAnimation.cpp
-  AssetLib/LWO/LWOAnimation.h
-  AssetLib/LWO/LWOBLoader.cpp
-  AssetLib/LWO/LWOFileData.h
-  AssetLib/LWO/LWOLoader.cpp
-  AssetLib/LWO/LWOLoader.h
-  AssetLib/LWO/LWOMaterial.cpp
-)
-
-ADD_ASSIMP_IMPORTER( LWS
-  AssetLib/LWS/LWSLoader.cpp
-  AssetLib/LWS/LWSLoader.h
-)
-
 if (ASSIMP_BUILD_M3D_IMPORTER)
     ADD_ASSIMP_IMPORTER( M3D
             AssetLib/M3D/M3DImporter.cpp
@@ -463,11 +434,6 @@ ADD_ASSIMP_IMPORTER( PLY
   AssetLib/Ply/PlyParser.h
 )
 
-ADD_ASSIMP_IMPORTER( MS3D
-  AssetLib/MS3D/MS3DLoader.cpp
-  AssetLib/MS3D/MS3DLoader.h
-)
-
 ADD_ASSIMP_IMPORTER( COB
   AssetLib/COB/COBLoader.cpp
   AssetLib/COB/COBLoader.h
@@ -491,24 +457,7 @@ ADD_ASSIMP_IMPORTER( BLEND
   AssetLib/Blender/BlenderTessellator.h
   AssetLib/Blender/BlenderTessellator.cpp
   AssetLib/Blender/BlenderCustomData.h
-  AssetLib/Blender/BlenderCustomData.cpp
-)
-
-ADD_ASSIMP_IMPORTER( IFC
-  AssetLib/IFC/IFCLoader.cpp
-  AssetLib/IFC/IFCLoader.h
-  AssetLib/IFC/IFCReaderGen1_2x3.cpp
-  AssetLib/IFC/IFCReaderGen2_2x3.cpp
-  AssetLib/IFC/IFCReaderGen_2x3.h
-  AssetLib/IFC/IFCUtil.h
-  AssetLib/IFC/IFCUtil.cpp
-  AssetLib/IFC/IFCGeometry.cpp
-  AssetLib/IFC/IFCMaterial.cpp
-  AssetLib/IFC/IFCProfile.cpp
-  AssetLib/IFC/IFCCurve.cpp
-  AssetLib/IFC/IFCBoolean.cpp
-  AssetLib/IFC/IFCOpenings.cpp
-)
+  AssetLib/Blender/BlenderCustomData.cpp)
 
 if (ASSIMP_BUILD_IFC_IMPORTER)
   if (MSVC)
@@ -618,10 +567,6 @@ if (NOT ASSIMP_NO_EXPORT)
     Pbrt/PbrtExporter.h
     Pbrt/PbrtExporter.cpp)
 
-  ADD_ASSIMP_EXPORTER( STEP
-    AssetLib/Step/StepExporter.h
-    AssetLib/Step/StepExporter.cpp)
-
 endif()
 
 SET( PostProcessing_SRCS
@@ -689,19 +634,6 @@ SET( PostProcessing_SRCS
   PostProcessing/SplitByBoneCountProcess.h
 )
 SOURCE_GROUP( PostProcessing FILES ${PostProcessing_SRCS})
-
-ADD_ASSIMP_IMPORTER( Q3D
-  AssetLib/Q3D/Q3DLoader.cpp
-  AssetLib/Q3D/Q3DLoader.h
-)
-
-ADD_ASSIMP_IMPORTER( Q3BSP
-  AssetLib/Q3BSP/Q3BSPFileData.h
-  AssetLib/Q3BSP/Q3BSPFileParser.h
-  AssetLib/Q3BSP/Q3BSPFileParser.cpp
-  AssetLib/Q3BSP/Q3BSPFileImporter.h
-  AssetLib/Q3BSP/Q3BSPFileImporter.cpp
-)
 
 ADD_ASSIMP_IMPORTER( RAW
   AssetLib/Raw/RawLoader.cpp
@@ -782,16 +714,6 @@ ADD_ASSIMP_IMPORTER(3MF
   AssetLib/3MF/D3MFOpcPackage.h
   AssetLib/3MF/D3MFOpcPackage.cpp
   AssetLib/3MF/3MFXmlTags.h
-)
-
-ADD_ASSIMP_IMPORTER( MMD
-  AssetLib/MMD/MMDCpp14.h
-  AssetLib/MMD/MMDImporter.cpp
-  AssetLib/MMD/MMDImporter.h
-  AssetLib/MMD/MMDPmdParser.h
-  AssetLib/MMD/MMDPmxParser.h
-  AssetLib/MMD/MMDPmxParser.cpp
-  AssetLib/MMD/MMDVmdParser.h
 )
 
 # Workaround for issue #2406 - force problematic large file to be optimized to prevent string table overflow error

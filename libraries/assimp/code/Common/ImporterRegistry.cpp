@@ -82,9 +82,6 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_STL_IMPORTER
 #include "AssetLib/STL/STLLoader.h"
 #endif
-#ifndef ASSIMP_BUILD_NO_LWO_IMPORTER
-#include "AssetLib/LWO/LWOLoader.h"
-#endif
 #ifndef ASSIMP_BUILD_NO_DXF_IMPORTER
 #include "AssetLib/DXF/DXFLoader.h"
 #endif
@@ -106,9 +103,6 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_BVH_IMPORTER
 #include "AssetLib/BVH/BVHLoader.h"
 #endif
-#ifndef ASSIMP_BUILD_NO_Q3D_IMPORTER
-#include "AssetLib/Q3D/Q3DLoader.h"
-#endif
 #ifndef ASSIMP_BUILD_NO_B3D_IMPORTER
 #include "AssetLib/B3D/B3DImporter.h"
 #endif
@@ -124,14 +118,8 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_3D_IMPORTER
 #include "AssetLib/Unreal/UnrealLoader.h"
 #endif
-#ifndef ASSIMP_BUILD_NO_LWS_IMPORTER
-#include "AssetLib/LWS/LWSLoader.h"
-#endif
 #ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
 #include "AssetLib/OpenGEX/OpenGEXImporter.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_MS3D_IMPORTER
-#include "AssetLib/MS3D/MS3DLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
 #include "AssetLib/COB/COBLoader.h"
@@ -139,14 +127,8 @@ corresponding preprocessor flag to selectively disable formats.
 #ifndef ASSIMP_BUILD_NO_BLEND_IMPORTER
 #include "AssetLib/Blender/BlenderLoader.h"
 #endif
-#ifndef ASSIMP_BUILD_NO_Q3BSP_IMPORTER
-#include "AssetLib/Q3BSP/Q3BSPFileImporter.h"
-#endif
 #ifndef ASSIMP_BUILD_NO_NDO_IMPORTER
 #include "AssetLib/NDO/NDOLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_IFC_IMPORTER
-#include "AssetLib/IFC/IFCLoader.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_XGL_IMPORTER
 #include "AssetLib/XGL/XGLLoader.h"
@@ -168,15 +150,6 @@ corresponding preprocessor flag to selectively disable formats.
 #endif
 #ifndef ASSIMP_BUILD_NO_3MF_IMPORTER
 #include "AssetLib/3MF/D3MFImporter.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
-#include "AssetLib/MMD/MMDImporter.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_M3D_IMPORTER
-#include "AssetLib/M3D/M3DImporter.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_IQM_IMPORTER
-#include "AssetLib/IQM/IQMImporter.h"
 #endif
 
 namespace Assimp {
@@ -235,9 +208,6 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #if (!defined ASSIMP_BUILD_NO_STL_IMPORTER)
     out.push_back(new STLImporter());
 #endif
-#if (!defined ASSIMP_BUILD_NO_LWO_IMPORTER)
-    out.push_back(new LWOImporter());
-#endif
 #if (!defined ASSIMP_BUILD_NO_DXF_IMPORTER)
     out.push_back(new DXFImporter());
 #endif
@@ -259,9 +229,6 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #if (!defined ASSIMP_BUILD_NO_BVH_IMPORTER)
     out.push_back(new BVHLoader());
 #endif
-#if (!defined ASSIMP_BUILD_NO_Q3D_IMPORTER)
-    out.push_back(new Q3DImporter());
-#endif
 #if (!defined ASSIMP_BUILD_NO_B3D_IMPORTER)
     out.push_back(new B3DImporter());
 #endif
@@ -277,14 +244,8 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #if (!defined ASSIMP_BUILD_NO_3D_IMPORTER)
     out.push_back(new UnrealImporter());
 #endif
-#if (!defined ASSIMP_BUILD_NO_LWS_IMPORTER)
-    out.push_back(new LWSImporter());
-#endif
 #if (!defined ASSIMP_BUILD_NO_OPENGEX_IMPORTER)
     out.push_back(new OpenGEX::OpenGEXImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_MS3D_IMPORTER)
-    out.push_back(new MS3DImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_COB_IMPORTER)
     out.push_back(new COBImporter());
@@ -292,14 +253,8 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #if (!defined ASSIMP_BUILD_NO_BLEND_IMPORTER)
     out.push_back(new BlenderImporter());
 #endif
-#if (!defined ASSIMP_BUILD_NO_Q3BSP_IMPORTER)
-    out.push_back(new Q3BSPFileImporter());
-#endif
 #if (!defined ASSIMP_BUILD_NO_NDO_IMPORTER)
     out.push_back(new NDOImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_IFC_IMPORTER)
-    out.push_back(new IFCImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_XGL_IMPORTER)
     out.push_back(new XGLImporter());
@@ -321,12 +276,6 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #endif
 #if (!defined ASSIMP_BUILD_NO_3MF_IMPORTER)
     out.push_back(new D3MFImporter());
-#endif
-#ifndef ASSIMP_BUILD_NO_MMD_IMPORTER
-    out.push_back(new MMDImporter());
-#endif
-#ifndef ASSIMP_BUILD_NO_IQM_IMPORTER
-    out.push_back(new IQMImporter());
 #endif
 }
 
