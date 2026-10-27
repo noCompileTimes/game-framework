@@ -1,0 +1,9 @@
+CompileFlags:
+  Add:
+    - -xc++
+    - -std=c++17
+    - -ID:/frameworks/game-framework/libraries/behaviortree-cpp/include
+    - -ID:/frameworks/game-framework/libraries/behaviortree-cpp/3rdparty
+    - -ID:/frameworks/game-framework/libraries/behaviortree-cpp/3rdparty/minitrace
+    - -ID:/frameworks/game-framework/libraries/behaviortree-cpp/3rdparty/tinyxml2
+    - -ID:/frameworks/game-framework/libraries/behaviortree-cpp/3rdparty/minicoro
