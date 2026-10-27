@@ -17,8 +17,7 @@ if (GLFW_USE_OSMESA)
 endif()
 
 if (DEFINED GLFW_USE_WAYLAND AND UNIX AND NOT APPLE)
-    message(FATAL_ERROR
-        "GLFW_USE_WAYLAND has been removed; delete the CMake cache and set GLFW_BUILD_WAYLAND and GLFW_BUILD_X11 instead")
+    message(FATAL_ERROR "GLFW_USE_WAYLAND has been removed; delete the CMake cache and set GLFW_BUILD_WAYLAND and GLFW_BUILD_X11 instead")
 endif()
 
 cmake_dependent_option(GLFW_BUILD_WIN32 "Build support for Win32" ON "WIN32" OFF)
@@ -26,10 +25,8 @@ cmake_dependent_option(GLFW_BUILD_COCOA "Build support for Cocoa" ON "APPLE" OFF
 cmake_dependent_option(GLFW_BUILD_X11 "Build support for X11" ON "UNIX;NOT APPLE" OFF)
 cmake_dependent_option(GLFW_BUILD_WAYLAND "Build support for Wayland" ON "UNIX;NOT APPLE" OFF)
 
-cmake_dependent_option(GLFW_USE_HYBRID_HPG "Force use of high-performance GPU on hybrid systems" OFF
-                       "WIN32" OFF)
-cmake_dependent_option(USE_MSVC_RUNTIME_LIBRARY_DLL "Use MSVC runtime library DLL" ON
-                       "MSVC" OFF)
+cmake_dependent_option(GLFW_USE_HYBRID_HPG "Force use of high-performance GPU on hybrid systems" OFF "WIN32" OFF)
+cmake_dependent_option(USE_MSVC_RUNTIME_LIBRARY_DLL "Use MSVC runtime library DLL" ON "MSVC" OFF)
 
 set(GLFW_LIBRARY_TYPE "${GLFW_LIBRARY_TYPE}" CACHE STRING
     "Library type override for GLFW (SHARED, STATIC, OBJECT, or empty to follow BUILD_SHARED_LIBS)")
@@ -64,9 +61,9 @@ endif()
 # Apply Microsoft C runtime library option
 # This is here because it also applies to tests and examples
 #--------------------------------------------------------------------
-if (MSVC AND NOT USE_MSVC_RUNTIME_LIBRARY_DLL)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif()
+#if (MSVC AND NOT USE_MSVC_RUNTIME_LIBRARY_DLL)
+#    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+#endif()
 
 #--------------------------------------------------------------------
 # Create generated files
@@ -91,34 +88,3 @@ add_subdirectory(src)
 
 add_subdirectory(examples)
 add_subdirectory(tests)
-
-#--------------------------------------------------------------------
-# Install files other than the library
-# The library is installed by src/CMakeLists.txt
-#--------------------------------------------------------------------
-if (GLFW_INSTALL)
-    install(DIRECTORY include/GLFW DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-            FILES_MATCHING PATTERN glfw3.h PATTERN glfw3native.h)
-
-    install(FILES "${GLFW_BINARY_DIR}/src/glfw3Config.cmake"
-                  "${GLFW_BINARY_DIR}/src/glfw3ConfigVersion.cmake"
-            DESTINATION "${GLFW_CONFIG_PATH}")
-
-    install(EXPORT glfwTargets FILE glfw3Targets.cmake
-            EXPORT_LINK_INTERFACE_LIBRARIES
-            DESTINATION "${GLFW_CONFIG_PATH}")
-    install(FILES "${GLFW_BINARY_DIR}/src/glfw3.pc"
-            DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
-
-    # Only generate this target if no higher-level project already has
-    if (NOT TARGET uninstall)
-        configure_file(CMake/cmake_uninstall.cmake.in
-                       cmake_uninstall.cmake IMMEDIATE @ONLY)
-
-        add_custom_target(uninstall
-                          "${CMAKE_COMMAND}" -P
-                          "${GLFW_BINARY_DIR}/cmake_uninstall.cmake")
-        set_target_properties(uninstall PROPERTIES FOLDER "GLFW3")
-    endif()
-endif()
-
