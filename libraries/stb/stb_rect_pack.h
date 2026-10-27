@@ -126,7 +126,6 @@ struct stbrp_rect
 
 }; // 16 bytes, nominally
 
-
 STBRP_DEF void stbrp_init_target (stbrp_context *context, int width, int height, stbrp_node *nodes, int num_nodes);
 // Initialize a rectangle packer to:
 //    pack a rectangle that is 'width' by 'height' in dimensions
@@ -165,7 +164,6 @@ enum
    STBRP_HEURISTIC_Skyline_BL_sortHeight = STBRP_HEURISTIC_Skyline_default,
    STBRP_HEURISTIC_Skyline_BF_sortHeight
 };
-
 
 //////////////////////////////////////////////////////////////////////////////
 //
