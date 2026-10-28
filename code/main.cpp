@@ -231,7 +231,7 @@ auto main() -> int32_t
             auto half_width = rectangles[i].w * 0.5f;
             auto half_height = rectangles[i].h * 0.5f;
 
-            rectangles_geometry.append(create_rectangle({ 0, 0,  (float)rectangles[i].w, (float)rectangles[i].h }, { 1.0f, 0.0f, 0.0 }));
+            rectangles_geometry.append(create_rectangle({ 0, 0,  static_cast<float>(rectangles[i].w), static_cast<float>(rectangles[i].h) }, { 1.0f, 0.0f, 0.0 }));
         }
         else
         {
