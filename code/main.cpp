@@ -258,6 +258,8 @@ auto main() -> int32_t
     framebuffer.attach(framebuffer_texture, GL_COLOR_ATTACHMENT0, 0);
     framebuffer.attach(renderbuffer, GL_DEPTH_ATTACHMENT);
 
+    graphics::opengl::Framebuffer default_fbo;
+
     // framebuffer - end
 
     // rectangles
@@ -290,8 +292,6 @@ auto main() -> int32_t
     graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
 
     graphics::opengl::Pipeline::disable(GL_MULTISAMPLE);
-
-    graphics::opengl::Framebuffer default_framebuffer;
 
     while (window_is_running)
     {
@@ -332,7 +332,7 @@ auto main() -> int32_t
 
         // sprites
 
-        default_framebuffer.bind();
+        default_fbo.bind();
 
         graphics::opengl::Pipeline::disable(GL_DEPTH_TEST);
 
