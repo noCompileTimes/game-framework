@@ -19,7 +19,7 @@
 #include "graphics/opengl/shader_stage.hpp"
 #include "graphics/opengl/shader_program.hpp"
 #include "graphics/opengl/texture_sampler.hpp"
-#include "graphics/opengl/texture.hpp"
+#include "graphics/opengl/framebuffer.hpp"
 
 #include "geometry.hpp"
 
@@ -248,19 +248,14 @@ auto main() -> int32_t
     framebuffer_texture.create();
     framebuffer_texture.storage(atlas_width, atlas_height, GL_RGB8, 1);
 
-    uint32_t renderbuffer;
-    glCreateRenderbuffers(1, &renderbuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer); // TODO remove this, after direct state access
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, atlas_width, atlas_height);
+    graphics::opengl::Renderbuffer renderbuffer;
+    renderbuffer.create();
+    renderbuffer.storage(atlas_width, atlas_height, GL_DEPTH_COMPONENT24);
 
-    uint32_t framebuffer;
-    glCreateFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-    glFramebufferTexture(GL_FRAMEBUFFER,  GL_COLOR_ATTACHMENT0, framebuffer_texture.handle, 0); // TODO remove this and all the versions
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER,  GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer); // TODO remove this after named version
-
-    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE); // TODO delete this and the named version at some point
+    graphics::opengl::Framebuffer framebuffer;
+    framebuffer.create();
+    framebuffer.attach(framebuffer_texture, GL_COLOR_ATTACHMENT0, 0);
+    framebuffer.attach(renderbuffer, GL_DEPTH_ATTACHMENT);
 
     // framebuffer - end
 
@@ -297,12 +292,12 @@ auto main() -> int32_t
     {
         // update
 
-         model_matrix = glm::rotate(glm::mat4(1.0), static_cast<float>(glfwGetTime()), glm::vec3{ 0.0f, 1.0f, 0.0f });
-        sprite_matrix = glm::translate(glm::mat4(1.0f), { 110.0f, 110.0f, 0.0f } );
+         model_matrix = rotate(glm::mat4(1.0), static_cast<float>(glfwGetTime()), glm::vec3{ 0.0f, 1.0f, 0.0f });
+        sprite_matrix = translate(glm::mat4(1.0f), { 110.0f, 110.0f, 0.0f } );
 
         // draw
 
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        framebuffer.bind();
 
         graphics::opengl::Pipeline::enable(GL_DEPTH_TEST);
 
@@ -326,7 +321,8 @@ auto main() -> int32_t
 
         // sprites
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        graphics::opengl::Framebuffer default_framebuffer;
+                                      default_framebuffer.bind();
 
         graphics::opengl::Pipeline::disable(GL_DEPTH_TEST);
 
@@ -356,9 +352,9 @@ auto main() -> int32_t
         {
             auto& rectangle = rectangles[i];
 
-            auto parent_matrix = glm::translate(glm::mat4(1.0f), { 30, 30, 0 });
+            auto parent_matrix = translate(glm::mat4(1.0f), { 30, 30, 0 });
 
-            auto rectangle_matrix = glm::translate(parent_matrix, { rectangle.x, rectangle.y, 0.0f });
+            auto rectangle_matrix = translate(parent_matrix, { rectangle.x, rectangle.y, 0.0f });
 
             transform_ubo.subdata(0, sizeof(glm::mat4), &rectangle_matrix);
 
