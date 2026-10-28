@@ -2138,9 +2138,6 @@ GLAPI PFNGLBINDRENDERBUFFERPROC glad_glBindRenderbuffer;
 typedef void (APIENTRYP PFNGLDELETERENDERBUFFERSPROC)(GLsizei n, const GLuint *renderbuffers);
 GLAPI PFNGLDELETERENDERBUFFERSPROC glad_glDeleteRenderbuffers;
 #define glDeleteRenderbuffers glad_glDeleteRenderbuffers
-typedef void (APIENTRYP PFNGLGENRENDERBUFFERSPROC)(GLsizei n, GLuint *renderbuffers);
-GLAPI PFNGLGENRENDERBUFFERSPROC glad_glGenRenderbuffers;
-#define glGenRenderbuffers glad_glGenRenderbuffers
 typedef void (APIENTRYP PFNGLRENDERBUFFERSTORAGEPROC)(GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
 GLAPI PFNGLRENDERBUFFERSTORAGEPROC glad_glRenderbufferStorage;
 #define glRenderbufferStorage glad_glRenderbufferStorage
@@ -2153,9 +2150,6 @@ GLAPI PFNGLBINDFRAMEBUFFERPROC glad_glBindFramebuffer;
 typedef void (APIENTRYP PFNGLDELETEFRAMEBUFFERSPROC)(GLsizei n, const GLuint *framebuffers);
 GLAPI PFNGLDELETEFRAMEBUFFERSPROC glad_glDeleteFramebuffers;
 #define glDeleteFramebuffers glad_glDeleteFramebuffers
-typedef void (APIENTRYP PFNGLGENFRAMEBUFFERSPROC)(GLsizei n, GLuint *framebuffers);
-GLAPI PFNGLGENFRAMEBUFFERSPROC glad_glGenFramebuffers;
-#define glGenFramebuffers glad_glGenFramebuffers
 typedef GLenum (APIENTRYP PFNGLCHECKFRAMEBUFFERSTATUSPROC)(GLenum target);
 GLAPI PFNGLCHECKFRAMEBUFFERSTATUSPROC glad_glCheckFramebufferStatus;
 #define glCheckFramebufferStatus glad_glCheckFramebufferStatus
