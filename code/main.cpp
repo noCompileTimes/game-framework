@@ -11,6 +11,7 @@
 
 #include "core/window_manager.hpp"
 #include "core/file.hpp"
+#include "core/rgba.hpp"
 
 #include "graphics/opengl/buffer.hpp"
 #include "graphics/opengl/vertex_array.hpp"
@@ -284,9 +285,13 @@ auto main() -> int32_t
         window_height = height;
     };
 
+    core::rgba framebuffer_color { 0.2f, 0.4f, 0.6f, 1.0f };
+
     graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
 
     graphics::opengl::Pipeline::disable(GL_MULTISAMPLE);
+
+    graphics::opengl::Framebuffer default_framebuffer;
 
     while (window_is_running)
     {
@@ -295,6 +300,13 @@ auto main() -> int32_t
          model_matrix = rotate(glm::mat4(1.0), static_cast<float>(glfwGetTime()), glm::vec3{ 0.0f, 1.0f, 0.0f });
         sprite_matrix = translate(glm::mat4(1.0f), { 110.0f, 110.0f, 0.0f } );
 
+        // clearing
+
+        framebuffer.clear(&framebuffer_color.r, 0);
+        framebuffer.clear(1.0f);
+
+        graphics::opengl::Commands::clear(GL_COLOR_BUFFER_BIT);
+
         // draw
 
         framebuffer.bind();
@@ -302,7 +314,6 @@ auto main() -> int32_t
         graphics::opengl::Pipeline::enable(GL_DEPTH_TEST);
 
         graphics::opengl::Commands::viewport(0, 0, atlas_width, atlas_height);
-        graphics::opengl::Commands::clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // models
 
@@ -321,13 +332,11 @@ auto main() -> int32_t
 
         // sprites
 
-        graphics::opengl::Framebuffer default_framebuffer;
-                                      default_framebuffer.bind();
+        default_framebuffer.bind();
 
         graphics::opengl::Pipeline::disable(GL_DEPTH_TEST);
 
         graphics::opengl::Commands::viewport(0, 0, window_width, window_height);
-        graphics::opengl::Commands::clear(GL_COLOR_BUFFER_BIT);
 
         sprite_camera_matrices[1] = glm::ortho(0.0f, static_cast<float>(window_width), static_cast<float>(window_height), 0.0f, 0.0f, 1.0f);
         camera_ubo.subdata(0, sizeof(sprite_camera_matrices), sprite_camera_matrices);
