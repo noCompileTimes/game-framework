@@ -2117,18 +2117,6 @@ GLAPI PFNGLGETTEXPARAMETERIIVPROC glad_glGetTexParameterIiv;
 typedef void (APIENTRYP PFNGLGETTEXPARAMETERIUIVPROC)(GLenum target, GLenum pname, GLuint *params);
 GLAPI PFNGLGETTEXPARAMETERIUIVPROC glad_glGetTexParameterIuiv;
 #define glGetTexParameterIuiv glad_glGetTexParameterIuiv
-typedef void (APIENTRYP PFNGLCLEARBUFFERIVPROC)(GLenum buffer, GLint drawbuffer, const GLint *value);
-GLAPI PFNGLCLEARBUFFERIVPROC glad_glClearBufferiv;
-#define glClearBufferiv glad_glClearBufferiv
-typedef void (APIENTRYP PFNGLCLEARBUFFERUIVPROC)(GLenum buffer, GLint drawbuffer, const GLuint *value);
-GLAPI PFNGLCLEARBUFFERUIVPROC glad_glClearBufferuiv;
-#define glClearBufferuiv glad_glClearBufferuiv
-typedef void (APIENTRYP PFNGLCLEARBUFFERFVPROC)(GLenum buffer, GLint drawbuffer, const GLfloat *value);
-GLAPI PFNGLCLEARBUFFERFVPROC glad_glClearBufferfv;
-#define glClearBufferfv glad_glClearBufferfv
-typedef void (APIENTRYP PFNGLCLEARBUFFERFIPROC)(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil);
-GLAPI PFNGLCLEARBUFFERFIPROC glad_glClearBufferfi;
-#define glClearBufferfi glad_glClearBufferfi
 typedef const GLubyte * (APIENTRYP PFNGLGETSTRINGIPROC)(GLenum name, GLuint index);
 GLAPI PFNGLGETSTRINGIPROC glad_glGetStringi;
 #define glGetStringi glad_glGetStringi
