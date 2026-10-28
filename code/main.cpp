@@ -122,7 +122,7 @@ auto main() -> int32_t
     cube_geometry_vao.attach_attribute({ 0, offsetof(model_vertex, position), 3, GL_FLOAT, 0 });
     cube_geometry_vao.attach_attribute({ 1, offsetof(model_vertex, texcoord), 2, GL_FLOAT, 0 });
 
-    const auto [sprite_vertices, sprite_elements] = create_sprite({ -100, -100, 100, 100 });
+    const auto [sprite_vertices, sprite_elements] = create_sprite({ 0, 0, 300, 300 });
 
     graphics::opengl::Buffer sprite_geometry_vbo;
     sprite_geometry_vbo.create();
@@ -181,14 +181,12 @@ auto main() -> int32_t
     pavement_texture.storage(image_width, image_height, GL_RGB8, 1);
     pavement_texture.subdata(image_width, image_height, GL_RGB, 0, image_data);
 
-    pavement_texture.bind(0);
-
     // rectangles packing - begin
 
     stbrp_context stbrp_context;
 
-    int32_t atlas_width = 2048;
-    int32_t atlas_height = 2048;
+    int32_t atlas_width = 1024;
+    int32_t atlas_height = 1024;
 
     constexpr auto atlas_nodes_count = 512;
     stbrp_node atlas_nodes[atlas_nodes_count];
@@ -245,6 +243,25 @@ auto main() -> int32_t
 
     // framebuffer - begin
 
+    graphics::opengl::Texture framebuffer_texture;
+    framebuffer_texture.type = GL_TEXTURE_2D;
+    framebuffer_texture.create();
+    framebuffer_texture.storage(atlas_width, atlas_height, GL_RGB8, 1);
+
+    uint32_t renderbuffer;
+    glCreateRenderbuffers(1, &renderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer); // TODO remove this, after direct state access
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, atlas_width, atlas_height);
+
+    uint32_t framebuffer;
+    glCreateFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    glFramebufferTexture(GL_FRAMEBUFFER,  GL_COLOR_ATTACHMENT0, framebuffer_texture.handle, 0); // TODO remove this and all the versions
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER,  GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer); // TODO remove this after named version
+
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE); // TODO delete this and the named version at some point
+
     // framebuffer - end
 
     // rectangles
@@ -285,38 +302,49 @@ auto main() -> int32_t
 
         // draw
 
-        graphics::opengl::Commands::viewport(0, 0, window_width, window_height);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+        graphics::opengl::Pipeline::enable(GL_DEPTH_TEST);
+
+        graphics::opengl::Commands::viewport(0, 0, atlas_width, atlas_height);
         graphics::opengl::Commands::clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // models
 
-        graphics::opengl::Pipeline::enable(GL_DEPTH_TEST);
-
-        model_camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
+        model_camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(atlas_width) / static_cast<float>(atlas_height), 0.3f, 100.0f);
         camera_ubo.subdata(0, sizeof(model_camera_matrices), model_camera_matrices);
 
         model_program_shader.bind();
+
+        pavement_texture.bind(0);
 
         cube_geometry_vao.bind();
 
         transform_ubo.subdata(0, sizeof(model_matrix), &model_matrix);
 
-        //graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, geometry_elements.size());
+        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, geometry_elements.size());
 
         // sprites
 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
         graphics::opengl::Pipeline::disable(GL_DEPTH_TEST);
+
+        graphics::opengl::Commands::viewport(0, 0, window_width, window_height);
+        graphics::opengl::Commands::clear(GL_COLOR_BUFFER_BIT);
 
         sprite_camera_matrices[1] = glm::ortho(0.0f, static_cast<float>(window_width), static_cast<float>(window_height), 0.0f, 0.0f, 1.0f);
         camera_ubo.subdata(0, sizeof(sprite_camera_matrices), sprite_camera_matrices);
 
         sprite_program_shader.bind();
 
+        framebuffer_texture.bind(0);
+
         sprite_geometry_vao.bind();
 
         transform_ubo.subdata(0, sizeof(sprite_matrix), &sprite_matrix);
 
-        //graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, sprite_elements.size());
+        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, sprite_elements.size());
 
         // rectangles
 
