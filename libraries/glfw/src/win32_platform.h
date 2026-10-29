@@ -501,7 +501,6 @@ void _glfwFocusWindowWin32(_GLFWwindow* window);
 void _glfwSetWindowMonitorWin32(_GLFWwindow* window, _GLFWmonitor* monitor, int xpos, int ypos, int width, int height, int refreshRate);
 GLFWbool _glfwWindowFocusedWin32(_GLFWwindow* window);
 GLFWbool _glfwWindowIconifiedWin32(_GLFWwindow* window);
-GLFWbool _glfwWindowVisibleWin32(_GLFWwindow* window);
 GLFWbool _glfwWindowMaximizedWin32(_GLFWwindow* window);
 GLFWbool _glfwWindowHoveredWin32(_GLFWwindow* window);
 GLFWbool _glfwFramebufferTransparentWin32(_GLFWwindow* window);

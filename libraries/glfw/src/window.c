@@ -264,7 +264,6 @@ void glfwDefaultWindowHints(void)
     // The default is a focused, visible, resizable window with decorations
     memset(&_glfw.hints.window, 0, sizeof(_glfw.hints.window));
     _glfw.hints.window.resizable    = true;
-    _glfw.hints.window.visible      = true;
     _glfw.hints.window.decorated    = true;
     _glfw.hints.window.focused      = true;
     _glfw.hints.window.autoIconify  = true;
@@ -360,9 +359,6 @@ GLFWAPI void glfwWindowHint(int hint, int value)
             return;
         case GLFW_MAXIMIZED:
             _glfw.hints.window.maximized = value;
-            return;
-        case GLFW_VISIBLE:
-            _glfw.hints.window.visible = value;
             return;
         case GLFW_POSITION_X:
             _glfw.hints.window.xpos = value;
@@ -852,8 +848,6 @@ GLFWAPI int glfwGetWindowAttrib(GLFWwindow* handle, int attrib)
             return _glfw.platform.windowFocused(window);
         case GLFW_ICONIFIED:
             return _glfw.platform.windowIconified(window);
-        case GLFW_VISIBLE:
-            return _glfw.platform.windowVisible(window);
         case GLFW_MAXIMIZED:
             return _glfw.platform.windowMaximized(window);
         case GLFW_HOVERED:

@@ -1508,9 +1508,10 @@ GLFWbool _glfwCreateWindowWin32(_GLFWwindow* window,
     if (wndconfig->mousePassthrough)
         _glfwSetWindowMousePassthroughWin32(window, GLFW_TRUE);
 
+    _glfwShowWindowWin32(window);
+
     if (window->monitor)
     {
-        _glfwShowWindowWin32(window);
         _glfwFocusWindowWin32(window);
         acquireMonitor(window);
         fitToMonitor(window);
@@ -1520,12 +1521,8 @@ GLFWbool _glfwCreateWindowWin32(_GLFWwindow* window,
     }
     else
     {
-        if (wndconfig->visible)
-        {
-            _glfwShowWindowWin32(window);
-            if (wndconfig->focused)
-                _glfwFocusWindowWin32(window);
-        }
+        if (wndconfig->focused)
+            _glfwFocusWindowWin32(window);
     }
 
     return GLFW_TRUE;
@@ -1933,11 +1930,6 @@ GLFWbool _glfwWindowFocusedWin32(_GLFWwindow* window)
 GLFWbool _glfwWindowIconifiedWin32(_GLFWwindow* window)
 {
     return IsIconic(window->win32.handle);
-}
-
-GLFWbool _glfwWindowVisibleWin32(_GLFWwindow* window)
-{
-    return IsWindowVisible(window->win32.handle);
 }
 
 GLFWbool _glfwWindowMaximizedWin32(_GLFWwindow* window)

@@ -245,7 +245,6 @@ struct _GLFWwndconfig
     int           width;
     int           height;
     bool          resizable;
-    bool          visible;
     bool          decorated;
     bool          focused;
     bool          autoIconify;
@@ -563,7 +562,6 @@ struct _GLFWplatform
     void (*setWindowMonitor)(_GLFWwindow*,_GLFWmonitor*,int,int,int,int,int);
     GLFWbool (*windowFocused)(_GLFWwindow*);
     GLFWbool (*windowIconified)(_GLFWwindow*);
-    GLFWbool (*windowVisible)(_GLFWwindow*);
     GLFWbool (*windowMaximized)(_GLFWwindow*);
     GLFWbool (*windowHovered)(_GLFWwindow*);
     GLFWbool (*framebufferTransparent)(_GLFWwindow*);

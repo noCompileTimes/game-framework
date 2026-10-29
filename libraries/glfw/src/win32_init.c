@@ -628,7 +628,6 @@ GLFWbool _glfwConnectWin32(int platformID, _GLFWplatform* platform)
         .setWindowMonitor = _glfwSetWindowMonitorWin32,
         .windowFocused = _glfwWindowFocusedWin32,
         .windowIconified = _glfwWindowIconifiedWin32,
-        .windowVisible = _glfwWindowVisibleWin32,
         .windowMaximized = _glfwWindowMaximizedWin32,
         .windowHovered = _glfwWindowHoveredWin32,
         .framebufferTransparent = _glfwFramebufferTransparentWin32,

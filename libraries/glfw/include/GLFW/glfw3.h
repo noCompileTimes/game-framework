@@ -865,12 +865,6 @@ extern "C" {
  *  [window attribute](@ref GLFW_RESIZABLE_attrib).
  */
 #define GLFW_RESIZABLE              0x00020003
-/*! @brief Window visibility window hint and attribute
- *
- *  Window visibility [window hint](@ref GLFW_VISIBLE_hint) and
- *  [window attribute](@ref GLFW_VISIBLE_attrib).
- */
-#define GLFW_VISIBLE                0x00020004
 /*! @brief Window decoration window hint and attribute
  *
  *  Window decoration [window hint](@ref GLFW_DECORATED_hint) and
