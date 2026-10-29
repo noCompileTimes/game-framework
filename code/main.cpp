@@ -256,6 +256,11 @@ auto main() -> int32_t
 
     // framebuffer - end
 
+    graphics::opengl::Buffer framebuffer_pbo;
+    framebuffer_pbo.create();
+    framebuffer_pbo.data(atlas_width * atlas_height * 3, nullptr); // TODO use here the storage with the GL_MAP_READ_BIT
+    framebuffer_pbo.bind(GL_PIXEL_PACK_BUFFER);
+
     // rectangles
 
     graphics::opengl::Buffer rectangles_vbo;
@@ -334,15 +339,18 @@ auto main() -> int32_t
         {
             auto channels = 3;
             auto buffer_size = atlas_width * atlas_height * channels;
-            auto* pixels = new unsigned char[buffer_size];
 
-            glReadnPixels(0, 0, atlas_width, atlas_height, GL_RGB, GL_UNSIGNED_BYTE, buffer_size, pixels);
+            glReadnPixels(0, 0, atlas_width, atlas_height, GL_RGB, GL_UNSIGNED_BYTE, buffer_size, nullptr);
 
-            stbi_write_png("sprite_atlas.png",
+            if (auto* pixels = static_cast<uint8_t*>(glMapNamedBufferRange(framebuffer_pbo.handle, 0, buffer_size, GL_MAP_READ_BIT)))
+            {
+                stbi_write_png("sprite_atlas.png",
                                atlas_width, atlas_height, channels,
                                pixels + atlas_width * channels * (atlas_height - 1),
                                -atlas_width * channels);
-            delete[] pixels;
+
+                glUnmapNamedBuffer(framebuffer_pbo.handle);
+            }
         }
 
         // main drawing
