@@ -4,8 +4,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <stb_image.h>
 #include <stb_rect_pack.h>
+#include <stb_image_write.h>
 
 #include "backends/glfw/window_factory.hpp"
 
@@ -23,6 +23,7 @@
 #include "graphics/opengl/framebuffer.hpp"
 
 #include "geometry.hpp"
+#include "resources.hpp"
 
 auto main() -> int32_t
 {
@@ -123,7 +124,7 @@ auto main() -> int32_t
     cube_geometry_vao.attach_attribute({ 0, offsetof(model_vertex, position), 3, GL_FLOAT, 0 });
     cube_geometry_vao.attach_attribute({ 1, offsetof(model_vertex, texcoord), 2, GL_FLOAT, 0 });
 
-    const auto [sprite_vertices, sprite_elements] = create_sprite({ 0, 0, 300, 300 });
+    const auto [sprite_vertices, sprite_elements] = create_sprite({ 0, 0, 256, 256 });
 
     graphics::opengl::Buffer sprite_geometry_vbo;
     sprite_geometry_vbo.create();
@@ -169,25 +170,21 @@ auto main() -> int32_t
     texture_sampler.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     texture_sampler.bind(0);
 
-    int32_t image_width;
-    int32_t image_height;
-    int32_t image_channels;
-
-    const auto image_data = stbi_load("pavement_albedo.png", &image_width, &image_height, &image_channels, 0);
+    texture_data pavement_image = load_texture("textures/pavement_albedo.png");
 
     graphics::opengl::Texture pavement_texture;
     pavement_texture.type = GL_TEXTURE_2D;
     pavement_texture.create();
 
-    pavement_texture.storage(image_width, image_height, GL_RGB8, 1);
-    pavement_texture.subdata(image_width, image_height, GL_RGB, 0, image_data);
+    pavement_texture.storage(pavement_image.width, pavement_image.height, GL_RGB8, 1);
+    pavement_texture.subdata(pavement_image.width, pavement_image.height, GL_RGB, 0, pavement_image.pixels);
 
     // rectangles packing - begin
 
     stbrp_context stbrp_context;
 
-    int32_t atlas_width = 1024;
-    int32_t atlas_height = 1024;
+    auto atlas_width = 1024;
+    auto atlas_height = 1024;
 
     constexpr auto atlas_nodes_count = 512;
     stbrp_node atlas_nodes[atlas_nodes_count];
@@ -229,9 +226,6 @@ auto main() -> int32_t
         {
             printf("Rect ID %d: Positioned at (%d, %d) [Size: %dx%d]\n", rectangles[i].id, rectangles[i].x, rectangles[i].y, rectangles[i].w, rectangles[i].h);
 
-            auto half_width = rectangles[i].w * 0.5f;
-            auto half_height = rectangles[i].h * 0.5f;
-
             rectangles_geometry.append(create_rectangle({ 0, 0,  static_cast<float>(rectangles[i].w), static_cast<float>(rectangles[i].h) }, { 1.0f, 0.0f, 0.0 }));
         }
         else
@@ -249,14 +243,14 @@ auto main() -> int32_t
     framebuffer_texture.create();
     framebuffer_texture.storage(atlas_width, atlas_height, GL_RGB8, 1);
 
-    graphics::opengl::Renderbuffer renderbuffer;
-    renderbuffer.create();
-    renderbuffer.storage(atlas_width, atlas_height, GL_DEPTH_COMPONENT24);
+    //graphics::opengl::Renderbuffer renderbuffer;
+    //renderbuffer.create();
+    //renderbuffer.storage(atlas_width, atlas_height, GL_DEPTH_COMPONENT24);
 
     graphics::opengl::Framebuffer framebuffer;
     framebuffer.create();
     framebuffer.attach(framebuffer_texture, GL_COLOR_ATTACHMENT0, 0);
-    framebuffer.attach(renderbuffer, GL_DEPTH_ATTACHMENT);
+    //framebuffer.attach(renderbuffer, GL_DEPTH_ATTACHMENT);
 
     graphics::opengl::Framebuffer default_fbo;
 
@@ -298,26 +292,72 @@ auto main() -> int32_t
         // update
 
          model_matrix = rotate(glm::mat4(1.0), static_cast<float>(glfwGetTime()), glm::vec3{ 0.0f, 1.0f, 0.0f });
-        sprite_matrix = translate(glm::mat4(1.0f), { 110.0f, 110.0f, 0.0f } );
+        sprite_matrix = translate(glm::mat4(1.0f), { 10.0f, 10.0f, 0.0f } );
 
         // clearing
 
         framebuffer.clear(&framebuffer_color.r, 0);
-        framebuffer.clear(1.0f);
+        //framebuffer.clear(1.0f);
 
-        graphics::opengl::Commands::clear(GL_COLOR_BUFFER_BIT);
+        graphics::opengl::Commands::clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // draw
 
         framebuffer.bind();
 
-        graphics::opengl::Pipeline::enable(GL_DEPTH_TEST);
-
         graphics::opengl::Commands::viewport(0, 0, atlas_width, atlas_height);
+
+        // rectangles
+
+        sprite_camera_matrices[1] = glm::ortho(0.0f, static_cast<float>(atlas_width), static_cast<float>(atlas_height), 0.0f, 0.0f, 1.0f);
+        camera_ubo.subdata(0, sizeof(sprite_camera_matrices), sprite_camera_matrices);
+
+        basic_program_shader.bind();
+
+        rectangles_vao.bind();
+
+        for (auto i = 0; i < rectangles_count; ++i)
+        {
+            auto& rectangle = rectangles[i];
+
+            // TODO remove it if not needed later on
+            auto parent_matrix = translate(glm::mat4(1.0f), { 0.0, 0.0, 0 });
+
+            auto rectangle_matrix = translate(parent_matrix, { rectangle.x, rectangle.y, 0.0f });
+
+            transform_ubo.subdata(0, sizeof(glm::mat4), &rectangle_matrix);
+
+            graphics::opengl::Commands::draw_elements(GL_LINES, i * 8, 8);
+        }
+
+        if (glfwGetKey(std::any_cast<GLFWwindow*>(window->handle()), GLFW_KEY_SPACE) == GLFW_PRESS)
+        {
+            auto channels = 3;
+            auto buffer_size = atlas_width * atlas_height * channels;
+            auto* pixels = new unsigned char[buffer_size];
+
+            glReadnPixels(0, 0, atlas_width, atlas_height, GL_RGB, GL_UNSIGNED_BYTE, buffer_size, pixels);
+
+            stbi_write_png("sprite_atlas.png",
+                               atlas_width, atlas_height, channels,
+                               pixels + atlas_width * channels * (atlas_height - 1),
+                               -atlas_width * channels);
+            delete[] pixels;
+        }
+
+        // main drawing
+
+        default_fbo.bind();
+
+        graphics::opengl::Commands::viewport(0, 0, window_width, window_height);
+
+        // 3D drawing
+
+        graphics::opengl::Pipeline::enable(GL_DEPTH_TEST);
 
         // models
 
-        model_camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(atlas_width) / static_cast<float>(atlas_height), 0.3f, 100.0f);
+        model_camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
         camera_ubo.subdata(0, sizeof(model_camera_matrices), model_camera_matrices);
 
         model_program_shader.bind();
@@ -330,13 +370,11 @@ auto main() -> int32_t
 
         graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, geometry_elements.size());
 
-        // sprites
-
-        default_fbo.bind();
+        // 2D drawing
 
         graphics::opengl::Pipeline::disable(GL_DEPTH_TEST);
 
-        graphics::opengl::Commands::viewport(0, 0, window_width, window_height);
+        // sprites
 
         sprite_camera_matrices[1] = glm::ortho(0.0f, static_cast<float>(window_width), static_cast<float>(window_height), 0.0f, 0.0f, 1.0f);
         camera_ubo.subdata(0, sizeof(sprite_camera_matrices), sprite_camera_matrices);
@@ -350,25 +388,6 @@ auto main() -> int32_t
         transform_ubo.subdata(0, sizeof(sprite_matrix), &sprite_matrix);
 
         graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, sprite_elements.size());
-
-        // rectangles
-
-        basic_program_shader.bind();
-
-        rectangles_vao.bind();
-
-        for (auto i = 0; i < rectangles_count; ++i)
-        {
-            auto& rectangle = rectangles[i];
-
-            auto parent_matrix = translate(glm::mat4(1.0f), { 30, 30, 0 });
-
-            auto rectangle_matrix = translate(parent_matrix, { rectangle.x, rectangle.y, 0.0f });
-
-            transform_ubo.subdata(0, sizeof(glm::mat4), &rectangle_matrix);
-
-            graphics::opengl::Commands::draw_elements(GL_LINES, i * 8, 8);
-        }
 
         window_manager.update();
     }
