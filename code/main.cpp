@@ -340,8 +340,10 @@ auto main() -> int32_t
             auto channels = 3;
             auto buffer_size = atlas_width * atlas_height * channels;
 
+            // TODO move this into the Commands?
             glReadnPixels(0, 0, atlas_width, atlas_height, GL_RGB, GL_UNSIGNED_BYTE, buffer_size, nullptr);
 
+            // TODO move the map/unmap functions into the buffer class
             if (auto* pixels = static_cast<uint8_t*>(glMapNamedBufferRange(framebuffer_pbo.handle, 0, buffer_size, GL_MAP_READ_BIT)))
             {
                 stbi_write_png("sprite_atlas.png",
