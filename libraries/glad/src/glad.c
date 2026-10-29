@@ -646,7 +646,6 @@ PFNGLPROVOKINGVERTEXPROC glad_glProvokingVertex = NULL;
 PFNGLPUSHDEBUGGROUPPROC glad_glPushDebugGroup = NULL;
 PFNGLQUERYCOUNTERPROC glad_glQueryCounter = NULL;
 PFNGLREADBUFFERPROC glad_glReadBuffer = NULL;
-PFNGLREADPIXELSPROC glad_glReadPixels = NULL;
 PFNGLREADNPIXELSPROC glad_glReadnPixels = NULL;
 PFNGLRELEASESHADERCOMPILERPROC glad_glReleaseShaderCompiler = NULL;
 PFNGLRENDERBUFFERSTORAGEMULTISAMPLEPROC glad_glRenderbufferStorageMultisample = NULL;
@@ -841,7 +840,6 @@ static void load_GL_VERSION_1_0(GLADloadproc load) {
 	glad_glPixelStoref = (PFNGLPIXELSTOREFPROC)load("glPixelStoref");
 	glad_glPixelStorei = (PFNGLPIXELSTOREIPROC)load("glPixelStorei");
 	glad_glReadBuffer = (PFNGLREADBUFFERPROC)load("glReadBuffer");
-	glad_glReadPixels = (PFNGLREADPIXELSPROC)load("glReadPixels");
 	glad_glGetBooleanv = (PFNGLGETBOOLEANVPROC)load("glGetBooleanv");
 	glad_glGetDoublev = (PFNGLGETDOUBLEVPROC)load("glGetDoublev");
 	glad_glGetError = (PFNGLGETERRORPROC)load("glGetError");
