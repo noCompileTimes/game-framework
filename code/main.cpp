@@ -292,6 +292,7 @@ auto main() -> int32_t
     // color: normal alpha blending, alpha: keep coverage correct on a transparent background (avoids alpha * alpha)
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     // TODO use the glBlendFuncSeparatei seems to work directly with the framebuffer?
+    // TODO check the glBlendFunc if is still usable or not
 
     // rectangles
 
@@ -426,3 +427,6 @@ auto main() -> int32_t
 // TODO - fix the precompile headers for graphics module
 // TODO - name the shader files as the variables
 // TODO - add all the shaders in one folder in the build
+
+// TODO - check and understand why in some cases we need create_sprite with flip_vertically true and sometimes false
+// TODO - update all the years for license files 2025 - 2026
