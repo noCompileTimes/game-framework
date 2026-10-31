@@ -109,11 +109,11 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer cube_geometry_vbo;
     cube_geometry_vbo.create();
-    cube_geometry_vbo.data(sizeof(model_vertex) * geometry_vertices.size(), geometry_vertices.data());
+    cube_geometry_vbo.storage(sizeof(model_vertex) * geometry_vertices.size(), geometry_vertices.data(), 0);
 
     graphics::opengl::Buffer cube_geometry_ebo;
     cube_geometry_ebo.create();
-    cube_geometry_ebo.data(sizeof(uint32_t) * geometry_elements.size(), geometry_elements.data());
+    cube_geometry_ebo.storage(sizeof(uint32_t) * geometry_elements.size(), geometry_elements.data(), 0);
 
     graphics::opengl::VertexArray cube_geometry_vao;
     cube_geometry_vao.create();
@@ -128,11 +128,11 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer sprite_geometry_vbo;
     sprite_geometry_vbo.create();
-    sprite_geometry_vbo.data(sizeof(sprite_vertex) * sprite_vertices.size(), sprite_vertices.data());
+    sprite_geometry_vbo.storage(sizeof(sprite_vertex) * sprite_vertices.size(), sprite_vertices.data(), 0);
 
     graphics::opengl::Buffer sprite_geometry_ebo;
     sprite_geometry_ebo.create();
-    sprite_geometry_ebo.data(sizeof(uint32_t) * sprite_elements.size(), sprite_elements.data());
+    sprite_geometry_ebo.storage(sizeof(uint32_t) * sprite_elements.size(), sprite_elements.data(), 0);
 
     graphics::opengl::VertexArray sprite_geometry_vao;
     sprite_geometry_vao.create();
@@ -154,7 +154,7 @@ auto main() -> int32_t
     graphics::opengl::Buffer camera_ubo;
     camera_ubo.create();
     camera_ubo.bind(GL_UNIFORM_BUFFER, 0);
-    camera_ubo.data(sizeof(model_camera_matrices), model_camera_matrices);
+    camera_ubo.storage(sizeof(model_camera_matrices), model_camera_matrices, GL_DYNAMIC_STORAGE_BIT);
 
     glm::mat4 model_matrix { 1.0f };
     glm::mat4 sprite_matrix { 1.0f };
@@ -162,7 +162,7 @@ auto main() -> int32_t
     graphics::opengl::Buffer transform_ubo;
     transform_ubo.create();
     transform_ubo.bind(GL_UNIFORM_BUFFER, 1);
-    transform_ubo.data(sizeof(model_matrix), &model_matrix);
+    transform_ubo.storage(sizeof(model_matrix), &model_matrix, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::TextureSampler texture_sampler;
     texture_sampler.create();
@@ -246,18 +246,18 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer framebuffer_pbo;
     framebuffer_pbo.create();
-    framebuffer_pbo.data(atlas_width * atlas_height * 4, nullptr); // TODO use here the storage with the GL_MAP_READ_BIT
+    framebuffer_pbo.storage(atlas_width * atlas_height * 4, nullptr, GL_MAP_READ_BIT);
     framebuffer_pbo.bind(GL_PIXEL_PACK_BUFFER);
 
     // rectangles
 
     graphics::opengl::Buffer rectangles_vbo;
     rectangles_vbo.create();
-    rectangles_vbo.data(sizeof(sprite_vertex) * rectangles_geometry.vertices.size(), rectangles_geometry.vertices.data());
+    rectangles_vbo.storage(sizeof(sprite_vertex) * rectangles_geometry.vertices.size(), rectangles_geometry.vertices.data(), 0);
 
     graphics::opengl::Buffer rectangles_ebo;
     rectangles_ebo.create();
-    rectangles_ebo.data(sizeof(uint32_t) * rectangles_geometry.elements.size(), rectangles_geometry.elements.data());
+    rectangles_ebo.storage(sizeof(uint32_t) * rectangles_geometry.elements.size(), rectangles_geometry.elements.data(), 0);
 
     graphics::opengl::VertexArray rectangles_vao;
     rectangles_vao.create();
@@ -328,18 +328,16 @@ auto main() -> int32_t
     auto channels = 4;
     auto buffer_size = atlas_width * atlas_height * channels;
 
-    // TODO move this into the Commands?
-    glReadnPixels(0, 0, atlas_width, atlas_height, GL_RGBA, GL_UNSIGNED_BYTE, buffer_size, nullptr);
+    graphics::opengl::Commands::read_pixels(0, 0, atlas_width, atlas_height, GL_RGBA, GL_UNSIGNED_BYTE, buffer_size);
 
-    // TODO move the map/unmap functions into the buffer class
-    if (auto* pixels = static_cast<uint8_t*>(glMapNamedBufferRange(framebuffer_pbo.handle, 0, buffer_size, GL_MAP_READ_BIT)))
+    if (auto* pixels = static_cast<uint8_t*>(framebuffer_pbo.map(0, buffer_size, GL_MAP_READ_BIT)))
     {
         stbi_write_png("sprite_atlas.png",
                        atlas_width, atlas_height, channels,
                        pixels + atlas_width * channels * (atlas_height - 1),
                        -atlas_width * channels);
 
-        glUnmapNamedBuffer(framebuffer_pbo.handle);
+        framebuffer_pbo.unmap();
     }
 
     // atlas output - end

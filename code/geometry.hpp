@@ -21,7 +21,7 @@ struct sprite_vertex
 struct editor_vertex
 {
     glm::vec3 position;
-    glm::vec3 color;
+    glm::vec3 color; // TODO create a rgb struct and use it here
 };
 
 template <typename vertex_, typename element_> // TODO maybe use the C++ way with V, E?
