@@ -430,3 +430,10 @@ auto main() -> int32_t
 
 // TODO - check and understand why in some cases we need create_sprite with flip_vertically true and sometimes false
 // TODO - update all the years for license files 2025 - 2026
+
+// TODO - remove glfwWaitEvents, glfwWaitEventsTimeout, glfwPostEmptyEvent from glfw
+// TODO - remove glfwHideWindow from glfw and all the internal function related to this
+// TODO - remove empty test from glfw
+
+// TODO - check if the RoboticsLearning can be removed from bullet together with all the robotics stuff we will not ever use
+// TODO - check which modules we will not use at any time in the future in the stb nothings
