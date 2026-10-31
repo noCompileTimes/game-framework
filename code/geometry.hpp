@@ -34,13 +34,13 @@ struct geometry
 
     auto append(const geometry& other) -> void
     {
-        const auto offset = vertices.size();
+        const auto offset = static_cast<element_>(vertices.size());
 
         vertices.insert(vertices.end(), other.vertices.begin(), other.vertices.end());
 
         for (const auto element : other.elements)
         {
-            elements.emplace_back(element + offset);
+            elements.emplace_back(static_cast<element_>(element + offset));
         }
     }
 };
