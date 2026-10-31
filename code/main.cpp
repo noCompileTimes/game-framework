@@ -440,3 +440,4 @@ auto main() -> int32_t
 // TODO - remove unnecessary formats loading from stb_image
 
 // TODO - have this #define GL_COLOR_ATTACHMENT0 0x8CE0 as a variable representing the albedo?
+// TODO - remove everything (functions) related to GL_POINTS | we will never render points or something like this
