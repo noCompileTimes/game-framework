@@ -437,5 +437,6 @@ auto main() -> int32_t
 
 // TODO - check if the RoboticsLearning can be removed from bullet together with all the robotics stuff we will not ever use
 // TODO - check which modules we will not use at any time in the future in the stb nothings
+// TODO - remove unnecessary formats loading from stb_image
 
 // TODO - have this #define GL_COLOR_ATTACHMENT0 0x8CE0 as a variable representing the albedo?

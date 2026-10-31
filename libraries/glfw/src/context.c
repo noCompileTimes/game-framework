@@ -596,12 +596,6 @@ GLFWAPI void glfwMakeContextCurrent(GLFWwindow* handle)
         window->context.makeCurrent(window);
 }
 
-GLFWAPI GLFWwindow* glfwGetCurrentContext(void)
-{
-    _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
-    return _glfwPlatformGetTls(&_glfw.contextSlot);
-}
-
 GLFWAPI void glfwSwapBuffers(GLFWwindow* handle)
 {
     _GLFW_REQUIRE_INIT();
@@ -655,8 +649,7 @@ GLFWAPI int glfwExtensionSupported(const char* extension)
                 window->context.GetStringi(GL_EXTENSIONS, i);
             if (!en)
             {
-                _glfwInputError(GLFW_PLATFORM_ERROR,
-                                "Extension string retrieval is broken");
+                _glfwInputError(GLFW_PLATFORM_ERROR,"Extension string retrieval is broken");
                 return GLFW_FALSE;
             }
 
