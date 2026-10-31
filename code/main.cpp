@@ -313,12 +313,12 @@ auto main() -> int32_t
         auto rectangle_matrix = translate(parent_matrix, { rectangle.x, rectangle.y, 0.0f });
         transform_ubo.subdata(0, sizeof(glm::mat4), &rectangle_matrix);
 
-        graphics::opengl::Texture rectangle_texture;
+        graphics::opengl::Texture rectangle_texture; // TODO cache this into a set/map to not recreate it everytime if is the same size
         rectangle_texture.type = GL_TEXTURE_2D;
         rectangle_texture.create();
         rectangle_texture.storage(rectangle.w, rectangle.h, GL_RGBA8, 1);
         rectangle_texture.subdata(rectangle.w, rectangle.h, GL_RGBA, 0, images_data[i].pixels);
-        rectangle_texture.bind(0);
+        rectangle_texture.bind(0); // TODO use a constant here? like albedo?
 
         graphics::opengl::Commands::draw_elements(GL_TRIANGLES, i * 6, 6);
 
