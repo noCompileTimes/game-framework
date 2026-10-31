@@ -2700,9 +2700,6 @@ GLAPI PFNGLBINDBUFFERSBASEPROC glad_glBindBuffersBase;
 typedef void (APIENTRYP PFNGLBINDBUFFERSRANGEPROC)(GLenum target, GLuint first, GLsizei count, const GLuint *buffers, const GLintptr *offsets, const GLsizeiptr *sizes);
 GLAPI PFNGLBINDBUFFERSRANGEPROC glad_glBindBuffersRange;
 #define glBindBuffersRange glad_glBindBuffersRange
-typedef void (APIENTRYP PFNGLBINDTEXTURESPROC)(GLuint first, GLsizei count, const GLuint *textures);
-GLAPI PFNGLBINDTEXTURESPROC glad_glBindTextures;
-#define glBindTextures glad_glBindTextures
 typedef void (APIENTRYP PFNGLBINDSAMPLERSPROC)(GLuint first, GLsizei count, const GLuint *samplers);
 GLAPI PFNGLBINDSAMPLERSPROC glad_glBindSamplers;
 #define glBindSamplers glad_glBindSamplers

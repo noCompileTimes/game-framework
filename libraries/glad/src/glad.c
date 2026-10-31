@@ -291,7 +291,6 @@ PFNGLBINDPROGRAMPIPELINEPROC glad_glBindProgramPipeline = NULL;
 PFNGLBINDSAMPLERPROC glad_glBindSampler = NULL;
 PFNGLBINDSAMPLERSPROC glad_glBindSamplers = NULL;
 PFNGLBINDTEXTUREUNITPROC glad_glBindTextureUnit = NULL;
-PFNGLBINDTEXTURESPROC glad_glBindTextures = NULL;
 PFNGLBINDTRANSFORMFEEDBACKPROC glad_glBindTransformFeedback = NULL;
 PFNGLBINDVERTEXARRAYPROC glad_glBindVertexArray = NULL;
 PFNGLBINDVERTEXBUFFERPROC glad_glBindVertexBuffer = NULL;
@@ -1261,7 +1260,6 @@ static void load_GL_VERSION_4_4(GLADloadproc load) {
 	glad_glClearTexSubImage = (PFNGLCLEARTEXSUBIMAGEPROC)load("glClearTexSubImage");
 	glad_glBindBuffersBase = (PFNGLBINDBUFFERSBASEPROC)load("glBindBuffersBase");
 	glad_glBindBuffersRange = (PFNGLBINDBUFFERSRANGEPROC)load("glBindBuffersRange");
-	glad_glBindTextures = (PFNGLBINDTEXTURESPROC)load("glBindTextures");
 	glad_glBindSamplers = (PFNGLBINDSAMPLERSPROC)load("glBindSamplers");
 	glad_glBindImageTextures = (PFNGLBINDIMAGETEXTURESPROC)load("glBindImageTextures");
 	glad_glBindVertexBuffers = (PFNGLBINDVERTEXBUFFERSPROC)load("glBindVertexBuffers");
