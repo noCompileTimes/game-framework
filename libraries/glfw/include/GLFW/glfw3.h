@@ -33,7 +33,6 @@
 extern "C" {
 #endif
 
-
 /*************************************************************************
  * Doxygen documentation
  *************************************************************************/
@@ -84,7 +83,6 @@ extern "C" {
  *  including creation, deletion and event polling.  For more task-oriented
  *  information, see the @ref window_guide.
  */
-
 
 /*************************************************************************
  * Compiler- and platform-specific preprocessor work
@@ -270,7 +268,6 @@ extern "C" {
 #else
  #define GLFWAPI
 #endif
-
 
 /*************************************************************************
  * GLFW API tokens
@@ -720,13 +717,6 @@ extern "C" {
  *  @analysis The installed graphics driver does not support the requested
  *  API, or does not support it via the chosen context creation API.
  *  Below are a few examples.
- *
- *  @par
- *  Some pre-installed Windows graphics drivers do not support OpenGL.  AMD only
- *  supports OpenGL ES via EGL, while Nvidia and Intel only support it via
- *  a WGL or GLX extension.  macOS does not provide OpenGL ES at all.  The Mesa
- *  EGL, OpenGL and OpenGL ES libraries do not interface with the Nvidia binary
- *  driver.  Older graphics drivers do not support Vulkan.
  */
 #define GLFW_API_UNAVAILABLE        0x00010006
 /*! @brief The requested OpenGL or OpenGL ES version is not available.
@@ -6092,9 +6082,6 @@ GLFWAPI GLFWwindow* glfwGetCurrentContext(void);
  *  window is not in view, this function may take a few extra milliseconds to
  *  return.
  *
- *  @remark __EGL:__ The context of the specified window must be current on the
- *  calling thread.
- *
  *  @thread_safety This function may be called from any thread.
  *
  *  @sa @ref buffer_swap
@@ -6408,7 +6395,6 @@ GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window
 
 #endif /*VK_VERSION_1_0*/
 
-
 /*************************************************************************
  * Global definition cleanup
  *************************************************************************/
@@ -6435,10 +6421,8 @@ GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window
 
 /* -------------------- END SYSTEM/COMPILER SPECIFIC --------------------- */
 
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _glfw3_h_ */
-

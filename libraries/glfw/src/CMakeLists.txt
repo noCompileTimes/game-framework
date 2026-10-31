@@ -6,14 +6,11 @@ add_library(glfw ${GLFW_LIBRARY_TYPE}
 # The time, thread and module code is shared between all backends on a given OS,
 # including the null backend, which still needs those bits to be functional
 if (APPLE)
-    target_sources(glfw PRIVATE macos_time.h macos_time.c posix_thread.h
-                                posix_module.c posix_thread.c)
+    target_sources(glfw PRIVATE macos_time.h macos_time.c posix_thread.h posix_module.c posix_thread.c)
 elseif (WIN32)
-    target_sources(glfw PRIVATE win32_time.h win32_thread.h win32_module.c
-                                win32_time.c win32_thread.c)
+    target_sources(glfw PRIVATE win32_time.h win32_thread.h win32_module.c win32_time.c win32_thread.c)
 else()
-    target_sources(glfw PRIVATE posix_time.h posix_thread.h posix_module.c
-                                posix_time.c posix_thread.c)
+    target_sources(glfw PRIVATE posix_time.h posix_thread.h posix_module.c posix_time.c posix_thread.c)
 endif()
 
 add_custom_target(update_mappings
@@ -28,29 +25,25 @@ set_target_properties(update_mappings PROPERTIES FOLDER "GLFW3")
 if (GLFW_BUILD_COCOA)
     enable_language(OBJC)
     target_compile_definitions(glfw PRIVATE _GLFW_COCOA)
-    target_sources(glfw PRIVATE cocoa_platform.h cocoa_joystick.h cocoa_init.m
-                                cocoa_joystick.m cocoa_monitor.m cocoa_window.m
+    target_sources(glfw PRIVATE cocoa_platform.h cocoa_joystick.h cocoa_init.m cocoa_joystick.m cocoa_monitor.m cocoa_window.m
                                 nsgl_context.m)
 endif()
 
 if (GLFW_BUILD_WIN32)
     target_compile_definitions(glfw PRIVATE _GLFW_WIN32)
-    target_sources(glfw PRIVATE win32_platform.h win32_joystick.h win32_init.c
-                                win32_joystick.c win32_monitor.c win32_window.c
+    target_sources(glfw PRIVATE win32_platform.h win32_joystick.h win32_init.c win32_joystick.c win32_monitor.c win32_window.c
                                 wgl_context.c)
 endif()
 
 if (GLFW_BUILD_X11)
     target_compile_definitions(glfw PRIVATE _GLFW_X11)
-    target_sources(glfw PRIVATE x11_platform.h x11_init.c
-                                x11_monitor.c x11_window.c xkb_unicode.c
+    target_sources(glfw PRIVATE x11_platform.h x11_init.c x11_monitor.c x11_window.c xkb_unicode.c
                                 glx_context.c)
 endif()
 
 if (GLFW_BUILD_WAYLAND)
     target_compile_definitions(glfw PRIVATE _GLFW_WAYLAND)
-    target_sources(glfw PRIVATE wl_platform.h wl_init.c
-                                wl_monitor.c wl_window.c)
+    target_sources(glfw PRIVATE wl_platform.h wl_init.c wl_monitor.c wl_window.c)
 endif()
 
 if (GLFW_BUILD_X11 OR GLFW_BUILD_WAYLAND)
@@ -81,13 +74,11 @@ if (GLFW_BUILD_WAYLAND)
 
         add_custom_command(OUTPUT ${header_file}
             COMMAND "${WAYLAND_SCANNER_EXECUTABLE}" client-header "${protocol_path}" ${header_file}
-            DEPENDS "${protocol_path}"
-            VERBATIM)
+            DEPENDS "${protocol_path}" VERBATIM)
 
         add_custom_command(OUTPUT ${code_file}
             COMMAND "${WAYLAND_SCANNER_EXECUTABLE}" private-code "${protocol_path}" ${code_file}
-            DEPENDS "${protocol_path}"
-            VERBATIM)
+            DEPENDS "${protocol_path}" VERBATIM)
 
         target_sources(glfw PRIVATE ${header_file} ${code_file})
     endmacro()
@@ -339,4 +330,3 @@ if (GLFW_INSTALL)
             ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
             LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 endif()
-

@@ -72,4 +72,3 @@ if (APPLE)
                           MACOSX_BUNDLE_LONG_VERSION_STRING ${GLFW_VERSION}
                           MACOSX_BUNDLE_INFO_PLIST "${GLFW_SOURCE_DIR}/CMake/Info.plist.in")
 endif()
-
