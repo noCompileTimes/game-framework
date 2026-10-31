@@ -79,6 +79,8 @@ static auto load_geometry(const std::string_view filename) -> geometry<model_ver
     return { };
 }
 
+// TODO add a new version of create sprite which takes an x, y, w, h and some size for the texture?
+
 // TODO check if this flip_vertical parameter it makes what stbi_set_flip_vertically_on_load does for stb image on load
 // flip_vertical = true  -> for textures stored bottom-up (e.g. framebuffer / render target textures)
 // flip_vertical = false -> for textures loaded with stb_image (stored top-down)
