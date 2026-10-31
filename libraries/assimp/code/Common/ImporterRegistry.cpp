@@ -46,10 +46,7 @@ directly (unless you are adding new loaders), instead use the
 corresponding preprocessor flag to selectively disable formats.
 */
 
-#include <assimp/anim.h>
 #include <assimp/BaseImporter.h>
-#include <vector>
-#include <cstdlib>
 
 // ------------------------------------------------------------------------------------------------
 // Importers
@@ -114,12 +111,6 @@ corresponding preprocessor flag to selectively disable formats.
 #endif
 #ifndef ASSIMP_BUILD_NO_CSM_IMPORTER
 #include "AssetLib/CSM/CSMLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_3D_IMPORTER
-#include "AssetLib/Unreal/UnrealLoader.h"
-#endif
-#ifndef ASSIMP_BUILD_NO_OPENGEX_IMPORTER
-#include "AssetLib/OpenGEX/OpenGEXImporter.h"
 #endif
 #ifndef ASSIMP_BUILD_NO_COB_IMPORTER
 #include "AssetLib/COB/COBLoader.h"
@@ -240,12 +231,6 @@ void GetImporterInstanceList(std::vector<BaseImporter *> &out) {
 #endif
 #if (!defined ASSIMP_BUILD_NO_CSM_IMPORTER)
     out.push_back(new CSMImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_3D_IMPORTER)
-    out.push_back(new UnrealImporter());
-#endif
-#if (!defined ASSIMP_BUILD_NO_OPENGEX_IMPORTER)
-    out.push_back(new OpenGEX::OpenGEXImporter());
 #endif
 #if (!defined ASSIMP_BUILD_NO_COB_IMPORTER)
     out.push_back(new COBImporter());
