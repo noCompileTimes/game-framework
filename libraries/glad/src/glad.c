@@ -13,10 +13,6 @@
     Omit khrplatform: False
     Reproducible: False
 
-    Commandline:
-        --profile="core" --api="gl=4.6" --generator="c" --spec="gl" --extensions=""
-    Online:
-        https://glad.dav1d.de/#profile=core&language=c&specification=gl&loader=on&api=gl%3D4.6
 */
 
 #include <stdio.h>
