@@ -12,12 +12,7 @@
     Local files: False
     Omit khrplatform: False
 
-    Commandline:
-        --profile="compatibility" --api="gl=4.5" --generator="c" --spec="gl" --extensions="GL_KHR_debug"
-    Online:
-        http://glad.dav1d.de/#profile=compatibility&language=c&specification=gl&loader=on&api=gl%3D4.5&extensions=GL_KHR_debug
 */
-
 
 #ifndef __glad_h_
 #define __glad_h_

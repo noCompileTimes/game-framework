@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 4.3.1)
-#cmake_policy(VERSION 3.0)
 
 project(LearnOpenGL)
 
@@ -22,8 +21,6 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 # find the required packages
 find_package(GLFW3 REQUIRED)
 message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
-find_package(ASSIMP REQUIRED)
-message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
 # find_package(SOIL REQUIRED)
 # message(STATUS "Found SOIL in ${SOIL_INCLUDE_DIR}")
 # find_package(GLEW REQUIRED)
@@ -176,8 +173,7 @@ set(GUEST_ARTICLES
 	8.guest/2022/5.computeshader_helloworld
 	8.guest/2022/6.physically_based_bloom
 	8.guest/2022/7.area_lights/1.area_light
-	8.guest/2022/7.area_lights/2.multiple_area_lights
-)
+	8.guest/2022/7.area_lights/2.multiple_area_lights)
 
 configure_file(configuration/root_directory.h.in configuration/root_directory.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/configuration)
@@ -202,8 +198,8 @@ function(create_project_from_sources chapter demo)
             "src/${chapter}/${demo}/*.tcs"
             "src/${chapter}/${demo}/*.tes"
             "src/${chapter}/${demo}/*.gs"
-            "src/${chapter}/${demo}/*.cs"
-    )
+            "src/${chapter}/${demo}/*.cs")
+
 	if (demo STREQUAL "")
 		SET(replaced "")
 		string(REPLACE "/" "_" replaced ${chapter})

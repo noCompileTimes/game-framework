@@ -3676,7 +3676,7 @@ int stbi_write_tga(char const *filename, int x, int y, int comp, void *data)
 
 #endif // STBI_NO_WRITE
 
-//	add in my DDS loading support
+// add in my DDS loading support
 #ifndef STBI_NO_DDS
 #include "stbi_DDS_aug_c.h"
 #endif
