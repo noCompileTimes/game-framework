@@ -20,8 +20,6 @@ endif(WIN32)
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 # find the required packages
-find_package(GLM REQUIRED)
-message(STATUS "GLM included at ${GLM_INCLUDE_DIR}")
 find_package(GLFW3 REQUIRED)
 message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 find_package(ASSIMP REQUIRED)
@@ -36,7 +34,7 @@ if(APPLE)
 endif(APPLE)
 
 if(WIN32)
-  set(LIBS glfw3 opengl32 assimp freetype irrKlang)
+  set(LIBS glfw3 glm opengl32 assimp freetype irrKlang gdi32 opengl32 user32 shell32)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 elseif(UNIX AND NOT APPLE)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
@@ -68,8 +66,7 @@ set(CHAPTERS
     4.advanced_opengl
     5.advanced_lighting
     6.pbr
-    7.in_practice
-)
+    7.in_practice)
 
 set(1.getting_started
     1.1.hello_window
@@ -95,8 +92,7 @@ set(1.getting_started
     7.1.camera_circle
     7.2.camera_keyboard_dt
     7.3.camera_mouse_zoom
-    7.4.camera_class
-)
+    7.4.camera_class)
 
 set(2.lighting
     1.colors
@@ -111,12 +107,10 @@ set(2.lighting
     5.2.light_casters_point
     5.3.light_casters_spot
     5.4.light_casters_spot_soft
-    6.multiple_lights
-)
+    6.multiple_lights)
 
 set(3.model_loading
-    1.model_loading
-)
+    1.model_loading)
 
 set(4.advanced_opengl
     1.1.depth_testing
@@ -136,8 +130,7 @@ set(4.advanced_opengl
     10.2.asteroids
     10.3.asteroids_instanced
     11.1.anti_aliasing_msaa
-    11.2.anti_aliasing_offscreen
-)
+    11.2.anti_aliasing_offscreen)
 
 set(5.advanced_lighting
     1.advanced_lighting
@@ -155,8 +148,7 @@ set(5.advanced_lighting
     7.bloom
     8.1.deferred_shading
     8.2.deferred_shading_volumes
-    9.ssao
-)
+    9.ssao)
 
 set(6.pbr
     1.1.lighting
@@ -164,8 +156,7 @@ set(6.pbr
     2.1.1.ibl_irradiance_conversion
     2.1.2.ibl_irradiance
     2.2.1.ibl_specular
-    2.2.2.ibl_specular_textured
-)
+    2.2.2.ibl_specular_textured)
 
 set(7.in_practice
     1.debugging
