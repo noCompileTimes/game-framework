@@ -1,0 +1,868 @@
+/*
+
+        Copyright 2024 Etay Meiri
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+#version 460 core
+
+#extension GL_ARB_bindless_texture : require
+
+in vec2 TexCoord0;
+in vec3 Normal0;
+in vec3 WorldPos0;
+in vec4 LightSpacePos0;
+in vec3 Tangent0;
+in vec3 Bitangent0;
+in flat int MaterialIndex;
+in vec4 ProjectedTexCoord;
+
+out vec4 FragColor;
+
+// Set once at the top of main(), in uniform control flow.
+vec2 TexCoord;
+vec2 TexDx, TexDy;            // gradients of the texture coordinates
+vec2 ProjUV, ProjDx, ProjDy;  // projected-texture UVs and their gradients
+
+#define MAX_NUM_LIGHTS 4
+
+#define LIGHT_TYPE_DIR   0
+#define LIGHT_TYPE_POINT 1
+#define LIGHT_TYPE_SPOT  2
+
+#define RENDER_MODE_FULL 0
+#define RENDER_MODE_TEXTURE_ONLY 1
+#define RENDER_MODE_LIGHTING_ONLY 2
+#define RENDER_MODE_NORMALS 3
+#define RENDER_MODE_TEXCOORDS 4
+#define RENDER_MODE_BASE_COLOR 5
+#define RENDER_MODE_WHITE 6
+#define PI 3.1415926535897932384626433832795
+
+struct LightSource {
+    vec3 Color;                    // offset 0
+    int LightType;                 // offset 12
+    vec3 Direction;                // offset 16
+    float AmbientIntensity;        // offset 28
+    vec3 WorldPos;                 // offset 32
+    float DiffuseIntensity;        // offset 44
+    float Atten_Constant;          // offset 48
+    float Atten_Linear;            // offset 52
+    float Atten_Exp;               // offset 56
+    float Cutoff;                  // offset 60
+};
+
+
+struct MaterialColor
+{
+    vec4 AmbientColor;
+    vec4 DiffuseColor;
+    vec4 SpecularColor;
+    vec4 EmissiveColor;
+};
+
+
+struct Material {
+    MaterialColor Color;
+    sampler2D DiffuseMap;
+    sampler2D NormalMap;
+};
+
+layout(std140, binding = 1) uniform LightUBO {
+    LightSource Lights[MAX_NUM_LIGHTS];
+};
+
+
+layout(std430, binding = 2) readonly buffer Materials {
+    Material materials[];
+};
+
+
+uniform int gNumLights = 0;
+uniform MaterialColor gMaterial;
+uniform bool gHasSampler = false;
+layout(binding = 0) uniform sampler2D gSampler;
+layout(binding = 1) uniform sampler2D gSamplerSpecularExponent;
+layout(binding = 2) uniform sampler2D gShadowMap;        // required only for shadow mapping (spot/directional light)
+layout(binding = 3) uniform samplerCube gShadowCubeMap;  // required only for shadow mapping (point light)
+layout(binding = 4) uniform sampler3D gShadowMapOffsetTexture;
+layout(binding = 5) uniform sampler2D gNormalMap;
+layout(binding = 12) uniform samplerCube gCubemapTexture;
+layout(binding = 18) uniform sampler2D gProjectedTexture;
+uniform bool gHasNormalMap = false;
+uniform int gShadowMapWidth = 0;
+uniform int gShadowMapHeight = 0;
+uniform int gShadowMapFilterSize = 0;
+uniform float gShadowMapOffsetTextureSize;
+uniform float gShadowMapOffsetFilterSize;
+uniform float gShadowMapRandomRadius = 0.0;
+uniform vec3 gCameraWorldPos;
+uniform vec4 gColorMod = vec4(1.0);
+uniform vec4 gColorAdd = vec4(0);
+uniform float gRimLightPower = 2.0;
+uniform bool gRimLightEnabled = false;
+uniform bool gCellShadingEnabled = false;
+uniform bool gEnableSpecularExponent = false;
+uniform bool gShadowsEnabled = true;
+uniform bool gIsIndirectRender = false;
+uniform bool gRefRefractEnabled = false;
+uniform float gMatToRefRefractFactor = 0.5;
+uniform float gETA = 1.0;
+uniform float gFresnelPower = 1.0;
+uniform bool gIsCubemapping = false;
+uniform int gCubeMipmapLevel = 0;
+uniform int gRenderMode = RENDER_MODE_FULL;
+
+// Fog
+uniform float gExpFogDensity = 1.0;
+uniform bool gExpSquaredFogEnabled = false;
+uniform float gLayeredFogTop = -1.0;
+uniform float gFogStart = -1.0;
+uniform float gFogEnd = -1.0;
+uniform float gFogTime = -1.0;
+uniform vec3 gFogColor = vec3(0.0, 0.0, 0.0);
+
+const int toon_color_levels = 4;
+const float toon_scale_factor = 1.0f / toon_color_levels;
+
+// Light level of a fully shadowed pixel (ambient is added separately).
+const float kShadowFloor = 0.05;
+
+// ---------------------------------------------------------------------------
+// Material
+// ---------------------------------------------------------------------------
+
+vec4 GetMaterialAmbientColor()
+{
+    if (gIsIndirectRender) {
+        return materials[MaterialIndex].Color.AmbientColor;
+    } else {
+        return gMaterial.AmbientColor;
+    }
+}
+
+
+vec4 GetMaterialEmissiveColor()
+{
+    if (gIsIndirectRender) {
+        return materials[MaterialIndex].Color.EmissiveColor;
+    } else {
+        return gMaterial.EmissiveColor;
+    }
+}
+
+
+vec4 GetMaterialDiffuseColor()
+{
+    if (gIsIndirectRender) {
+        return materials[MaterialIndex].Color.DiffuseColor;
+    } else {
+        return gMaterial.DiffuseColor;
+    }
+}
+
+
+vec4 GetMaterialSpecularColor()
+{
+    if (gIsIndirectRender) {
+        return materials[MaterialIndex].Color.SpecularColor;
+    } else {
+        return gMaterial.SpecularColor;
+    }
+}
+
+
+// ---------------------------------------------------------------------------
+// Shadows
+// ---------------------------------------------------------------------------
+float CalcShadowFactorPointLight(vec3 LightToPixel)
+{
+    float Distance = length(LightToPixel);
+
+    LightToPixel.y = -LightToPixel.y;
+
+    float SampledDistance = texture(gShadowCubeMap, LightToPixel).r;
+
+    const float bias = 0.015;
+
+    return (SampledDistance + bias < Distance) ? kShadowFloor : 1.0;
+}
+
+
+vec3 CalcShadowCoords()
+{
+    vec3 ProjCoords = LightSpacePos0.xyz / LightSpacePos0.w;
+    vec3 ShadowCoords = ProjCoords * 0.5 + vec3(0.5);
+    return ShadowCoords;
+}
+
+
+float CalcShadowFactorBasic(vec3 LightDirection, vec3 Normal)
+{
+    vec3 ShadowCoords = CalcShadowCoords();
+
+    float Depth = textureLod(gShadowMap, ShadowCoords.xy, 0.0).x;
+
+    float DiffuseFactor = dot(Normal, -LightDirection);
+
+    float bias = max(0.05 * (1.0 - DiffuseFactor), 0.005);  
+
+    if (Depth + bias < ShadowCoords.z)
+        return 0.05;
+    else
+        return 1.0;
+}
+
+
+float CalcShadowFactorPCF(vec3 LightDirection, vec3 Normal)
+{
+    if (gShadowMapWidth == 0 || gShadowMapHeight == 0) {
+        return 1.0;
+    }
+
+    vec3 ProjCoords = LightSpacePos0.xyz / LightSpacePos0.w;
+    vec3 ShadowCoords = ProjCoords * 0.5 + vec3(0.5);
+
+    float DiffuseFactor = dot(Normal, -LightDirection);
+    float bias = mix(0.001, 0.0, DiffuseFactor);
+
+    float TexelWidth = 1.0 / gShadowMapWidth;
+    float TexelHeight = 1.0 / gShadowMapHeight;
+
+    vec2 TexelSize = vec2(TexelWidth, TexelHeight);
+
+    float ShadowSum = 0.0;
+
+    int HalfFilterSize = gShadowMapFilterSize / 2;
+
+    for (int y = -HalfFilterSize ; y < -HalfFilterSize + gShadowMapFilterSize ; y++) {
+        for (int x = -HalfFilterSize ; x < -HalfFilterSize + gShadowMapFilterSize ; x++) {
+            vec2 Offset = vec2(x, y) * TexelSize;
+            float Depth = textureLod(gShadowMap, ShadowCoords.xy + Offset, 0.0).x;
+
+            if (Depth + bias < ShadowCoords.z) {
+                ShadowSum += 0.0;
+            } else {
+                ShadowSum += 1.0;
+            }
+       }
+   }
+
+   float FinalShadowFactor = ShadowSum / float(pow(gShadowMapFilterSize, 2));
+
+   return FinalShadowFactor;
+}
+
+
+float CalcShadowFactorWithRandomSampling(vec3 LightDirection, vec3 Normal)
+{
+    ivec3 OffsetCoord;
+    vec2 f = mod(gl_FragCoord.xy, vec2(gShadowMapOffsetTextureSize));
+    OffsetCoord.yz = ivec2(f);
+    float Sum = 0.0;
+    int SamplesDiv2 = int(gShadowMapOffsetFilterSize * gShadowMapOffsetFilterSize / 2.0);
+    vec3 ShadowCoords = CalcShadowCoords();
+    vec4 sc = vec4(ShadowCoords, 1.0);
+
+    float TexelWidth = 1.0 / gShadowMapWidth;
+    float TexelHeight = 1.0 / gShadowMapHeight;
+
+    vec2 TexelSize = vec2(TexelWidth, TexelHeight);
+
+    float DiffuseFactor = dot(Normal, -LightDirection);
+    float bias = mix(0.001, 0.0, DiffuseFactor);
+    float Depth = 0.0;
+
+    for (int i = 0 ; i < 4 ; i++) {
+        OffsetCoord.x = i;
+        vec4 Offsets = texelFetch(gShadowMapOffsetTexture, OffsetCoord, 0) * gShadowMapRandomRadius;
+        sc.xy = ShadowCoords.xy + Offsets.rg * TexelSize;
+        Depth = textureLod(gShadowMap, sc.xy, 0.0).x;
+        if (Depth + bias < ShadowCoords.z) {
+           Sum += 0.0;
+        } else {
+           Sum += 1.0;
+        }
+
+        sc.xy = ShadowCoords.xy + Offsets.ba * TexelSize;
+        Depth = textureLod(gShadowMap, sc.xy, 0.0).x;
+        if (Depth + bias < ShadowCoords.z) {
+           Sum += 0.0;
+        } else {
+           Sum += 1.0;
+        }
+    }
+
+    float Shadow = Sum / 8.0;
+
+    if (Shadow != 0.0 && Shadow != 1.0) {
+        for (int i = 4 ; i < SamplesDiv2 ; i++) {
+            OffsetCoord.x = i;
+            vec4 Offsets = texelFetch(gShadowMapOffsetTexture, OffsetCoord, 0) * gShadowMapRandomRadius;
+            sc.xy = ShadowCoords.xy + Offsets.rg * TexelSize;
+            Depth = textureLod(gShadowMap, sc.xy, 0.0).x;
+            if (Depth + bias < ShadowCoords.z) {
+               Sum += 0.0;
+            } else {
+               Sum += 1.0;
+            }
+
+            sc.xy = ShadowCoords.xy + Offsets.ba * TexelSize;
+            Depth = textureLod(gShadowMap, sc.xy, 0.0).x;
+            if (Depth + bias < ShadowCoords.z) {
+               Sum += 0.0;
+            } else {
+               Sum += 1.0;
+            }
+        }
+
+        Shadow = Sum / float(SamplesDiv2 * 2.0);
+    }
+
+    return Shadow;
+}
+
+
+float CalcShadowFactor(vec3 LightDirection, vec3 Normal, bool IsPoint)
+{
+    float ShadowFactor = 1.0;
+
+    if (gShadowsEnabled) {
+        if (IsPoint) {
+            ShadowFactor = CalcShadowFactorPointLight(LightDirection);
+        } else if (gShadowMapRandomRadius > 0.0) {
+            ShadowFactor = CalcShadowFactorWithRandomSampling(LightDirection, Normal);        
+        } else if (gShadowMapFilterSize > 0){
+            ShadowFactor = CalcShadowFactorPCF(LightDirection, Normal);        
+        } else {
+            ShadowFactor = CalcShadowFactorBasic(LightDirection, Normal);
+        }
+    }
+
+    return ShadowFactor;
+}
+
+// ---------------------------------------------------------------------------
+// Lighting
+// ---------------------------------------------------------------------------
+
+float CalcRimLightFactor(vec3 PixelToCamera, vec3 Normal)
+{
+    float RimFactor = dot(PixelToCamera, Normal);
+    RimFactor = 1.0 - RimFactor;
+    RimFactor = max(0.0, RimFactor);
+    RimFactor = pow(RimFactor, gRimLightPower);
+    return RimFactor;
+}
+
+
+vec4 CalcLightInternal(int Index, vec3 LightDirection, vec3 Normal, float ShadowFactor)
+{
+    vec4 AmbientColor = vec4(Lights[Index].Color, 1.0f) *
+                        Lights[Index].AmbientIntensity *
+                        GetMaterialAmbientColor();
+
+    float DiffuseFactor = dot(Normal, -LightDirection);
+
+    vec4 DiffuseColor = vec4(0, 0, 0, 0);
+    vec4 SpecularColor = vec4(0, 0, 0, 0);
+    vec4 RimColor = vec4(0, 0, 0, 0);
+
+    if (DiffuseFactor > 0) {
+        if (gCellShadingEnabled) {
+            DiffuseFactor = ceil(DiffuseFactor * toon_color_levels) * toon_scale_factor;
+        }
+
+        DiffuseColor = vec4(Lights[Index].Color, 1.0f) *
+                       Lights[Index].DiffuseIntensity *
+                       GetMaterialDiffuseColor() *
+                       DiffuseFactor;
+
+        vec3 PixelToCamera = normalize(gCameraWorldPos - WorldPos0);
+        vec3 LightReflect = normalize(reflect(LightDirection, Normal));
+        float SpecularFactor = dot(PixelToCamera, LightReflect);
+
+        if (!gCellShadingEnabled && (SpecularFactor > 0)) {
+            float SpecularExponent = 128.0;
+
+            if (gEnableSpecularExponent) {
+                // Inside a divergent branch: explicit gradients keep the LOD well defined.
+                SpecularExponent = textureGrad(gSamplerSpecularExponent, TexCoord, TexDx, TexDy).r * 255.0;
+                SpecularExponent = max(SpecularExponent, 1.0);   // pow(x, 0) == 1 gave full-power specular
+            }
+
+            SpecularFactor = pow(SpecularFactor, SpecularExponent);
+            SpecularColor = vec4(Lights[Index].Color, 1.0f) *
+                                 Lights[Index].DiffuseIntensity * // using the diffuse intensity for diffuse/specular
+                                 GetMaterialSpecularColor() *
+                                 SpecularFactor;
+        }
+
+        if (gRimLightEnabled) {
+           float RimFactor = CalcRimLightFactor(PixelToCamera, Normal);
+           RimColor = DiffuseColor * RimFactor;
+        }
+    }
+
+    if (gHasNormalMap) {
+        float OriginalDiffuse = max(0.0, dot(normalize(Normal0), -LightDirection));
+        DiffuseColor *= OriginalDiffuse;
+    }
+
+    return (AmbientColor + ShadowFactor * (DiffuseColor + SpecularColor + RimColor));
+}
+
+
+vec4 CalcDirectionalLight(int Index, vec3 Normal)
+{
+    float ShadowFactor = CalcShadowFactor(Lights[Index].Direction, Normal, false);
+    return CalcLightInternal(Index, Lights[Index].Direction, Normal, ShadowFactor);
+}
+
+
+vec4 CalcPointLight(int Index, vec3 Normal, bool IsPoint)
+{
+    vec3 LightWorldDir = WorldPos0 - Lights[Index].WorldPos;
+
+    float Distance = length(LightWorldDir);     // Distance before normalization!
+
+    LightWorldDir = normalize(LightWorldDir);
+    
+    float ShadowFactor = CalcShadowFactor(LightWorldDir, Normal, IsPoint);    
+    
+    vec4 Color = CalcLightInternal(Index, LightWorldDir, Normal, ShadowFactor);
+
+    float Attenuation =  Lights[Index].Atten_Constant +
+                         Lights[Index].Atten_Linear * Distance +
+                         Lights[Index].Atten_Exp * Distance * Distance;
+
+    return Color / (1.0 + Attenuation);
+}
+
+
+vec4 CalcSpotLight(int Index, vec3 Normal)
+{
+    vec3 PixelToLight = normalize(Lights[Index].WorldPos - WorldPos0);
+    float SpotFactor = dot(PixelToLight, -Lights[Index].Direction);
+
+    if (SpotFactor > Lights[Index].Cutoff) {
+        vec4 Color = CalcPointLight(Index, Normal, false);
+        float SpotLightIntensity = (1.0 - (1.0 - SpotFactor)/(1.0 - Lights[Index].Cutoff));
+        return Color * SpotLightIntensity;
+    }
+    else {
+        return vec4(0,0,0,0);
+    }
+}
+
+
+vec4 GetTotalLight(vec3 Normal)
+{        
+    vec4 TotalLight = vec4(0.0);
+
+    for (int i = 0 ; i < gNumLights ; i++) {
+        switch (Lights[i].LightType) {
+
+            case LIGHT_TYPE_DIR:
+                TotalLight += CalcDirectionalLight(i, Normal);
+                break;
+
+            case LIGHT_TYPE_POINT:
+                TotalLight += CalcPointLight(i, Normal, true);
+                break;
+
+            case LIGHT_TYPE_SPOT:
+                TotalLight += CalcSpotLight(i, Normal);
+                break;
+        }
+    }
+
+    return TotalLight;
+}
+
+
+// ---------------------------------------------------------------------------
+// Normal mapping
+// ---------------------------------------------------------------------------
+
+vec3 CalcBumpedNormal()                                                                     
+{             
+    // Step #1: Sample a normal from the normal map
+    vec3 BumpMapNormal;
+    
+    if (gIsIndirectRender) {
+        BumpMapNormal = texture(materials[MaterialIndex].NormalMap, TexCoord.xy).xyz;
+    } else {
+        BumpMapNormal = texture(gNormalMap, TexCoord).xyz;
+    }
+    
+    // Step #2: transform from [0,1] to [-1,1]
+    BumpMapNormal = 2.0 * BumpMapNormal - vec3(1.0);
+
+    // Step #3: re-normalize the tangent space base vector after interpolation
+    vec3 Normal = normalize(Normal0);
+    vec3 Tangent = normalize(Tangent0);
+    vec3 Bitangent = normalize(Bitangent0);
+
+    // Improvement: re-orthogonalize the TBN base vectors using the Gram-Schmidt process:
+    //              (in this case the bitangent is calculated on the fly so we don't need
+    //              to put it in the vertex buffer)
+    // Tangent = normalize(Tangent - dot(Tangent, Normal) * Normal);
+    // Bitangent = cross(Tangent, Normal);    
+    
+    mat3 TBN = mat3(Tangent, Bitangent, Normal);
+
+    // Step #4: transform from tangent space to world space
+    vec3 NewNormal = normalize(TBN * BumpMapNormal);
+
+    return NewNormal;                                                                       
+}            
+
+
+vec3 GetNormal()
+{
+    vec3 Normal;    
+
+    if (gHasNormalMap) {
+        Normal = CalcBumpedNormal();
+    } else {
+        Normal = normalize(Normal0);
+    }
+
+    return Normal;
+}
+
+
+// ---------------------------------------------------------------------------
+// Fog
+// ---------------------------------------------------------------------------
+
+float CalcLinearFogFactor()
+{
+    float CameraToPixelDist = length(WorldPos0 - gCameraWorldPos);
+    float FogRange = gFogEnd - gFogStart;
+    float FogDist = gFogEnd - CameraToPixelDist;
+    float FogFactor = FogDist / FogRange;    
+    return FogFactor;
+}
+
+
+float CalcExpFogFactor()
+{
+    float CameraToPixelDist = length(WorldPos0 - gCameraWorldPos);
+    float DistRatio = 4.0 * CameraToPixelDist / gFogEnd;
+    float FogFactor = 1.0;
+
+    if (gExpSquaredFogEnabled) {
+        FogFactor = exp(-DistRatio * gExpFogDensity * DistRatio * gExpFogDensity);
+    } else {
+        FogFactor = exp(-DistRatio * gExpFogDensity);
+    }
+
+    return FogFactor;
+}
+
+
+float CalcLayeredFogFactor()
+{
+    vec3 CameraProj = gCameraWorldPos;
+    CameraProj.y = 0.0;
+
+    vec3 PixelProj = WorldPos0;
+    PixelProj.y = 0.0;
+
+    float DeltaD = length(CameraProj - PixelProj) / gFogEnd;
+
+    float DeltaY = 0.0f;
+    float DensityIntegral = 0.0f;
+
+    if (gCameraWorldPos.y > gLayeredFogTop) { // The camera is above the top of the fog
+        if (WorldPos0.y < gLayeredFogTop) {   // The pixel is inside the fog
+            DeltaY = (gLayeredFogTop - WorldPos0.y) / gLayeredFogTop;
+            DensityIntegral = DeltaY * DeltaY * 0.5;
+        }                                     // else - the pixel is above the fog - nothing to do
+    } else {                                  // The camera is inside the fog
+        if (WorldPos0.y < gLayeredFogTop) {   // The pixel is inside the fog
+            DeltaY = abs(gCameraWorldPos.y - WorldPos0.y) / gLayeredFogTop;
+            float DeltaCamera = (gLayeredFogTop - gCameraWorldPos.y) / gLayeredFogTop;
+            float DensityIntegralCamera = DeltaCamera * DeltaCamera * 0.5;
+            float DeltaPixel = (gLayeredFogTop - WorldPos0.y) / gLayeredFogTop;
+            float DensityIntegralPixel = DeltaPixel * DeltaPixel * 0.5;
+            DensityIntegral = abs(DensityIntegralCamera - DensityIntegralPixel);
+        } else {                              // The pixel is above the fog
+            DeltaY = (gLayeredFogTop - gCameraWorldPos.y) / gLayeredFogTop;
+            DensityIntegral = DeltaY * DeltaY * 0.5;
+        }
+    }
+
+    float FogDensity = 0.0;
+
+    if (DeltaY != 0) {
+        FogDensity = (sqrt(1.0 + ((DeltaD / DeltaY) * (DeltaD / DeltaY)))) * DensityIntegral;
+    }
+
+    float FogFactor = exp(-FogDensity);
+
+    return FogFactor;
+}
+
+
+float CalcAnimatedFogFactor()
+{
+    float CameraToPixelDist = length(WorldPos0 - gCameraWorldPos);
+
+    float DistRatio = CameraToPixelDist / gFogEnd;
+
+    float ExpFogFactor = exp(-DistRatio * gExpFogDensity);
+
+    float x = WorldPos0.x / 20.0;
+    float y = WorldPos0.y / 20.0;
+    float z = WorldPos0.z / 20.0;
+
+    float AnimFactor = -(1.0 +
+                         0.5 * cos(5.0 * PI * z + gFogTime) +
+                         0.2 * cos(7.0 * PI * (z + 0.1 * x)) +
+                         0.2 * cos(5.0 * PI * (z - 0.05 * x)) +
+                         0.1 * cos(PI * x) * cos(PI * z / 2.0));
+
+    float FogFactor = ExpFogFactor + (CameraToPixelDist / gFogEnd) * AnimFactor;
+
+    return FogFactor;
+}
+
+
+float CalcFogFactor()
+{
+    float FogFactor = 1.0;
+
+    if (gFogTime > 0.0) {
+        FogFactor = CalcAnimatedFogFactor();
+    } else if (gLayeredFogTop > 0.0) {
+        FogFactor = CalcLayeredFogFactor();
+    } else if (gFogStart >= 0.0) {
+        FogFactor = CalcLinearFogFactor();
+    } else {
+        FogFactor = CalcExpFogFactor();
+    }
+
+    FogFactor = clamp(FogFactor, 0.0, 1.0);
+
+    return FogFactor;
+}
+
+
+
+
+// ---------------------------------------------------------------------------
+// Texture / reflection / refraction
+// ---------------------------------------------------------------------------
+
+vec4 ApplyRefRefract(vec4 FinalColor, vec3 Normal)
+{
+    vec3 CameraToPixel = normalize(WorldPos0 - gCameraWorldPos);
+
+    vec3 ReflectionDir = normalize(reflect(CameraToPixel, Normal));
+    vec4 ColorReflect = vec4(texture(gCubemapTexture, ReflectionDir).rgb, 1.0);
+
+    vec3 RefractionDir = normalize(refract(CameraToPixel, Normal, gETA));    
+
+    float F = ((1.0 - gETA) * (1.0 - gETA)) / 
+              ((1.0 + gETA) * (1.0 + gETA));
+
+    float Ratio = F + (1.0 - F) * pow((1.0 - dot(-CameraToPixel, Normal)), gFresnelPower);
+
+    vec4 ColorRefract = vec4(texture(gCubemapTexture, RefractionDir).rgb, 1.0);
+
+    vec4 ColorRefractReflect = mix(ColorRefract, ColorReflect, Ratio);
+
+    FinalColor = mix(FinalColor, ColorRefractReflect, gMatToRefRefractFactor);
+
+    return FinalColor;
+}
+
+vec3 toGamma(vec3 _rgb)
+{
+    const float gamma = 2.2;
+    return pow(abs(_rgb), vec3(1.0/gamma) );
+}
+
+
+vec4 GetTexColor()
+{
+    vec4 TexColor;
+
+    if (gIsCubemapping) {
+        vec3 CameraToPixel = normalize(WorldPos0 - gCameraWorldPos);
+        vec3 ReflectionDir = normalize(reflect(CameraToPixel, normalize(Normal0)));
+        TexColor = vec4(textureLod(gCubemapTexture, ReflectionDir, gCubeMipmapLevel).rgb, 1.0);
+    } else if (gIsIndirectRender) {
+        TexColor = texture(materials[MaterialIndex].DiffuseMap, TexCoord.xy);
+    } else if (gHasSampler) {
+        TexColor = texture(gSampler, TexCoord.xy);
+    } else {
+        TexColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+
+    return TexColor;
+}
+
+
+vec4 CalcPhongLighting(vec3 Normal)
+{
+    vec4 TotalLight;
+    
+    if (gNumLights > 0) {
+        TotalLight = GetTotalLight(Normal);
+      //  FragColor = TotalLight;
+      //  return;
+    } else {
+        TotalLight = vec4(1.0);
+    }
+
+    vec4 TexColor = GetTexColor();
+
+    // I'm using gColorMod and gColorAdd to enhance the color in
+    // my youtube thumbnails. They are not an integral part of the lighting equation.
+
+    TexColor = TexColor * gColorMod + gColorAdd;
+
+    vec4 FinalColor = TexColor * TotalLight;
+
+    // Emissive light doesn't depend on the light sources (alpha holds the alpha cutoff)
+    FinalColor.rgb += GetMaterialEmissiveColor().rgb;
+
+    if (gRefRefractEnabled) {
+        FinalColor = ApplyRefRefract(FinalColor, Normal);
+    }  
+
+    // HDR tone mapping
+ //   FinalColor.rgb = FinalColor.rgb / (FinalColor.rgb + vec3(1.0));
+
+    // Gamma correction
+   // FinalColor = vec4(pow(FinalColor.rgb, vec3(1.0/2.2)), 1.0);
+
+    return FinalColor;
+}
+
+
+// TODO: currently unused
+vec3 getNormalFromMap()
+{
+    vec3 tangentNormal = texture(gNormalMap, TexCoord0).xyz * 2.0 - 1.0;
+
+    vec3 Q1  = dFdx(WorldPos0);
+    vec3 Q2  = dFdy(WorldPos0);
+    vec2 st1 = dFdx(TexCoord0);
+    vec2 st2 = dFdy(TexCoord0);
+
+    vec3 N   = normalize(Normal0);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * tangentNormal);
+}
+
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+void main()
+{
+    // Everything that needs implicit derivatives is computed here, in uniform control
+    // flow, before any branch. Inside branches we only use textureGrad / textureLod.
+    TexCoord = TexCoord0;
+
+    TexDx = dFdx(TexCoord);
+    TexDy = dFdy(TexCoord);
+
+    // Safe even when w <= 0: these values are only *used* inside the w > 0 branch
+    ProjUV = ProjectedTexCoord.xy / ProjectedTexCoord.w;
+    ProjDx = dFdx(ProjUV);
+    ProjDy = dFdy(ProjUV);
+
+    vec3 Normal = GetNormal();
+    
+    FragColor = CalcPhongLighting(Normal);
+
+    vec4 TempColor = vec4(0.0);
+
+    if (gFogColor == vec3(0)) {
+        TempColor = FragColor;
+    } else {
+        float FogFactor = CalcFogFactor();
+        TempColor = mix(vec4(gFogColor, 1.0), FragColor, FogFactor);
+    }
+
+    // vec2 ProjectionUVs = ProjectedTexCoord.xy / ProjectedTexCoord.w; Method #1: divide the texture coordinates by w
+
+    // vec4 projTexColor = texture(gProjectedTexture, ProjectionUVs);
+
+    // 1. Check raw Z first. If it's negative, the GPU can immediately exit the block
+    if (ProjectedTexCoord.w > 0.0 && ProjectedTexCoord.z <= ProjectedTexCoord.w) {
+        // z <= w is the same as z/w <= 1.0 without the divide
+        if (all(greaterThanEqual(ProjUV, vec2(0.0))) && all(lessThanEqual(ProjUV, vec2(1.0)))) {
+            vec4 projTexColor = textureGrad(gProjectedTexture, ProjUV, ProjDx, ProjDy);
+            TempColor += projTexColor * 0.5;
+        }
+    }
+
+    switch (gRenderMode) {
+        case RENDER_MODE_FULL:
+            FragColor = TempColor;
+            break;
+
+        case RENDER_MODE_TEXTURE_ONLY:
+            FragColor = GetTexColor();
+            break;
+
+        case RENDER_MODE_LIGHTING_ONLY:
+            FragColor = vec4(GetTotalLight(Normal).rgb, 1.0);
+            break;
+
+        case RENDER_MODE_NORMALS:
+            // Shading normal (includes the normal map), remapped from [-1,1] to [0,1].
+            // Use GeoNormal here instead to see the raw vertex normal.
+            FragColor = vec4(Normal * 0.5 + 0.5, 1.0);
+            break;
+
+        case RENDER_MODE_TEXCOORDS:
+            FragColor = vec4(fract(TexCoord), 0.0, 1.0);
+            break;
+
+        case RENDER_MODE_BASE_COLOR:
+            FragColor = GetMaterialDiffuseColor();
+            break;
+
+        case RENDER_MODE_WHITE:
+            FragColor = vec4(1.0);
+            break;
+
+        default:
+            FragColor = vec4(1.0, 0.0, 0.0, 1.0); // red for error 
+    }
+   // FragColor = vec4(1.0);  
+
+//    FragColor = texture(gSampler, TexCoord.xy);
+   //   FragColor = texture(materials[MaterialIndex].DiffuseMap, TexCoord.xy);
+
+   // FragColor = GetMaterialAmbientColor();
+ 
+  // FragColor = vec4(Lights[1].DiffuseIntensity);
+
+  //  FragColor = texture(gNormalMap, TexCoord);
+}

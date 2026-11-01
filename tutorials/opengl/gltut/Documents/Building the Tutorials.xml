@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?oxygen RNGSchema="http://docbook.org/xml/5.0/rng/docbookxi.rng" type="xml"?>
+<?oxygen SCHSchema="http://docbook.org/xml/5.0/rng/docbookxi.rng"?>
+<article xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xlink="http://www.w3.org/1999/xlink" version="5.0">
+    <?dbhtml filename="Building the Tutorials.html" ?>
+    <title>Building the Tutorials</title>
+    <para>This section describes how to build the tutorials.</para>
+    <formalpara>
+        <title>What You Need to Download</title>
+        <para>Obviously, you will need a C++ compiler and build environment. You will also need the
+            Windows or Linux operating systems, as these are the only OS's supported by the
+            tutorials. Supported build environments include Visual Studio 2008/2010, Code::Blocks,
+            and Linux-based GNU Makefiles. Other build systems may work, but they are not regularly
+            tested.</para>
+    </formalpara>
+    <para>You will need to download the <link
+            xlink:href="https://github.com/paroj/gltut/releases">source distribution</link>;
+        download the .zip file with the highest version number. All of the libraries needed to build
+
+        the tutorials are bundled as part of the distribution, so this is the only source code
+        download you will need.</para>
+    <para>You will also need to download and install the <link xlink:href="https://cmake.org/"
+            >CMake</link> utility for your platform of choice.</para>
+    <para>You will need minimal familiarity with using the command line in order to build these
+        tutorials. Also, any mention of directories is always relative to where you unzipped this
+        distribution.</para>
+    <formalpara>
+        <title>Distribution File Layout</title>
+        <para>The layout of the files in the tutorial directory is quite simple. The
+                <filename>framework</filename> directory and all directories of the form
+                <filename>Tut*</filename> contain the source code for the tutorials themselves. Each
+                <filename>Tut*</filename> directory has the code for the various tutorials. The
+                <filename>framework</filename> directory simply contains utility code that is
+            commonly used by each tutorial.</para>
+    </formalpara>
+    <para>Each tutorial contains one or more projects; each project is referenced in the text for
+        that tutorial.</para>
+    <para>The <filename>Documents</filename> directory contains the source for the text
+        documentation explaining how these tutorials work. This source is in xml files using the
+        DocBook 5.0 format.</para>
+    <para>The other directories either contain libraries used by the tutorials or data files that
+        the tutorials load.</para>
+    <formalpara>
+        <title>CMake</title>
+        <para>CMake generates build files for a specific platform. CMake's build scripts use their own language.</para>
+    </formalpara>
+    <para>Note that CMake only generates build files; once the build files are created, you can
+        use them as normal. It can generate project files for Visual Studio, <link
+            xlink:href="http://www.codeblocks.org/">Code::Blocks</link>, as well as GNU Makefiles.
+        And unless you want to modify one of the tutorials, you only need to run CMake once.</para>
+    <para>The CMake download comes as a pre-built executable for all platforms of interest,
+        including Linux.</para>
+    <formalpara>
+        <title>Unofficial OpenGL SDK</title>
+        <para>Bundled with the tutorials is the Unofficial OpenGL SDK (you do not need to download
+            it separately). This is an aggregation of libraries, unifying a number of tools for
+            developing OpenGL applications, all bound together with a unified build system. You do
+            not need to download it; a version of the SDK is part of the tutorial distribution. The
+            copy that comes with these tutorials does not contain the documentation or GLFW.</para>
+    </formalpara>
+    <para>The SDK libraries are built using CMake as well. The tutorial-build is aware of the SDK
+        and will take care of building it, when you build the tutorials as described below.</para>
+    <para>There is no need to execute <userinput>make install</userinput> or similar
+        commands when building the SDK. The SDK is designed to be used where it is; it does not
+        install itself to any system directories on your machine. Incidentally, neither do these
+        tutorials.</para>
+    <formalpara>
+        <title>Tutorial Building and Running</title>
+    </formalpara>
+    <para>All of the tutorials are built at once; go to the root directory of the
+        distribution and use CMake on the <filename>CMakeLists.txt</filename> file in that
+        directory. It will put all of the tutorials into a single project that you can
+        build them all.</para>
+    <para>Each tutorial will generally have more than one source file and generate multiple
+        executables. Each executable represents a different section of the tutorial, as explained in
+        that tutorial's documentation.</para>
+    <para>If you look at any of the tutorial source files, you will not find the
+            <function>main</function> function defined anywhere. This function is defined in
+            <filename>framework/framework.cpp</filename>; it and all of the other source files in
+        the <filename>framework</filename> directory is shared by every tutorial. It does the basic
+        boilerplate work: creating a FreeGLUT window, etc. This allows the tutorial source files to
+        focus on the useful OpenGL-specific code.</para>
+    <para>Note that the framework project is a library, not an executable. So attempting to run the
+        framework from your IDE of choice will not work. You must select one of the tutorial
+        projects and set it to be the active project. Then you will be able to run that tutorial
+        from the IDE.</para>
+</article>

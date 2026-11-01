@@ -1,0 +1,11 @@
+BIN = fbuffer64
+CC    = g++
+FLAGS = -Wall -pedantic
+LIBS  = -lGLEW -lglfw -lGL
+SRC   = main.cpp maths_funcs.cpp gl_utils.cpp obj_parser.cpp
+
+all:
+	$(CC) $(FLAGS) -o $(BIN) $(SRC) $(LIBS)
+
+clean:
+	rm -rf $(BIN)

@@ -1,0 +1,9 @@
+BIN = particles
+CC = g++
+FLAGS = -Wall -pedantic
+LIBS = -lGLEW -lglfw -lGL
+SRC = main.cpp maths_funcs.cpp gl_utils.cpp
+
+all:
+	${CC} ${FLAGS} -o ${BIN} ${SRC} ${INC} ${LOC_LIB} ${LIBS}
+

@@ -1,0 +1,16 @@
+CC      = g++
+FLAGS   = -Wall -pedantic
+LIBS    = -lGLEW -lglfw -lGL
+SYS_LIB = -lGL 
+INC     = -I /usr/include/freetype2/
+
+all: generator viewer
+
+generator:
+	${CC} ${FLAGS} -o generate generator_main.cpp $(INC) -lfreetype $(LIBS)
+
+viewer:
+	${CC} ${FLAGS} -o view viewer_main.cpp maths_funcs.cpp $(LIBS)
+
+clean:
+	rm -rf generate view

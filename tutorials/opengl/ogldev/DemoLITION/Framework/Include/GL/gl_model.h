@@ -1,0 +1,111 @@
+/*
+
+        Copyright 2025 Etay Meiri
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#pragma once
+
+#include "Int/core_model.h"
+#include "GL/gl_indirect_render.h"
+
+enum BUFFER_TYPE {
+    INDEX_BUFFER = 0,
+    VERTEX_BUFFER = 1,
+    WVP_MAT_BUFFER = 2,  // required only for instancing
+    WORLD_MAT_BUFFER = 3,  // required only for instancing
+    NUM_BUFFERS = 4
+};
+
+
+class GLModel : public CoreModel
+{
+public:
+
+    GLModel(CoreRenderingSystem* pCoreRenderingSystem);
+
+    ~GLModel();
+
+    virtual void ConvertToMesh(const char* pFilename);
+
+    bool LoadMesh(const std::string& Filename);
+
+    void Render(DemolitionRenderCallbacks* pRenderCallbacks);
+
+    void Render(uint DrawIndex, uint PrimID);
+
+    void Render(uint NumInstances, const Matrix4f* WVPMats, const Matrix4f* WorldMats);
+
+    virtual void SetColorTexture(int TextureHandle);
+
+    virtual void SetNormalMap(int TextureHandle);
+
+    virtual void SetHeightMap(int TextureHandle);
+
+    virtual void SetAmbientOcclusionMap(int TextureHandle);
+
+    virtual Texture* AllocTexture2D();
+
+    virtual void DestroyTexture(Texture* pTexture);
+
+    void RenderIndirect(const Matrix4f& ObjectMatrix);
+
+    Texture* GetNormalMap() const { return m_pNormalMap; }
+
+    Texture* GetHeightMap() const { return m_pHeightMap; }
+
+    Texture* GetAOMap() const { return m_pAOMap; }
+
+protected:    
+
+    virtual void PopulateBuffersSkinned(std::vector<SkinnedVertex>& Vertices);
+
+    virtual void PopulateBuffers(std::vector<Vertex>& Vertices);
+
+    virtual void InitGeometryPost();
+
+private:
+
+    void AllocBuffers();
+
+    template<typename VertexType>
+    void PopulateBuffersInternal(std::vector<VertexType>& Vertices);
+
+    template<typename VertexType>
+    void PopulateBuffersPVP(std::vector<VertexType>& Vertices);
+
+    template<typename VertexType>
+    void PopulateBuffersNonDSA(std::vector<VertexType>& Vertices);
+
+    template<typename VertexType>
+    void PopulateBuffersDSA(std::vector<VertexType>& Vertices);
+
+    void RenderInstance(int InstanceIndex, DemolitionRenderCallbacks* pRenderCallbacks = NULL);
+
+    void BindTextures(int MaterialIndex);
+
+    GLuint m_VAO = 0;
+
+    GLuint m_Buffers[NUM_BUFFERS] = { 0 };
+
+    size_t m_vertexBufferSizeBytes = 0;
+    size_t m_indexBufferSizeBytes = 0;
+
+    IndirectRender m_indirectRender;
+
+    Texture* m_pNormalMap = NULL;
+    Texture* m_pHeightMap = NULL;
+    Texture* m_pAOMap = NULL;
+};

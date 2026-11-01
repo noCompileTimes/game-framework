@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui.cpp" />
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui_draw.cpp" />
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui_tables.cpp" />
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui_widgets.cpp" />
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\imguizmo_quat.cpp" />
+    <ClCompile Include="..\..\..\..\Common\3rdparty\SPIRV-Reflect\spirv_reflect.cpp" />
+    <ClCompile Include="..\..\..\..\Common\3rdparty\stb_image.cpp" />
+    <ClCompile Include="..\..\..\..\Common\math_3d.cpp" />
+    <ClCompile Include="..\..\..\..\Common\ogldev_ect_cubemap.cpp" />
+    <ClCompile Include="..\..\..\..\Common\ogldev_glfw_camera_handler.cpp" />
+    <ClCompile Include="..\..\..\..\Common\ogldev_glm_camera.cpp" />
+    <ClCompile Include="..\..\..\..\Common\ogldev_util.cpp" />
+    <ClCompile Include="..\..\..\..\DemoLITION\Framework\Source\assimp_model_loader.cpp" />
+    <ClCompile Include="..\..\..\..\DemoLITION\Framework\Source\core_model.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\big_texture_array.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\compute_pipeline.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\core.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\device.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\glfw_vulkan.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\graphics_pipeline.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\graphics_pipeline_v2.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\graphics_pipeline_v3.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\graphics_pipeline_v4.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\model.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\ogldev_imgui.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\Pipelines\fsquad_pipeline.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\Pipelines\texgen_pipeline.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\gfx_program.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\queue.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\shader.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\skybox.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\skybox_hdr.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\texture.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\util.cpp" />
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\wrapper.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imconfig.h" />
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\imGuIZMOquat.h" />
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\imguizmo_config.h" />
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\imguizmo_quat.h" />
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\vGizmo3D.h" />
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\vGizmo3D_config.h" />
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\vgMath.h" />
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\vgMath_config.h" />
+    <ClInclude Include="..\..\..\..\Common\3rdparty\SPIRV-Reflect\spirv_reflect.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\Int\model_desc.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\Int\pipeline_desc.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_big_texture_array.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_compute_pipeline.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_core.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_device.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_glfw.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_graphics_pipeline.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_graphics_pipeline_v2.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_graphics_pipeline_v3.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_graphics_pipeline_v4.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_imgui.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_model.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_pipeline_program.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_queue.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_shader.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_simple_mesh.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_skybox.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_skybox_hdr.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_texture.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_util.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_wrapper.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\Pipelines\ogldev_vulkan_fsquad_pipeline.h" />
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\Pipelines\ogldev_vulkan_texgen_pipeline.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\Vulkan\VulkanCore\Shaders\FSQuad.vert" />
+    <None Include="..\..\..\..\Vulkan\VulkanCore\Shaders\skybox.frag" />
+    <None Include="..\..\..\..\Vulkan\VulkanCore\Shaders\skybox.vert" />
+    <None Include="..\..\..\..\Vulkan\VulkanCore\Shaders\skybox_hdr.frag" />
+    <None Include="..\..\..\..\Vulkan\VulkanCore\Shaders\skybox_hdr.vert" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{78de46db-5cb4-4b6c-9be7-68d59964b639}</ProjectGuid>
+    <RootNamespace>VulkanCore</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)\..\Lib\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)\..\Lib\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_USE_MATH_DEFINES;OGLDEV_VULKAN;_DEBUG;_LIB;IMGUIZMO_IMGUI_FOLDER=$(SolutionDir)..\..\Common\3rdparty\ImGui\GLFW\;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)\..\..\Vulkan\VulkanCore\Include;$(SolutionDir)\..\..\Include;$(SolutionDir)\..\..\Include\assimp5;$(SolutionDir)\..\..\Common;$(SolutionDir)\..\..\Common\3rdparty;$(SolutionDir)\..\..\DemoLITION\Framework\Include;$(SolutionDir)\..\..\Common\3rdparty\ImGui\GLFW;$(SolutionDir)\..\..\Common\3rdparty\ImGui\imGuIZMO.quat</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>vulkan-1.lib;SPIRVd.lib;SPIRV-Toolsd.lib;SPIRV-Tools-diffd.lib;SPIRV-Tools-optd.lib;glslangd.lib;OSDependentd.lib;GenericCodeGend.lib;MachineIndependentd.lib;glslang-default-resource-limitsd.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_USE_MATH_DEFINES;OGLDEV_VULKAN;_LIB;IMGUIZMO_IMGUI_FOLDER=$(SolutionDir)..\..\Common\3rdparty\ImGui\GLFW\;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)\..\..\Vulkan\VulkanCore\Include;$(SolutionDir)\..\..\Include;$(SolutionDir)\..\..\Include\assimp5;$(SolutionDir)\..\..\Common;$(SolutionDir)\..\..\Common\3rdparty;$(SolutionDir)\..\..\DemoLITION\Framework\Include;$(SolutionDir)\..\..\Common\3rdparty\ImGui\GLFW;$(SolutionDir)\..\..\Common\3rdparty\ImGui\imGuIZMO.quat</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>vulkan-1.lib;SPIRV.lib;SPIRV-Tools.lib;SPIRV-Tools-diff.lib;SPIRV-Tools-opt.lib;glslang.lib;OSDependent.lib;GenericCodeGen.lib;MachineIndependent.lib;glslang-default-resource-limits.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

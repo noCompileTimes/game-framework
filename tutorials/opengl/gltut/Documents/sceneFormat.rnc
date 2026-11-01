@@ -1,0 +1,327 @@
+datatypes xsd = "http://www.w3.org/2001/XMLSchema-datatypes"
+namespace a = "http://relaxng.org/ns/compatibility/annotations/1.0"
+namespace scn = "http://www.arcsynthesis.com/gltut/scene"
+
+##Structure and elements
+div
+{
+    start = sc.rootelements
+    
+    sc.rootelements =
+        sc.scene
+        
+    sc.scene =
+        ##The root element. Contains the meshes, programs, and nodes.
+        element scn:scene { sc.scene.content }
+
+    sc.scene.content =
+        (sc.mesh | sc.texture | sc.prog | sc.node | sc.camera )+
+        
+    sc.mesh =
+        ##A mesh to load. Meshes have a name and a filename.
+        element scn:mesh { sc.mesh.content }
+        
+    sc.mesh.content =
+        sc.mesh.attlist
+        
+    sc.texture =
+        ##A texture to load. Textures have a name and a filename.
+        element scn:texture { sc.texture.content }
+        
+    sc.texture.content =
+        sc.texture.attlist
+        
+    sc.prog =
+        ##A shader program. It represents a number of shaders, as well as uniforms and pre-4.20
+        ##bindings.
+        element scn:prog { sc.prog.content }
+        
+    sc.prog.content =
+        sc.prog.attlist, (sc.sampler | sc.block)*
+    
+    sc.sampler =
+        ##Associates a sampler uniform with a texture unit.
+        element scn:sampler { sc.sampler.content }
+        
+    sc.sampler.content =
+        sc.sampler.attlist
+        
+    sc.block =
+        ##Associates a uniform block with a block binding
+        element scn:block { sc.block.content }
+        
+    sc.block.content =
+        sc.block.attlist
+        
+    sc.node =
+        ##Defines a named instance of a mesh, program, and other node attributes. 
+        element scn:node { sc.node.content }
+        
+    sc.node.content =
+        sc.node.attlist, (sc.note | sc.node.texture | sc.node.variant)*
+        
+    sc.note =
+        ##User-defined strings that can be queried.
+        element scn:note { sc.note.content }
+        
+    sc.note.content =
+        sc.note.attlist, text
+
+    sc.node.texture =
+        ##Associates a loaded texture with a sampler and texture unit for this node.
+        element scn:texture { sc.node.texture.content }
+        
+    sc.node.texture.content =
+        sc.node.texture.attlist
+        
+    sc.node.variant =
+        ##Associates a named variant, which can have different shaders and textures.
+        element scn:variant { sc.node.variant.content }
+        
+    sc.node.variant.content =
+        sc.node.variant.attlist, sc.node.texture*
+       
+    sc.camera =
+        ##Defines the attributes of a named camera.
+        element scn:camera { sc.camera.content }
+        
+    sc.camera.content =
+        sc.camera.attlist
+}
+
+##Attributes
+div
+{
+    sc.mesh.attlist =
+        sc.xml.id.attribute, sc.mesh.file.attribute
+        
+    sc.texture.attlist =
+        sc.xml.id.attribute, sc.texture.file.attribute, sc.texture.srgb.attribute?
+    
+    sc.prog.attlist =
+        sc.xml.id.attribute,
+        sc.prog.vert.attribute,
+        sc.prog.frag.attribute,
+        sc.prog.geom.attribute?,
+        sc.prog.model-to-camera.attribute,
+        sc.prog.normal-model-to-camera.attribute?,
+        sc.prog.normal-camera-to-model.attribute?
+        
+    sc.sampler.attlist =
+        sc.sampler.name.attribute, sc.sampler.unit.attribute
+        
+    sc.block.attlist =
+        sc.block.name.attribute, sc.block.binding.attribute
+    
+    sc.node.attlist =
+        sc.node.name.attribute,
+        sc.node.mesh.attribute,
+        sc.node.prog.attribute?,
+        sc.node.pos.attribute,
+        sc.node.orient.attribute?,
+        sc.node.scale.attribute?
+    
+    sc.note.attlist =
+        sc.note.name.attribute
+        
+    sc.node.texture.attlist =
+        sc.node.texture.name.attribute,
+        sc.node.texture.unit.attribute,
+        sc.node.texture.sampler-filter.attribute,
+        sc.node.texture.sampler-edge.attribute?,
+        sc.node.texture.sampler-aniso.attribute?
+        
+    sc.node.variant.attlist =
+        sc.variant.name.attribute,
+        (sc.node.prog.attribute | sc.variant.base.attribute)
+    
+    sc.camera.attlist =
+        sc.xml.id.attribute,
+        sc.camera.start-pos.attribute,
+        sc.camera.start-orient.attribute,
+        sc.camera.start-radius.attribute,
+        sc.camera.start-up-spin.attribute,
+        sc.camera.radius-limits.attribute,
+        sc.camera.radius-deltas.attribute,
+        sc.camera.pos-deltas.attribute,
+        sc.camera.rotation-scale.attribute
+    
+    sc.xml.id.attribute =
+        ##Uniquely named object
+        attribute xml:id { xsd:ID }
+    
+    sc.mesh.file.attribute =
+        ##The mesh's filename.
+        attribute file { acc.filename.type }
+        
+    sc.texture.file.attribute =
+        ##The texture's filename.
+        attribute file { acc.filename.type }
+        
+    sc.texture.srgb.attribute =
+        ##True if the texture if in the srgb format.
+        attribute srgb { xsd:boolean }
+    
+    sc.prog.vert.attribute =
+        ##The vertex shader filename for this program
+        attribute vert { acc.filename.type }
+    
+    sc.prog.frag.attribute =
+        ##The fragment shader filename for this program
+        attribute frag { acc.filename.type }
+    
+    sc.prog.geom.attribute =
+        ##The geometry shader filename for this program
+        attribute geom { acc.filename.type }
+
+    sc.prog.model-to-camera.attribute =
+        ##The uniform name of a mat4 that represents the model-to-camera transform.
+        attribute model-to-camera { acc.uniform.type }
+    
+    sc.prog.normal-model-to-camera.attribute =
+        ##The uniform name of a mat3 that represents the normal model-to-camera transform.
+        attribute normal-model-to-camera { acc.uniform.type }
+        
+    sc.prog.normal-camera-to-model.attribute =
+        ##The uniform name of a mat3 that represent the normal camera-to-model transform
+        ##(inverse of the model to camera).
+        attribute normal-camera-to-model { acc.uniform.type }
+
+    sc.sampler.name.attribute =
+        ##The name of a sampler uniform.
+        attribute name { acc.uniform.type }
+    
+    sc.sampler.unit.attribute =
+        ##The texture unit to use with the uniform sampler
+        attribute unit { acc.texture-unit.type }
+    
+    sc.block.name.attribute =
+        ##The name of a uniform block.
+        attribute name { acc.uniform.type }
+
+    sc.block.binding.attribute =
+        ##The uniform buffer binding point to use with this uniform block name. 
+        attribute binding { acc.block-binding.type }
+        
+    sc.node.name.attribute =
+        ##The name of a node. It must be unique.
+        attribute name { text }
+        
+    sc.node.mesh.attribute =
+        ##The name of a mesh. If no mesh is found with this name, an error results.
+        attribute mesh { xsd:IDREF }
+        
+    sc.node.prog.attribute =
+        ##The name of a program. If no program is found, an error results.
+        attribute prog { xsd:IDREF }
+        
+    sc.node.pos.attribute =
+        ##The position of the object in world-space.
+        attribute pos { acc.position3d.type }
+        
+    sc.node.orient.attribute =
+        ##The orientation of the object in world-space, as a quaternion. In XYZW format.
+        attribute orient { acc.quaternion.type }
+        
+    sc.node.scale.attribute =
+        ##The scale of the object in world-space. Can be one float or 3.
+        attribute scale { acc.position3d.type }
+        
+    sc.note.name.attribute =
+        ##The name of an annotation in a node. The note name must be unique within the node.
+        attribute name { text }
+
+    sc.node.texture.name.attribute =
+        ##The name of a texture. If no program is found, an error results.
+        attribute name { xsd:IDREF }
+    
+    sc.node.texture.unit.attribute =
+        ##The texture unit to use when binding this texture.
+        attribute unit { acc.texture-unit.type }
+        
+    sc.node.texture.sampler-filter.attribute =
+        ##The sample filtering mode to use for this texture access.
+        attribute sampler-filter { acc.sampler.filter }
+        
+    sc.node.texture.sampler-edge.attribute =
+        ##The edge sampling behavior for this texture access.
+        ##Defaults to repeat.
+        attribute sampler-edge { acc.sampler.edge }
+        
+    sc.node.texture.sampler-aniso.attribute =
+        ##The max anisotropy for this texture access.
+        ##Defauts to 0.
+        attribute sampler-aniso { acc.sampler.aniso }
+
+    sc.variant.name.attribute =
+        ##The name of a variant node.
+        attribute name { text }
+        
+    sc.variant.base.attribute =
+        ##The presence of this attribute means that the default variant's data should be used.
+        attribute base { empty }
+        
+    sc.camera.start-pos.attribute =
+        ##Initial camera position
+        attribute start-pos { acc.position3d.type }
+        
+    sc.camera.start-orient.attribute =
+        ##Initial camera orientation
+        attribute start-orient { acc.quaternion.type }
+        
+    sc.camera.start-radius.attribute =
+        ##Initial distance from rotate position
+        attribute start-radius { xsd:decimal }
+        
+    sc.camera.start-up-spin.attribute =
+        ##Initial up vector spin, in degrees, relative to the start-orient
+        attribute start-up-spin { xsd:decimal }
+        
+    sc.camera.radius-limits.attribute =
+        ##The smallest and largest allowed radius values.
+        attribute radius-limits { text }
+        
+    sc.camera.radius-deltas.attribute =
+        ##The small and large values incremented with wheel up/down motions.
+        attribute radius-deltas { text }
+        
+    sc.camera.pos-deltas.attribute =
+        ##The large and small values added to the camera position.
+        attribute pos-deltas { text }
+        
+    sc.camera.rotation-scale.attribute =
+        ##The scale factor for rotations. Larger means faster rotation.
+        attribute rotation-scale { xsd:decimal }
+}
+
+## Accessories
+div
+{
+    acc.sampler.filter =
+        "nearest" |
+        "linear" |
+        "mipmap nearest" |
+        "mipmap linear"
+        
+    acc.sampler.edge =
+        "clamp edge" |
+        "clamp border" |
+        "repeat" |
+        "mirror repeat"
+        
+    acc.sampler.aniso =
+        "max" |
+        "half" |
+        "none" |
+        xsd:nonNegativeInteger { minInclusive = "0" maxExclusive = "32"}
+        
+    acc.texture-unit.type = xsd:nonNegativeInteger { minInclusive = "0" maxExclusive = "80"}
+    acc.block-binding.type = xsd:nonNegativeInteger { minInclusive = "0" maxExclusive = "80"}
+    acc.uniform.type = text
+    acc.filename.type = text
+    acc.attribute.type =
+        xsd:nonNegativeInteger { minInclusive = "0" maxExclusive = "16"}
+        
+    acc.position3d.type = text
+    acc.quaternion.type = text
+}

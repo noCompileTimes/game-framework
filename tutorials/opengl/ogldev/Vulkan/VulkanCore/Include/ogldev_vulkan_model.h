@@ -1,0 +1,129 @@
+/*
+		Copyright 2025 Etay Meiri
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#pragma once
+
+#include <vector>
+
+#include "ogldev_vulkan_texture.h"
+#include "ogldev_vulkan_graphics_pipeline_v2.h"
+#include "ogldev_vulkan_graphics_pipeline_v3.h"
+#include "ogldev_vulkan_graphics_pipeline_v4.h"
+#include "Int/core_model.h"
+#include "Int/model_desc.h"
+
+namespace OgldevVK {
+
+class VulkanCore;
+
+class VkModel : public CoreModel
+{
+public:
+
+    VkModel() = default;
+
+    ~VkModel() { Destroy(); }
+
+	void Destroy();
+
+	void Init(VulkanCore* pVulkanCore, bool IsDescriptorIndexing, bool UseInternalUniformBuffers) 
+	{
+		m_pVulkanCore = pVulkanCore; 
+		m_isDescriptorIndexing = IsDescriptorIndexing;
+		m_useInternalUniformBuffers = UseInternalUniformBuffers;
+	}
+
+	virtual void ConvertToMesh(MeshData& mesh) { assert(0); }
+
+	void CreateDescriptorSets(GraphicsPipelineV2& Pipeline);
+
+	void CreateDescriptorSets(GraphicsPipelineV3& Pipeline);
+
+	void CreateDescriptorSets(GraphicsPipelineV4& Pipeline);
+
+	void RecordCommandBuffer(VkCommandBuffer CmdBuf, GraphicsPipelineV2& pPipeline, int ImageIndex);
+
+	void RecordCommandBuffer(VkCommandBuffer CmdBuf, GraphicsPipelineV3& pPipeline, int ImageIndex);
+
+	void RecordCommandBufferIndirect(VkCommandBuffer CmdBuf, VkPipelineLayout PipelineLayout, int ImageIndex);
+
+	void RecordCommandBufferIndirect(VkCommandBuffer CmdBuf);
+
+	void Update(int ImageIndex, const glm::mat4& Transformation);
+
+    // IsPBR is mostly for backwards compatibility with tutorials which lack the material SSBO
+	// and access the texture array directly with the material index.
+	void UpdateModelDesc(ModelDesc& md, bool IsPBR);
+
+protected:
+
+	virtual Texture* AllocTexture2D();
+
+	virtual void DestroyTexture(Texture* pTexture);
+
+	virtual void PopulateBuffersSkinned(std::vector<SkinnedVertex>& Vertices) { assert(0); }
+
+	virtual void PopulateBuffers(std::vector<Vertex>& Vertices);
+
+	virtual void GetWindowSize(int& Width, int& Height) const;
+
+private:	
+
+	void UpdateAlignedMeshesArray();
+
+	void CreateBuffers(std::vector<Vertex>& Vertices);
+
+	void CreateMetaData();
+
+	void CreateIndirectBuffer();
+
+	VulkanCore* m_pVulkanCore = NULL;
+
+	bool m_isDescriptorIndexing = false;
+
+    // This is a hack because in the first few tutorials the model class was responsible for creating its own uniform buffers, 
+	// but in later tutorials the uniform buffers are created by the application.
+	// If true, the model will create its own uniform buffers for each image.
+	// If false, the model will expect the user to provide uniform buffers.
+    // In a robust design, the model should not be responsible for creating its own uniform buffers, 
+	// but for the sake of simplicity in the first few tutorials, we do it.
+    bool m_useInternalUniformBuffers = false;
+	BufferAndMemory m_vb;
+	BufferAndMemory m_ib;
+	BufferAndMemory m_metaData;
+	BufferAndMemory m_indirectBuffer;
+    BufferAndMemory m_materialsBuffer; // Buffer for materials data (GPUMaterial)
+	std::vector<BufferAndMemory> m_uniformBuffers;
+	std::vector<std::vector<VkDescriptorSet>> m_descriptorSets;
+	VkDescriptorSet m_texturesDescriptorSet = NULL;
+
+	size_t m_vertexSize = 0;	// sizeof(Vertex) OR sizeof(SkinnedVertex)
+
+	struct VulkanMeshEntry {
+		size_t VertexBufferOffset = 0;
+		size_t VertexBufferRange = 0;
+		size_t IndexBufferOffset = 0;
+		size_t IndexBufferRange = 0;
+	};
+
+	std::vector<VulkanMeshEntry> m_alignedMeshes;
+
+	MemBuf m_alignedVertices;
+	MemBuf m_alignedIndices;
+};
+
+}

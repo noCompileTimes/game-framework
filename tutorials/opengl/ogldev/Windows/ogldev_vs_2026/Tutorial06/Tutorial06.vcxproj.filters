@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\..\Common\ogldev_util.cpp" />
+    <ClCompile Include="..\..\..\tutorial06\tutorial06.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\tutorial06\shader.fs" />
+    <None Include="..\..\..\tutorial06\shader.vs" />
+  </ItemGroup>
+</Project>

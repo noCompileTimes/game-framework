@@ -1,0 +1,65 @@
+/*
+		Copyright 2026 Etay Meiri
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#pragma once
+#include <vulkan/vulkan.h>
+
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
+#include "ogldev_types.h"
+#include "ogldev_vulkan_core.h"
+#include "Int/model_desc.h"
+#include "Int/pipeline_desc.h"
+
+namespace OgldevVK {
+
+
+class ComputePipeline {
+
+public:
+
+	ComputePipeline() {}
+
+	void Init(VulkanCore& vkCore, VkDescriptorPool DescPool, const char* pCSFilename);
+
+	void Destroy();
+
+	void RecordCommandBuffer(VkDescriptorSet DescSet, VkCommandBuffer CmdBuf, 
+		                     u32 GroupCountX, u32 GroupCountY, u32 GroupCountZ);
+
+	void AllocDescSets(int DescCount, std::vector<VkDescriptorSet>& DescriptorSets);
+
+protected:
+
+	virtual VkDescriptorSetLayout CreateDescSetLayout(OgldevVK::VulkanCore& vkCore) = 0;
+
+	VkDevice m_device = VK_NULL_HANDLE;
+
+private:
+	
+	void CreatePipelineLayout();
+	void CreatePipeline(VkShaderModule cs);
+
+	VkShaderModule m_cs = VK_NULL_HANDLE;
+	VkPipeline m_pipeline = VK_NULL_HANDLE;
+	VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
+	VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
+	VkDescriptorSetLayout m_descriptorSetLayout = VK_NULL_HANDLE;
+};
+
+}

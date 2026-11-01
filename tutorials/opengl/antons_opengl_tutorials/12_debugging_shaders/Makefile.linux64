@@ -1,0 +1,11 @@
+BIN = debugshdrs
+CC = g++
+FLAGS = -Wall -pedantic
+LIBS = -lGLEW -lglfw -lGL
+SRC = main.cpp gl_utils.cpp maths_funcs.cpp obj_parser.cpp
+
+all:
+	$(CC) $(FLAGS) -o $(BIN) $(SRC) $(LIBS)
+
+clean:
+	rm -rf $(BIN)

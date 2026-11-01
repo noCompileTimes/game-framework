@@ -1,0 +1,572 @@
+/*
+		Copyright 2026 Etay Meiri
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include <stdio.h>
+
+#include "ogldev_types.h"
+#include "ogldev_util.h"
+#include "ogldev_math_3d.h"
+#include "ogldev_vulkan_util.h"
+#include "ogldev_vulkan_wrapper.h"
+#include "lighting_program.h"
+
+
+namespace OgldevVK {
+
+enum Binding {
+	BindingVB = 0,
+	BindingIB = 1,
+	BindingUniformVS = 2,
+	BindingMetaData = 3,
+	BindingUniformFS = 4,
+	BindingShadowMapFS = 5,
+	BindingLightVP = 6,
+	BindingMaterialData = 7,
+    BindingEnvMap = 8,
+    BindingIrradianceMap = 9,
+    BindingBRDF_LUT = 10,
+	NumBindings = 11
+};
+
+static_assert(sizeof(LightSource) == 80, "LightSource size must be 80 bytes");
+
+
+void LightingProgram::Init(VulkanCore& vkCore,
+						   VkFormat ColorFormat,
+						   VkDescriptorPool DescPool,
+						   VkDescriptorSetLayout TextureDescSetLayout,
+						   VkDescriptorSet TextureDescSet,
+						   VkShaderModule vs,
+						   VkShaderModule fs,
+						   LIGHTING_MODE LightingMode)
+{
+	m_textureDescSetLayout = TextureDescSetLayout;
+	m_textureDescSet = TextureDescSet;
+    m_numImages = vkCore.GetNumImages();
+
+	VkSpecializationMapEntry SpecMapEntry = {
+		.constantID = 0,
+		.offset = 0,
+		.size = sizeof(u32)
+	};
+
+	VkSpecializationInfo SpecInfo = {
+		.mapEntryCount = 1,
+		.pMapEntries = &SpecMapEntry,
+		.dataSize = sizeof(u32),
+		.pData = &LightingMode
+	};
+
+	GraphicsPipeline::Init(vkCore, ColorFormat, DescPool, vs, fs, NULL, &SpecInfo);
+
+	VkFilter MinFilter = VK_FILTER_LINEAR;
+	VkFilter MaxFilter = VK_FILTER_LINEAR;
+	VkSamplerAddressMode AddressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+	float MaxAnisotropy = -1.0f;
+
+	m_shadowMapSampler = OgldevVK::CreateTextureSampler(m_device, MinFilter, MaxFilter, AddressMode, MaxAnisotropy);
+}
+
+
+void LightingProgram::AllocDescSets(std::vector<VkDescriptorSet>& DescSets)
+{
+	// The first descriptor set layout belongs to the global texture array.
+    // The second descriptor set layout belongs to the per-model data (vertex/index buffers, uniforms, etc). Here
+    // we allocate descriptor sets for the second layout, hence the index 1 in the call below.
+	GraphicsPipeline::AllocDescSets(m_numImages, DescSets, 1);
+}
+
+
+void LightingProgram::Destroy()
+{
+	GraphicsPipeline::Destroy(false);
+
+    // The first layout was created externally and belongs to the global texture array, 
+	// so we don't destroy it here. 
+	// The second layout was created by this class, so we destroy it.
+	vkDestroyDescriptorSetLayout(m_device, m_descSetLayouts[1], NULL);
+
+	vkDestroySampler(m_device, m_shadowMapSampler, NULL);
+}
+
+
+void LightingProgram::Bind(int ImageIndex, VkCommandBuffer CmdBuf, VkDescriptorSet& DescSet, u32 BaseTextureIndex)
+{
+	std::vector<VkDescriptorSet> DescSets = { m_textureDescSet, DescSet };
+	GraphicsPipeline::Bind(CmdBuf, DescSets); 
+
+	vkCmdPushConstants(CmdBuf,
+        m_pipelineLayout,
+		VK_SHADER_STAGE_FRAGMENT_BIT, // Must match shader stage
+		0,                            // Offset in push constant block
+		sizeof(u32),				  // Size of data
+		&BaseTextureIndex);
+}
+
+
+std::vector<VkDescriptorSetLayout> LightingProgram::CreateDescSetLayout(OgldevVK::VulkanCore& vkCore)
+{
+	std::vector<VkDescriptorSetLayoutBinding> Bindings{
+		{.
+			 binding = BindingVB,	// 0
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+			.pImmutableSamplers = NULL
+		}, {
+			.binding = BindingIB,	// 1
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+			.pImmutableSamplers = NULL
+		}, {
+			.binding = BindingUniformVS,	// 2
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+			.pImmutableSamplers = NULL
+		}, {
+			.binding = BindingMetaData, // 3
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+			.pImmutableSamplers = NULL
+		}, {
+			.binding = BindingUniformFS, // 4
+			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+			.pImmutableSamplers = NULL
+		}, {
+			.binding = BindingShadowMapFS,	// 5
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = MAX_NUM_LIGHTS,
+			.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+			.pImmutableSamplers = NULL
+		}, {
+			.binding = BindingLightVP, // 6
+			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+			.pImmutableSamplers = NULL
+		}, {
+			.binding = BindingMaterialData, // 7
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+			.pImmutableSamplers = NULL
+		}, {
+			.binding = BindingEnvMap, // 8
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+			.pImmutableSamplers = NULL
+		}, {
+			.binding = BindingIrradianceMap, // 9
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+			.pImmutableSamplers = NULL
+		}, {
+			.binding = BindingBRDF_LUT, // 10
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.descriptorCount = 1,
+			.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+			.pImmutableSamplers = NULL
+		}
+	};
+
+	VkDescriptorSetLayout l = vkCore.CreateDescSetLayout({ Bindings });
+
+	std::vector<VkDescriptorSetLayout> ret = { m_textureDescSetLayout, l };
+
+	return ret;
+}
+
+
+std::vector<VkPushConstantRange> LightingProgram::GetPushConstantRange()
+{
+	std::vector<VkPushConstantRange> PushConstantRanges = {
+		{
+			.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+			.offset = 0,
+			.size = sizeof(u32)
+		}
+	};
+
+	return PushConstantRanges;
+}
+
+
+void LightingProgram::UpdateDescriptorSets(const ModelDesc& ModelDesc,
+										   const std::vector<VkDescriptorSet>& DescSets,
+										   const std::vector<BufferAndMemory>& UniformBuffersVS,
+										   const std::vector<BufferAndMemory>& UniformBuffersFS,
+										   const std::vector<BufferAndMemory>& UniformBuffersLights,
+										   const std::vector< std::vector<OgldevVK::VulkanTexture>>& ShadowMaps,
+										   const VulkanTexture& EnvMap,
+										   const VulkanTexture& IrradianceMap,
+										   const VulkanTexture& BRDF_LUT)
+{
+	std::vector<VkDescriptorBufferInfo> BufferInfoUniformsVS(DescSets.size());
+
+	for (int i = 0; i < (int)BufferInfoUniformsVS.size(); i++) {
+		BufferInfoUniformsVS[i].buffer = UniformBuffersVS[i].m_buffer;
+		BufferInfoUniformsVS[i].offset = 0;
+		BufferInfoUniformsVS[i].range = VK_WHOLE_SIZE;
+	}
+
+	std::vector<VkDescriptorBufferInfo> BufferInfoUniformsFS(DescSets.size());
+
+	for (int i = 0; i < (int)BufferInfoUniformsFS.size(); i++) {
+		BufferInfoUniformsFS[i].buffer = UniformBuffersFS[i].m_buffer;
+		BufferInfoUniformsFS[i].offset = 0;
+		BufferInfoUniformsFS[i].range = VK_WHOLE_SIZE;
+	}
+
+	std::vector<VkDescriptorBufferInfo> BufferInfoUniformsLights(DescSets.size());
+
+	for (int i = 0; i < (int)BufferInfoUniformsLights.size(); i++) {
+		BufferInfoUniformsLights[i].buffer = UniformBuffersLights[i].m_buffer;
+		BufferInfoUniformsLights[i].offset = 0;
+		BufferInfoUniformsLights[i].range = VK_WHOLE_SIZE;
+	}
+
+    std::vector<VkDescriptorImageInfo> ShadowMapImageInfos(DescSets.size() * MAX_NUM_LIGHTS);
+
+    for (int i = 0; i < (int)DescSets.size(); i++) {
+        for (int j = 0; j < MAX_NUM_LIGHTS; j++) {
+            int Index = i * MAX_NUM_LIGHTS + j;
+            ShadowMapImageInfos[Index].sampler = m_shadowMapSampler;
+            ShadowMapImageInfos[Index].imageView = ShadowMaps[i][j].m_view;
+            ShadowMapImageInfos[Index].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        }
+    }
+
+	VkDescriptorBufferInfo BufferInfo_VB = {
+		.buffer = ModelDesc.m_vb,
+		.offset = 0,
+		.range = VK_WHOLE_SIZE
+	};
+
+	VkDescriptorBufferInfo BufferInfo_IB = {
+		.buffer = ModelDesc.m_ib,
+		.offset = 0,
+		.range = VK_WHOLE_SIZE
+	};
+	
+	VkDescriptorBufferInfo MetaDataBufferInfo = {
+		.buffer = ModelDesc.m_metaData,
+		.offset = 0,
+		.range = VK_WHOLE_SIZE
+	};
+
+	VkDescriptorBufferInfo MaterialDataBufferInfo = {
+        .buffer = ModelDesc.m_materialsData,
+		.offset = 0,
+		.range = VK_WHOLE_SIZE
+	};
+
+    VkDescriptorImageInfo EnvMapImageInfo = {
+        .sampler = EnvMap.m_sampler,
+        .imageView = EnvMap.m_view,
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    };
+
+    VkDescriptorImageInfo IrradianceMapImageInfo = {
+        .sampler = IrradianceMap.m_sampler,
+        .imageView = IrradianceMap.m_view,
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    };
+
+    VkDescriptorImageInfo BRDF_LUTImageInfo = {
+        .sampler = BRDF_LUT.m_sampler,
+        .imageView = BRDF_LUT.m_view,
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+    };
+
+	std::vector<VkWriteDescriptorSet> WriteDescriptorSet(DescSets.size() * NumBindings);
+
+	u32 WdsIndex = 0;
+
+	for (int i = 0; i < (int)DescSets.size(); i++) {
+		const VkDescriptorSet& DstSet = DescSets[i];
+
+		VkWriteDescriptorSet wds = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = DstSet,
+			.dstBinding = BindingVB,
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.pBufferInfo = &BufferInfo_VB
+		};
+
+		assert(WdsIndex < WriteDescriptorSet.size());
+		WriteDescriptorSet[WdsIndex++] = wds;
+
+		wds = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = DstSet,
+			.dstBinding = BindingIB,
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.pBufferInfo = &BufferInfo_IB
+		};
+
+		assert(WdsIndex < WriteDescriptorSet.size());
+		WriteDescriptorSet[WdsIndex++] = wds;
+
+		wds = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = DstSet,
+			.dstBinding = BindingUniformVS,
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.pBufferInfo = &BufferInfoUniformsVS[i]
+		};
+
+		assert(WdsIndex < WriteDescriptorSet.size());
+		WriteDescriptorSet[WdsIndex++] = wds;
+
+		wds = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.pNext = NULL,
+			.dstSet = DstSet,
+			.dstBinding = BindingMetaData,
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.pImageInfo = NULL,
+			.pBufferInfo = &MetaDataBufferInfo,
+			.pTexelBufferView = NULL
+		};
+
+		assert(WdsIndex < WriteDescriptorSet.size());
+		WriteDescriptorSet[WdsIndex++] = wds;
+
+		wds = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = DstSet,
+			.dstBinding = BindingUniformFS,
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			.pBufferInfo = &BufferInfoUniformsFS[i]
+		};
+
+		assert(WdsIndex < WriteDescriptorSet.size());
+		WriteDescriptorSet[WdsIndex++] = wds;
+
+		wds = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = DstSet,
+			.dstBinding = BindingShadowMapFS,
+			.dstArrayElement = 0,
+			.descriptorCount = MAX_NUM_LIGHTS,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .pImageInfo = ShadowMapImageInfos.data() + i * MAX_NUM_LIGHTS
+		};
+
+		assert(WdsIndex < WriteDescriptorSet.size());
+		WriteDescriptorSet[WdsIndex++] = wds;
+
+		wds = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = DstSet,
+			.dstBinding = BindingLightVP,	// 6
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			.pBufferInfo = &BufferInfoUniformsLights[i]
+		};
+
+		assert(WdsIndex < WriteDescriptorSet.size());
+		WriteDescriptorSet[WdsIndex++] = wds;
+
+		wds = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = DstSet,
+			.dstBinding = BindingMaterialData,	// 7
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+			.pBufferInfo = &MaterialDataBufferInfo
+		};
+
+		assert(WdsIndex < WriteDescriptorSet.size());
+		WriteDescriptorSet[WdsIndex++] = wds;
+
+		wds = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = DstSet,
+			.dstBinding = BindingEnvMap,	// 8
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.pImageInfo = &EnvMapImageInfo
+		};
+
+		assert(WdsIndex < WriteDescriptorSet.size());
+		WriteDescriptorSet[WdsIndex++] = wds;
+
+		wds = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = DstSet,
+			.dstBinding = BindingIrradianceMap,	// 9
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.pImageInfo = &IrradianceMapImageInfo
+		};
+
+		assert(WdsIndex < WriteDescriptorSet.size());
+		WriteDescriptorSet[WdsIndex++] = wds;
+
+		wds = {
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = DstSet,
+			.dstBinding = BindingBRDF_LUT,	// 10
+			.dstArrayElement = 0,
+			.descriptorCount = 1,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.pImageInfo = &BRDF_LUTImageInfo
+		};
+
+		assert(WdsIndex < WriteDescriptorSet.size());
+		WriteDescriptorSet[WdsIndex++] = wds;
+
+	}
+
+	vkUpdateDescriptorSets(m_device, WdsIndex, WriteDescriptorSet.data(), 0, NULL);
+}
+
+
+void LightingProgram::UpdateUniformBuffers(VkDevice Device,
+										   const glm::vec3& CameraWorldPos,
+                                           const glm::mat4& VP, 
+                                           const glm::mat4& World,
+										   const PersProjInfo& PersProjInfo_,
+                                           const std::vector<glm::mat4>& SubmeshTransformations,
+										   int NumLights,
+										   const std::vector<LightSource>& Lights,
+                                           BufferAndMemory& UniformBufferVS,
+                                           BufferAndMemory& UniformBufferFS,
+                                           BufferAndMemory& UBOLights,
+										   uint ShadowMapWidth,
+										   uint ShadowMapHeight,
+                                           float Exposure,
+                                           float IBLIntensity)
+{
+    LightingProgram::UpdateUniformBuffersVS(Device, VP, World, SubmeshTransformations, UniformBufferVS);
+
+    LightingProgram::UpdateUniformBuffersFS(Device, CameraWorldPos, NumLights, Lights, UniformBufferFS, Exposure, IBLIntensity);
+
+    LightingProgram::UpdateUniformBuffersLightTransforms(Device, NumLights, Lights, VP, PersProjInfo_, 
+														 UBOLights, ShadowMapWidth, ShadowMapHeight);
+}
+
+
+void LightingProgram::UpdateUniformBuffersVS(VkDevice Device,
+											 const glm::mat4& VP,
+											 const glm::mat4& World,
+											 const std::vector<glm::mat4>& SubmeshTransformations,
+											 BufferAndMemory& UniformBufferVS)
+{
+	std::vector<UniformDataVS> UboDataVS(SubmeshTransformations.size());
+
+	glm::mat4 WVP = VP * World;
+
+	for (int i = 0; i < SubmeshTransformations.size(); i++) {
+		UboDataVS[i].WVP = WVP * SubmeshTransformations[i];
+
+		glm::mat4 WorldTransform = World * SubmeshTransformations[i];
+		glm::mat3 NormalMatrix = glm::transpose(glm::inverse(glm::mat3(WorldTransform)));
+
+		UboDataVS[i].WorldTransform = WorldTransform;
+		UboDataVS[i].NormalTransform = glm::mat4(NormalMatrix);
+	}
+
+	UniformBufferVS.Update(Device, UboDataVS.data(), sizeof(UniformDataVS) * UboDataVS.size());
+}
+
+
+void LightingProgram::UpdateUniformBuffersFS(VkDevice Device,
+											 const glm::vec3& CameraWorldPos,
+											 int NumLights,
+											 const std::vector<LightSource>& Lights,
+											 BufferAndMemory& UniformBufferFS,
+											 float Exposure,
+											 float IBLIntensity)
+{
+	UniformDataFS UboDataFS = {
+		.Counts = glm::ivec4(NumLights, 0, 0, 0),            // .x = NumLights, .y = NumPointLights, .z = NumSpotLights, .w = NumDirectionalLights
+		.CameraWorldPos = glm::vec4(CameraWorldPos, 1.0f),
+        .Config = glm::vec4(0.0f, Exposure, IBLIntensity, 0.0f),     // .x = specular intensity, .y = exposure, .z = IBL intensity, .w = unused
+	};
+
+	for (int i = 0; i < NumLights; i++) {
+		UboDataFS.LightSources[i] = Lights[i];
+	}
+
+	UniformBufferFS.Update(Device, &UboDataFS, sizeof(UboDataFS));
+}
+
+
+void LightingProgram::UpdateUniformBuffersLightTransforms(VkDevice Device,
+												int NumLights,
+												const std::vector<LightSource>& Lights,
+												const glm::mat4& VP,
+												const PersProjInfo& PersProjInfo_,
+												BufferAndMemory& UBOLights,
+												uint ShadowMapWidth,
+												uint ShadowMapHeight)
+{
+	UniformBufferLightTransforms UBL = {};
+
+	for (int i = 0; i < NumLights; i++) {
+		const LightSource& Light = Lights[i];
+
+		switch (Light.LightType) {
+		case LIGHT_TYPE_DIR:
+			UBL.LightVP[i] = CalcTightLightProjection(VP, Light.Direction, PersProjInfo_.zNear, PersProjInfo_.zFar, 40.0f);
+			break;
+
+		case LIGHT_TYPE_SPOT:
+		{
+			glm::vec3 Dir = glm::normalize(Light.Direction);
+			glm::vec3 Up = (fabsf(Dir.y) > 0.99f) ? glm::vec3(1.0f, 0.0f, 0.0f) : glm::vec3(0.0f, 1.0f, 0.0f);
+			glm::mat4 View = glm::lookAtLH(Light.WorldPos, Light.WorldPos + Dir, Up);
+
+			float FOV = 2.0f * acosf(Light.Cutoff);               // Cutoff is cos(half-angle) -> full cone angle in radians
+			float Aspect = (float)ShadowMapWidth / (float)ShadowMapHeight;
+			glm::mat4 Proj = glm::perspectiveLH_ZO(FOV, Aspect, 1.0f, 100.0f);
+			UBL.LightVP[i] = Proj * View;
+		}
+		break;
+
+		default:
+			;
+		}
+	}
+
+	UBOLights.Update(Device, &UBL, sizeof(UBL));
+}
+
+}

@@ -1,0 +1,11 @@
+BIN = matsvecs
+CC = g++
+FLAGS = -Wall -pedantic
+LIBS = -lGLEW -lglfw -lGL
+SRC = main.cpp gl_utils.cpp
+
+all:
+	$(CC) $(FLAGS) -o $(BIN) $(SRC) $(LIBS)
+
+clean:
+	rm -rf $(BIN)

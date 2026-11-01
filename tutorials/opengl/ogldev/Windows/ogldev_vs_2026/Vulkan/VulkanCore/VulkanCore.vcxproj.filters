@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\CommonOgldev">
+      <UniqueIdentifier>{4939a630-0e07-4638-86e9-269961108740}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Vulkan">
+      <UniqueIdentifier>{a62c035f-b479-4bf3-abd5-ee7560353f39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\DemoLITION">
+      <UniqueIdentifier>{acc52068-bd7a-4008-b4be-220490467a19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Int">
+      <UniqueIdentifier>{79ede9d0-eb99-4211-8d8e-14ba058ff0e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SPIRV-Reflect">
+      <UniqueIdentifier>{4c720016-a84d-4a0e-bcec-1ac21b8fbaa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ImGUI">
+      <UniqueIdentifier>{db6f8806-4475-4ff8-8002-bed0166a6476}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ImGUIZMOQuat">
+      <UniqueIdentifier>{f893b59f-da2a-4145-b8f1-6f35a162acb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Pipelines">
+      <UniqueIdentifier>{41486e70-6be9-4072-9d56-15f793102793}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Vulkan\Pipelines">
+      <UniqueIdentifier>{e9a4855a-af94-4cb2-a38c-3a5f477511a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{063091f3-1859-4bf7-9e89-265202004d5e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\Common\ogldev_util.cpp">
+      <Filter>Source Files\CommonOgldev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\math_3d.cpp">
+      <Filter>Source Files\CommonOgldev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\core.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\util.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\device.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\wrapper.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\queue.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\shader.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\graphics_pipeline.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\glfw_vulkan.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\ogldev_glm_camera.cpp">
+      <Filter>Source Files\CommonOgldev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\ogldev_glfw_camera_handler.cpp">
+      <Filter>Source Files\CommonOgldev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\3rdparty\stb_image.cpp">
+      <Filter>Source Files\CommonOgldev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\DemoLITION\Framework\Source\core_model.cpp">
+      <Filter>Source Files\DemoLITION</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\model.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\texture.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\graphics_pipeline_v2.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\3rdparty\SPIRV-Reflect\spirv_reflect.cpp">
+      <Filter>Source Files\SPIRV-Reflect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui.cpp">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui_draw.cpp">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui_impl_glfw.cpp">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui_impl_vulkan.cpp">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui_tables.cpp">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imgui_widgets.cpp">
+      <Filter>Source Files\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\ogldev_imgui.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\imguizmo_quat.cpp">
+      <Filter>Source Files\ImGUIZMOQuat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Common\ogldev_ect_cubemap.cpp">
+      <Filter>Source Files\CommonOgldev</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\skybox.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\graphics_pipeline_v3.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\graphics_pipeline_v4.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\compute_pipeline.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\gfx_program.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\Pipelines\fsquad_pipeline.cpp">
+      <Filter>Source Files\Vulkan\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\Pipelines\texgen_pipeline.cpp">
+      <Filter>Source Files\Vulkan\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\big_texture_array.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\DemoLITION\Framework\Source\assimp_model_loader.cpp">
+      <Filter>Source Files\DemoLITION</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Vulkan\VulkanCore\Source\skybox_hdr.cpp">
+      <Filter>Source Files\Vulkan</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_wrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_graphics_pipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_simple_mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_glfw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\Int\model_desc.h">
+      <Filter>Header Files\Int</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_graphics_pipeline_v2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\3rdparty\SPIRV-Reflect\spirv_reflect.h">
+      <Filter>Source Files\SPIRV-Reflect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_imgui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\GLFW\imconfig.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\vGizmo3D.h">
+      <Filter>Source Files\ImGUIZMOQuat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\vGizmo3D_config.h">
+      <Filter>Source Files\ImGUIZMOQuat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\vgMath.h">
+      <Filter>Source Files\ImGUIZMOQuat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\vgMath_config.h">
+      <Filter>Source Files\ImGUIZMOQuat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\imguizmo_config.h">
+      <Filter>Source Files\ImGUIZMOQuat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\imguizmo_quat.h">
+      <Filter>Source Files\ImGUIZMOQuat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Common\3rdparty\ImGui\imGuIZMO.quat\imGuIZMOquat.h">
+      <Filter>Source Files\ImGUIZMOQuat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_graphics_pipeline_v3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\Int\pipeline_desc.h">
+      <Filter>Header Files\Int</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_graphics_pipeline_v4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_compute_pipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_pipeline_program.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\Pipelines\ogldev_vulkan_fsquad_pipeline.h">
+      <Filter>Header Files\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\Pipelines\ogldev_vulkan_texgen_pipeline.h">
+      <Filter>Header Files\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_big_texture_array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Vulkan\VulkanCore\Include\ogldev_vulkan_skybox_hdr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\Vulkan\VulkanCore\Shaders\FSQuad.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\..\..\Vulkan\VulkanCore\Shaders\skybox.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\..\..\Vulkan\VulkanCore\Shaders\skybox.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\..\..\Vulkan\VulkanCore\Shaders\skybox_hdr.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\..\..\Vulkan\VulkanCore\Shaders\skybox_hdr.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
