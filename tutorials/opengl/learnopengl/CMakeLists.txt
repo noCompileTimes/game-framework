@@ -31,7 +31,7 @@ if(APPLE)
 endif(APPLE)
 
 if(WIN32)
-  set(LIBS glfw3 glm opengl32 assimp freetype irrKlang gdi32 opengl32 user32 shell32)
+  set(LIBS glfw3 glm glad opengl32 assimp freetype irrKlang gdi32 opengl32 user32 shell32)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 elseif(UNIX AND NOT APPLE)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
