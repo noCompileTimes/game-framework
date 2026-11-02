@@ -18,13 +18,6 @@ endif(WIN32)
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
-# find the required packages
-find_package(GLFW3 REQUIRED)
-message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
-# find_package(SOIL REQUIRED)
-# message(STATUS "Found SOIL in ${SOIL_INCLUDE_DIR}")
-# find_package(GLEW REQUIRED)
-# message(STATUS "Found GLEW in ${GLEW_INCLUDE_DIR}")
 if(APPLE)
   find_package(Freetype REQUIRED)
   message(STATUS "Found Freetype in ${FREETYPE_INCLUDE_DIRS}")

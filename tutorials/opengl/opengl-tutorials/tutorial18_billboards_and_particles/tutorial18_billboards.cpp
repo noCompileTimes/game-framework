@@ -11,9 +11,8 @@ GLFWwindow* window;
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/norm.hpp>
-using namespace glm;
 
+using namespace glm;
 
 #include <common/shader.hpp>
 #include <common/texture.hpp>
@@ -21,7 +20,7 @@ using namespace glm;
 
 #define DRAW_CUBE // Comment or uncomment this to simplify the code
 
-int main( void )
+int main()
 {
 	// Initialize GLFW
 	if( !glfwInit() )
@@ -123,6 +122,13 @@ int main( void )
 	glBufferData(GL_ARRAY_BUFFER, sizeof(g_cube_color_buffer_data), g_cube_color_buffer_data, GL_DYNAMIC_DRAW);
 #endif
 
+    static auto close = false;
+
+    glfwSetWindowCloseCallback(window, [](GLFWwindow* window_handle)
+    {
+        close = true;
+    });
+
 	double lastTime = glfwGetTime();
 	do
 	{
@@ -221,15 +227,12 @@ int main( void )
 
 		glDisableVertexAttribArray(0);
 
-
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
 	} // Check if the ESC key was pressed or the window was closed
-	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-		   glfwWindowShouldClose(window) == 0 );
-
+	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS && close == false);
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &billboard_vertex_buffer);

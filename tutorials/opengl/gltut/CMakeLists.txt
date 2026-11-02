@@ -16,7 +16,7 @@ function(add_tutorial base_dir tgt_name)
     set(sources ${ARGN})
     list(TRANSFORM sources PREPEND "${base_dir}/")
     add_executable(${tgt_name} ${sources})
-    target_link_libraries(${tgt_name} PRIVATE framework)
+    target_link_libraries(${tgt_name} PRIVATE framework gdi32 opengl32 user32 shell32 advapi32)
 endfunction()
 
 ## copy all data files to the build directory

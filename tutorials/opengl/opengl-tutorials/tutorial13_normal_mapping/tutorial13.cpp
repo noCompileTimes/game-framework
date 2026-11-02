@@ -166,6 +166,13 @@ int main( void )
 	double lastTime = glfwGetTime();
 	int nbFrames = 0;
 
+    static auto close = false;
+
+    glfwSetWindowCloseCallback(window, [](GLFWwindow* window_handle)
+    {
+        close = true;
+    });
+
 	do{
 
 		// Measure speed
@@ -368,8 +375,7 @@ int main( void )
 		glfwPollEvents();
 
 	} // Check if the ESC key was pressed or the window was closed
-	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-		   glfwWindowShouldClose(window) == 0 );
+	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS && close == false );
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);

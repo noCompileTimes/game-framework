@@ -32,7 +32,6 @@ void initText2D(const char * texturePath){
 
 	// Initialize uniforms' IDs
 	Text2DUniformID = glGetUniformLocation( Text2DShaderID, "myTextureSampler" );
-
 }
 
 void printText2D(const char * text, int x, int y, int size){
@@ -73,6 +72,7 @@ void printText2D(const char * text, int x, int y, int size){
 		UVs.push_back(uv_up_right);
 		UVs.push_back(uv_down_left);
 	}
+
 	glBindBuffer(GL_ARRAY_BUFFER, Text2DVertexBufferID);
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec2), &vertices[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, Text2DUVBufferID);
@@ -107,7 +107,6 @@ void printText2D(const char * text, int x, int y, int size){
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
-
 }
 
 void cleanupText2D(){

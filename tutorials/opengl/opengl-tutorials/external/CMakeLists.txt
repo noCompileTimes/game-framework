@@ -7,19 +7,12 @@ add_definitions(
 	-DTW_STATIC
 	-DTW_NO_LIB_PRAGMA
 	-DTW_NO_DIRECT3D
+	-DTW_NO_DIRECT3D
 	-DGLEW_STATIC
 	-D_CRT_SECURE_NO_WARNINGS
 )
 
-### GLFW ###
-
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "Build the GLFW documentation")
-add_subdirectory (glfw-3.1.2)
-
-include_directories(
-	glfw-3.1.2/include/GLFW/
-	glew-1.13.0/include/
-)
+include_directories(glew-1.13.0/include/)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 set(OPENGL_LIBRARY
@@ -150,7 +143,6 @@ target_link_libraries(ANTTWEAKBAR_116_OGLCORE_GLFW
 include(CheckIncludeFile)
 include(CheckTypeSize)
 include(CheckFunctionExists)
-add_subdirectory( assimp-3.0.1270/contrib/zlib )
 
 # Compile without Boost
 include_directories( assimp-3.0.1270/code/BoostWorkaround )
@@ -162,18 +154,9 @@ set(LIBASSIMP_COMPONENT libassimp3.0-r1270-OGLtuts)
 set(ZLIB_LIBRARIES zlib)
 set(BUILD_STATIC_LIB ON)
 #set(ZLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/zlib)
-add_subdirectory( assimp-3.0.1270/code )
-
 
 ### BULLET ###
 # Bullet already has a CMakeLists.txt so let's use these
 
 set(BULLET_VERSION 2.81)
-include_directories(
-	bullet-2.81-rev2613/src
-)
-add_subdirectory( bullet-2.81-rev2613/src/BulletSoftBody )
-add_subdirectory( bullet-2.81-rev2613/src/BulletCollision )
-add_subdirectory( bullet-2.81-rev2613/src/BulletDynamics )
-add_subdirectory( bullet-2.81-rev2613/src/LinearMath )
-
+include_directories(bullet-2.81-rev2613/src)

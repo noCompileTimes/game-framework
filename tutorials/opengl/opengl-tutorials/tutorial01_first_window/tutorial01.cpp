@@ -7,6 +7,7 @@
 
 // Include GLFW
 #include <GLFW/glfw3.h>
+
 GLFWwindow* window;
 
 // Include GLM
@@ -53,7 +54,15 @@ int main( void )
 	// Dark blue background
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
-	do{
+    static auto close = false;
+
+    glfwSetWindowCloseCallback(window, [](GLFWwindow* window_handle)
+    {
+        close = true;
+    });
+
+	do
+	{
 		// Clear the screen. It's not mentioned before Tutorial 02, but it can cause flickering, so it's there nonetheless.
 		glClear( GL_COLOR_BUFFER_BIT );
 
@@ -65,8 +74,7 @@ int main( void )
 		glfwPollEvents();
 
 	} // Check if the ESC key was pressed or the window was closed
-	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-		   glfwWindowShouldClose(window) == 0 );
+	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS && close == false);
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
