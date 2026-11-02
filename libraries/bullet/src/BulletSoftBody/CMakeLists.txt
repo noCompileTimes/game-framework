@@ -72,10 +72,7 @@ SET(BulletSoftBody_HDRS
 	BulletReducedDeformableBody/btReducedDeformableBody.h
 	BulletReducedDeformableBody/btReducedDeformableBodyHelpers.h
 	BulletReducedDeformableBody/btReducedDeformableBodySolver.h
-	BulletReducedDeformableBody/btReducedDeformableContactConstraint.h
-)
-
-
+	BulletReducedDeformableBody/btReducedDeformableContactConstraint.h)
 
 ADD_LIBRARY(BulletSoftBody  ${BulletSoftBody_SRCS} ${BulletSoftBody_HDRS})
 SET_TARGET_PROPERTIES(BulletSoftBody PROPERTIES VERSION ${BULLET_VERSION})
