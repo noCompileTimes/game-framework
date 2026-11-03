@@ -16,6 +16,7 @@ add_subdirectory(behaviortree-cpp)
 add_subdirectory(recastnavigation)
 add_subdirectory(ozz-animation)
 
+add_subdirectory(freetype)
 add_subdirectory(cereal)
 
 add_subdirectory(SDL)
