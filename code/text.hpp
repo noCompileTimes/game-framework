@@ -23,17 +23,17 @@ struct text_character
 
 static std::map<GLchar, text_character> font_characters;
 
-static auto render_text(const graphics::opengl::Buffer& vbo, std::string text, float x, const float y, const float scale, glm::vec3 color) -> void
+static auto render_text(const graphics::opengl::Buffer& vbo, std::string text, float x, const float y) -> void
 {
     for (std::string::const_iterator c = text.begin(); c != text.end(); ++c)
     {
         auto [texture, size, bearing, advance] = font_characters[*c];
 
-        const auto xpos = x + bearing.x * scale;
-        const auto ypos = y - bearing.y * scale;
+        const auto xpos = x + bearing.x;
+        const auto ypos = y - bearing.y;
 
-        const auto w = size.x * scale;
-        const auto h = size.y * scale;
+        const auto w = size.x;
+        const auto h = size.y;
 
         const float vertices[6][4]
         {
@@ -52,7 +52,7 @@ static auto render_text(const graphics::opengl::Buffer& vbo, std::string text, f
 
         graphics::opengl::Commands::draw_vertices(GL_TRIANGLES, 0, 6);
 
-        x += (advance >> 6) * scale;
+        x += advance >> 6;
     }
 }
 
@@ -102,4 +102,6 @@ static auto load_font(const std::string_view filename) -> int32_t
 
     FT_Done_Face(ft_face);
     FT_Done_FreeType(ft_library);
+
+    return 0;
 }

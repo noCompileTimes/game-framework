@@ -184,6 +184,11 @@ auto main() -> int32_t
     transform_ubo.bind(GL_UNIFORM_BUFFER, 1);
     transform_ubo.storage(sizeof(model_matrix), &model_matrix, GL_DYNAMIC_STORAGE_BIT);
 
+    graphics::opengl::Buffer material_ubo;
+    material_ubo.create();
+    material_ubo.bind(GL_UNIFORM_BUFFER, 2);
+    material_ubo.storage(sizeof(glm::vec3), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
     graphics::opengl::TextureSampler texture_sampler;
     texture_sampler.create();
     texture_sampler.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -397,6 +402,11 @@ auto main() -> int32_t
     // TODO check if this is still necesary
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    glm::vec3  red_color { 1.0f, 0.0f, 0.0f };
+    glm::vec3 blue_color { 0.0f, 0.0f, 1.0f };
+
+    glm::mat4 text_matrix { 1.0f };
+
     graphics::opengl::Framebuffer default_fbo;
                                   default_fbo.bind();
     while (window_is_running)
@@ -453,14 +463,19 @@ auto main() -> int32_t
 
         text_program_shader.bind();
 
-        glm::mat4 text_matrix { 1.0f };
-
-        transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
-
         text_vao.bind();
 
-        render_text(text_vbo, "This is sample text", 350.0f, 105.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-        render_text(text_vbo, "This is a second sample text", 370.0f, 700.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
+        text_matrix = scale(glm::mat4(1.0f), { 1.0f, 1.0f, 1.0f });
+        transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
+
+        material_ubo.subdata(0, sizeof(glm::vec3), &red_color);
+        render_text(text_vbo, "This is sample text", 350.0f, 105.0f);
+
+        text_matrix = scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f });
+        transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
+
+        material_ubo.subdata(0, sizeof(glm::vec3), &blue_color);
+        render_text(text_vbo, "This is a second sample text", 370.0f, 700.0f);
 
         window_manager.update();
     }
