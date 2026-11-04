@@ -7,11 +7,7 @@
 #include <stb_rect_pack.h>
 #include <stb_image_write.h>
 
-#include <ft2build.h> // TODO - check this header if is needed
-#include <freetype/freetype.h>
-
 #include <print>
-#include <map>
 
 #include "backends/glfw/window_factory.hpp"
 
@@ -30,56 +26,7 @@
 
 #include "geometry.hpp"
 #include "resources.hpp"
-
-struct text_vertex
-{
-    core::vec2 position;
-    core::vec2 uv; // TODO this should be called like in the other structs
-};
-
-struct font_character
-{
-    graphics::opengl::Texture texture;
-
-    glm::ivec2   size;      // Size of glyph
-    glm::ivec2   bearing;   // Offset from baseline to left/top of glyph
-    unsigned int advance;   // Horizontal offset to advance to next glyph
-};
-
-static std::map<GLchar, font_character> font_characters;
-
-static auto render_text(const graphics::opengl::Buffer& vbo, std::string text, float x, const float y, const float scale, glm::vec3 color) -> void
-{
-    for (std::string::const_iterator c = text.begin(); c != text.end(); ++c)
-    {
-        auto [texture, size, bearing, advance] = font_characters[*c];
-
-        const auto xpos = x + bearing.x * scale;
-        const auto ypos = y - bearing.y * scale;
-
-        const auto w = size.x * scale;
-        const auto h = size.y * scale;
-
-        const float vertices[6][4]
-        {
-            { xpos,     ypos,       0.0f, 0.0f },
-            { xpos,     ypos + h,   0.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 1.0f },
-
-            { xpos,     ypos,       0.0f, 0.0f },
-            { xpos + w, ypos + h,   1.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 0.0f }
-        };
-
-        texture.bind(0);
-
-        vbo.subdata(0, sizeof(vertices), vertices);
-
-        graphics::opengl::Commands::draw_vertices(GL_TRIANGLES, 0, 6);
-
-        x += (advance >> 6) * scale;
-    }
-}
+#include "text.hpp"
 
 auto main() -> int32_t
 {
@@ -254,48 +201,10 @@ auto main() -> int32_t
 
     // fonts - begin
 
-    FT_Library ft_library;
-    if (FT_Init_FreeType(&ft_library))
+    if (auto font_result = load_font("Antonio-Bold.ttf"); font_result != 0)
     {
-        return -1;
+        return font_result;
     }
-
-    FT_Face ft_face;
-    if (FT_New_Face(ft_library, "Antonio-Bold.ttf", 0, &ft_face))
-    {
-        return -1;
-    }
-
-    FT_Set_Pixel_Sizes(ft_face, 0, 48);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    for (unsigned char c = 0; c < 128; c++)
-    {
-        if (FT_Load_Char(ft_face, c, FT_LOAD_RENDER))
-        {
-            std::println("Failed to load Glyph");
-
-            continue;
-        }
-
-        graphics::opengl::Texture texture;
-        texture.type = GL_TEXTURE_2D;
-        texture.create();
-        texture.storage(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows, GL_R8, 1);
-        texture.subdata(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows, GL_RED, 0, ft_face->glyph->bitmap.buffer);
-
-        font_character character;
-        character.texture = texture;
-        character.size = glm::ivec2(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows);
-        character.bearing = glm::ivec2(ft_face->glyph->bitmap_left, ft_face->glyph->bitmap_top);
-        character.advance = static_cast<unsigned int>(ft_face->glyph->advance.x);
-
-        font_characters.insert(std::make_pair(c, character));
-    }
-
-    FT_Done_Face(ft_face);
-    FT_Done_FreeType(ft_library);
 
     graphics::opengl::Buffer text_vbo;
     text_vbo.create();
@@ -310,7 +219,7 @@ auto main() -> int32_t
     text_vao.attach_vertices(text_vbo, sizeof(text_vertex));
 
     text_vao.attach_attribute({ 0, offsetof(text_vertex, position), 2, GL_FLOAT, 0 });
-    text_vao.attach_attribute({ 1, offsetof(text_vertex, uv), 2, GL_FLOAT, 0 });
+    text_vao.attach_attribute({ 1, offsetof(text_vertex, texcoord), 2, GL_FLOAT, 0 });
 
     // TODO - optimization | put all the characters inside the vertex buffer object
 
@@ -577,7 +486,6 @@ auto main() -> int32_t
     return 0;
 }
 
-// TODO - move the render_text in a different file together with the text_vertex for now and the font_character
 // TODO - remove the text_rendering.cpp from learnopengl after we are done with the basic text rendering
 
 // TODO - use the range buffer binding
