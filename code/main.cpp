@@ -465,17 +465,18 @@ auto main() -> int32_t
 
         text_vao.bind();
 
-        text_matrix = scale(glm::mat4(1.0f), { 1.0f, 1.0f, 1.0f });
+        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 400.0f, 0.0f });
         transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
 
         material_ubo.subdata(0, sizeof(glm::vec3), &red_color);
-        render_text(text_vbo, "This is sample text", 350.0f, 105.0f);
+        render_text(text_vbo, "This is sample text");
 
-        text_matrix = scale(glm::mat4(1.0f), { 0.5f, 0.5f, 0.5f });
+        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 200.0f, 0.0f });
+        text_matrix = scale(text_matrix, { 0.5f, 0.5f, 0.5f });
         transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
 
         material_ubo.subdata(0, sizeof(glm::vec3), &blue_color);
-        render_text(text_vbo, "This is a second sample text", 370.0f, 700.0f);
+        render_text(text_vbo, "This is a second sample text");
 
         window_manager.update();
     }

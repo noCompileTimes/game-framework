@@ -23,11 +23,15 @@ struct text_character
 
 static std::map<GLchar, text_character> font_characters;
 
-static auto render_text(const graphics::opengl::Buffer& vbo, std::string text, float x, const float y) -> void
+static auto render_text(const graphics::opengl::Buffer& vbo, std::string text) -> void
 {
+    auto x = 0.0f;
+
     for (std::string::const_iterator c = text.begin(); c != text.end(); ++c)
     {
         auto [texture, size, bearing, advance] = font_characters[*c];
+
+        constexpr auto y = 0.0f;
 
         const auto xpos = x + bearing.x;
         const auto ypos = y - bearing.y;
