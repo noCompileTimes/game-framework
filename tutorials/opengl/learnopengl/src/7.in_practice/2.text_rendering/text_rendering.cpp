@@ -66,13 +66,13 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    
+
     // OpenGL state
     // ------------
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
+
     // compile and setup the shader
     // ----------------------------
     Shader shader("text.vs", "text.fs");
@@ -114,7 +114,7 @@ int main()
         // load first 128 characters of ASCII set
         for (unsigned char c = 0; c < 128; c++)
         {
-            // Load character glyph 
+            // Load character glyph
             if (FT_Load_Char(face, c, FT_LOAD_RENDER))
             {
                 std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
@@ -123,7 +123,7 @@ int main()
             // generate texture
             unsigned int texture;
             glGenTextures(1, &texture);
-            glBindTexture(GL_TEXTURE_2D, texture);
+            //glBindTexture(GL_TEXTURE_2D, texture);
             glTexImage2D(
                 GL_TEXTURE_2D,
                 0,
@@ -155,7 +155,6 @@ int main()
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    
     // configure VAO/VBO for texture quads
     // -----------------------------------
     glGenVertexArrays(1, &VAO);
@@ -183,7 +182,7 @@ int main()
 
         RenderText(shader, "This is sample text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
         RenderText(shader, "(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
-       
+
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -216,7 +215,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // -------------------
 void RenderText(Shader &shader, std::string text, float x, float y, float scale, glm::vec3 color)
 {
-    // activate corresponding render state	
+    // activate corresponding render state
     shader.use();
     glUniform3f(glGetUniformLocation(shader.ID, "textColor"), color.x, color.y, color.z);
     glActiveTexture(GL_TEXTURE0);
@@ -224,7 +223,7 @@ void RenderText(Shader &shader, std::string text, float x, float y, float scale,
 
     // iterate through all characters
     std::string::const_iterator c;
-    for (c = text.begin(); c != text.end(); c++) 
+    for (c = text.begin(); c != text.end(); c++)
     {
         Character ch = Characters[*c];
 
@@ -235,13 +234,13 @@ void RenderText(Shader &shader, std::string text, float x, float y, float scale,
         float h = ch.Size.y * scale;
         // update VBO for each character
         float vertices[6][4] = {
-            { xpos,     ypos + h,   0.0f, 0.0f },            
+            { xpos,     ypos + h,   0.0f, 0.0f },
             { xpos,     ypos,       0.0f, 1.0f },
             { xpos + w, ypos,       1.0f, 1.0f },
 
             { xpos,     ypos + h,   0.0f, 0.0f },
             { xpos + w, ypos,       1.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 0.0f }           
+            { xpos + w, ypos + h,   1.0f, 0.0f }
         };
         // render glyph texture over quad
         glBindTexture(GL_TEXTURE_2D, ch.TextureID);

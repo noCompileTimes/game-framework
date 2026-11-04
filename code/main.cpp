@@ -7,6 +7,12 @@
 #include <stb_rect_pack.h>
 #include <stb_image_write.h>
 
+#include <ft2build.h> // TODO - check this header if is needed
+#include <freetype/freetype.h>
+
+#include <print>
+#include <map>
+
 #include "backends/glfw/window_factory.hpp"
 
 #include "core/window_manager.hpp"
@@ -24,6 +30,56 @@
 
 #include "geometry.hpp"
 #include "resources.hpp"
+
+struct text_vertex
+{
+    core::vec2 position;
+    core::vec2 uv; // TODO this should be called like in the other structs
+};
+
+struct font_character
+{
+    graphics::opengl::Texture texture;
+
+    glm::ivec2   size;      // Size of glyph
+    glm::ivec2   bearing;   // Offset from baseline to left/top of glyph
+    unsigned int advance;   // Horizontal offset to advance to next glyph
+};
+
+static std::map<GLchar, font_character> font_characters;
+
+static auto render_text(const graphics::opengl::Buffer& vbo, std::string text, float x, const float y, const float scale, glm::vec3 color) -> void
+{
+    for (std::string::const_iterator c = text.begin(); c != text.end(); ++c)
+    {
+        auto [texture, size, bearing, advance] = font_characters[*c];
+
+        const auto xpos = x + bearing.x * scale;
+        const auto ypos = y - bearing.y * scale;
+
+        const auto w = size.x * scale;
+        const auto h = size.y * scale;
+
+        const float vertices[6][4]
+        {
+            { xpos,     ypos,       0.0f, 0.0f },
+            { xpos,     ypos + h,   0.0f, 1.0f },
+            { xpos + w, ypos + h,   1.0f, 1.0f },
+
+            { xpos,     ypos,       0.0f, 0.0f },
+            { xpos + w, ypos + h,   1.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 0.0f }
+        };
+
+        texture.bind(0);
+
+        vbo.subdata(0, sizeof(vertices), vertices);
+
+        graphics::opengl::Commands::draw_vertices(GL_TRIANGLES, 0, 6);
+
+        x += (advance >> 6) * scale;
+    }
+}
 
 auto main() -> int32_t
 {
@@ -54,29 +110,37 @@ auto main() -> int32_t
 
     graphics::opengl::ShaderStage model_vertex_stage;
     model_vertex_stage.create(GL_VERTEX_SHADER);
-    model_vertex_stage.source(core::File::read("model_vert_shader.glsl"));
+    model_vertex_stage.source(core::File::read("shaders/model_vert_shader.glsl"));
 
     graphics::opengl::ShaderStage model_fragment_stage;
     model_fragment_stage.type(GL_FRAGMENT_SHADER);
     model_fragment_stage.create();
-    model_fragment_stage.source(core::File::read("model_frag_shader.glsl"));
+    model_fragment_stage.source(core::File::read("shaders/model_frag_shader.glsl"));
 
     graphics::opengl::ShaderStage sprite_vertex_stage;
     sprite_vertex_stage.create(GL_VERTEX_SHADER);
-    sprite_vertex_stage.source(core::File::read("sprite_vert_shader.glsl"));
+    sprite_vertex_stage.source(core::File::read("shaders/sprite_vert_shader.glsl"));
 
     graphics::opengl::ShaderStage sprite_fragment_stage;
     sprite_fragment_stage.create(GL_FRAGMENT_SHADER);
-    sprite_fragment_stage.source(core::File::read("sprite_frag_shader.glsl"));
+    sprite_fragment_stage.source(core::File::read("shaders/sprite_frag_shader.glsl"));
 
     graphics::opengl::ShaderStage basic_vertex_stage;
     basic_vertex_stage.create(GL_VERTEX_SHADER);
-    basic_vertex_stage.source(core::File::read("basic_vert_shader.glsl"));
+    basic_vertex_stage.source(core::File::read("shaders/basic_vert_shader.glsl"));
 
     graphics::opengl::ShaderStage basic_fragment_stage;
     basic_fragment_stage.type(GL_FRAGMENT_SHADER);
     basic_fragment_stage.create();
-    basic_fragment_stage.source(core::File::read("basic_frag_shader.glsl"));
+    basic_fragment_stage.source(core::File::read("shaders/basic_frag_shader.glsl"));
+
+    graphics::opengl::ShaderStage text_vertex_stage;
+    text_vertex_stage.create(GL_VERTEX_SHADER);
+    text_vertex_stage.source(core::File::read("shaders/text_vert_shader.glsl"));
+
+    graphics::opengl::ShaderStage text_fragment_stage;
+    text_fragment_stage.create(GL_FRAGMENT_SHADER);
+    text_fragment_stage.source(core::File::read("shaders/text_frag_shader.glsl"));
 
     graphics::opengl::ShaderProgram model_program_shader;
     model_program_shader.create();
@@ -96,6 +160,12 @@ auto main() -> int32_t
     basic_program_shader.attach(basic_fragment_stage);
     basic_program_shader.link();
 
+    graphics::opengl::ShaderProgram text_program_shader;
+    text_program_shader.create();
+    text_program_shader.attach(text_vertex_stage);
+    text_program_shader.attach(text_fragment_stage);
+    text_program_shader.link();
+
     model_vertex_stage.destroy();
     model_fragment_stage.destroy();
 
@@ -104,6 +174,9 @@ auto main() -> int32_t
 
     basic_vertex_stage.destroy();
     basic_fragment_stage.destroy();
+
+    text_vertex_stage.destroy();
+    text_fragment_stage.destroy();
 
     const auto [geometry_vertices, geometry_elements] = load_geometry("cube.obj");
 
@@ -178,6 +251,70 @@ auto main() -> int32_t
 
     pavement_texture.storage(pavement_image.width, pavement_image.height, GL_RGB8, 1);
     pavement_texture.subdata(pavement_image.width, pavement_image.height, GL_RGB, 0, pavement_image.pixels);
+
+    // fonts - begin
+
+    FT_Library ft_library;
+    if (FT_Init_FreeType(&ft_library))
+    {
+        return -1;
+    }
+
+    FT_Face ft_face;
+    if (FT_New_Face(ft_library, "Antonio-Bold.ttf", 0, &ft_face))
+    {
+        return -1;
+    }
+
+    FT_Set_Pixel_Sizes(ft_face, 0, 48);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    for (unsigned char c = 0; c < 128; c++)
+    {
+        if (FT_Load_Char(ft_face, c, FT_LOAD_RENDER))
+        {
+            std::println("Failed to load Glyph");
+
+            continue;
+        }
+
+        graphics::opengl::Texture texture;
+        texture.type = GL_TEXTURE_2D;
+        texture.create();
+        texture.storage(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows, GL_R8, 1);
+        texture.subdata(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows, GL_RED, 0, ft_face->glyph->bitmap.buffer);
+
+        font_character character;
+        character.texture = texture;
+        character.size = glm::ivec2(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows);
+        character.bearing = glm::ivec2(ft_face->glyph->bitmap_left, ft_face->glyph->bitmap_top);
+        character.advance = static_cast<unsigned int>(ft_face->glyph->advance.x);
+
+        font_characters.insert(std::make_pair(c, character));
+    }
+
+    FT_Done_Face(ft_face);
+    FT_Done_FreeType(ft_library);
+
+    graphics::opengl::Buffer text_vbo;
+    text_vbo.create();
+    text_vbo.storage(1000 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+    //graphics::opengl::Buffer text_ebo;
+    //text_ebo.create();
+    //text_vbo.storage(1000 * sizeof(uint32_t), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+    graphics::opengl::VertexArray text_vao;
+    text_vao.create();
+    text_vao.attach_vertices(text_vbo, sizeof(text_vertex));
+
+    text_vao.attach_attribute({ 0, offsetof(text_vertex, position), 2, GL_FLOAT, 0 });
+    text_vao.attach_attribute({ 1, offsetof(text_vertex, uv), 2, GL_FLOAT, 0 });
+
+    // TODO - optimization | put all the characters inside the vertex buffer object
+
+    // fonts - end
 
     // rectangles packing - begin
 
@@ -348,6 +485,9 @@ auto main() -> int32_t
 
     // atlas output - end
 
+    // TODO check if this is still necesary
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     graphics::opengl::Framebuffer default_fbo;
                                   default_fbo.bind();
     while (window_is_running)
@@ -400,6 +540,19 @@ auto main() -> int32_t
 
         graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, sprite_elements.size());
 
+        // texts
+
+        text_program_shader.bind();
+
+        glm::mat4 text_matrix { 1.0f };
+
+        transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
+
+        text_vao.bind();
+
+        render_text(text_vbo, "This is sample text", 350.0f, 105.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+        render_text(text_vbo, "This is a second sample text", 370.0f, 700.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
+
         window_manager.update();
     }
 
@@ -424,6 +577,9 @@ auto main() -> int32_t
     return 0;
 }
 
+// TODO - move the render_text in a different file together with the text_vertex for now and the font_character
+// TODO - remove the text_rendering.cpp from learnopengl after we are done with the basic text rendering
+
 // TODO - use the range buffer binding
 // TODO - create a light opengl functions loader
 // TODO - use buffer storage for buffer also
@@ -447,3 +603,7 @@ auto main() -> int32_t
 // TODO - remove everything (functions) related to GL_POINTS | we will never render points or something like this
 
 // TODO - check glfw to be sure is using just GLFW_OPENGL_CORE_PROFILE
+
+// TODO - resolve the flipping of the y from the ortho matrix (need to recheck all the sprites/fonts)
+
+// TODO - make a specific texture sampler for texts
