@@ -23,7 +23,8 @@ void main()
 {
     gl_Position = projection * view * model * vec4(in_position, 1.0);
 
-    out_normal   = in_normal;
+    // TODO use this mat3(transpose(inverse(model))) when you are having a uniform scalling
+    out_normal   = mat3(model) * in_normal;
     out_texcoord = in_texcoord;
     out_position = vec3(model * vec4(in_position, 1.0));
 }

@@ -27,15 +27,7 @@
 #include "geometry.hpp"
 #include "resources.hpp"
 #include "text.hpp"
-
-// TODO - chekc how to align it for 16bits to be usefull in the shader for std140?
-struct light
-{
-    glm::vec3 color;
-    float temp1; // TODO maybe not correct
-    glm::vec3 position;
-    float temp2; // TODO maybe not correct
-};
+#include "light.hpp"
 
 auto main() -> int32_t
 {
@@ -221,7 +213,7 @@ auto main() -> int32_t
 
     light default_light;
     default_light.color = { 1.0f, 0.5f, 0.31f };
-    default_light.position = { 4.0f, 5.0f, 6.0f };
+    default_light.position = { 5.0f, 5.0f, 5.0f };
 
     graphics::opengl::Buffer light_ubo;
     light_ubo.create();

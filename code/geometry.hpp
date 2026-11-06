@@ -59,9 +59,10 @@ static auto load_geometry(const std::string_view filename) -> geometry<model_ver
         for (auto i = 0; i < mesh->mNumVertices; i++)
         {
             const auto& position = mesh->mVertices[i];
+            const auto& normal = mesh->mNormals[i];
             const auto& texcoord = mesh->mTextureCoords[0][i];
 
-            geometry.vertices.emplace_back(model_vertex { { position.x, position.y, position.z },  { }, { texcoord.x, texcoord.y } });
+            geometry.vertices.emplace_back(model_vertex { { position.x, position.y, position.z },  { normal.x, normal.y, normal.z }, { texcoord.x, texcoord.y } });
         }
 
         for (auto i = 0; i < mesh->mNumFaces; i++)

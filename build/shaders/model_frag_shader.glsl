@@ -11,15 +11,15 @@ layout (binding = 0) uniform sampler2D u_albedo_texture;
 layout (binding = 3, std140) uniform light_ubo
 {
     vec3 color;
+    float temp1;
     vec3 position;
+    float temp2;
 } u_light;
 
 void main()
 {
     float ambient_factor = 0.1f;
     vec3 ambient_color = ambient_factor * u_light.color;
-
-    // TODO add a position for the light in here
 
     vec3 normal = normalize(in_normal);
     vec3 light_direction = normalize(u_light.position - in_position);
