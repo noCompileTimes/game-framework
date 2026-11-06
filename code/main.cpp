@@ -33,7 +33,7 @@ auto main() -> int32_t
 {
     constexpr core::window::configuration window_configuration
     {
-        "Game Framework", 1024, 768, 4
+        "Game Framework", 1920, 1080, 4
     };
 
     const std::unique_ptr<core::base::WindowFactory> window_factory = std::make_unique<backends::glfw::WindowFactory>();
@@ -213,7 +213,8 @@ auto main() -> int32_t
 
     light default_light;
     default_light.color = { 1.0f, 0.5f, 0.31f };
-    default_light.source = { 5.0f, 5.0f, 5.0f };
+    default_light.source = { -1.0f, -1.0f, -1.0f };
+    default_light.intensity = 1.0f;
 
     graphics::opengl::Buffer light_ubo;
     light_ubo.create();
@@ -597,3 +598,13 @@ auto main() -> int32_t
 // TODO - resolve the flipping of the y from the ortho matrix (need to recheck all the sprites/fonts)
 
 // TODO - make a specific texture sampler for texts
+
+// TODO check the benefits of this
+/*
+// declare an interface block; see 'Advanced GLSL' for what these are.
+out VS_OUT {
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+} vs_out;
+*/

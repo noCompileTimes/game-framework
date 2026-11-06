@@ -1,6 +1,6 @@
 /*
 
-        Copyright 2011 Etay Meiri
+    Copyright 2011 Etay Meiri
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,12 +16,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     Tutorial 18 - Diffuse Lighting
+
 */
 
 #include <math.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
-
 
 #include "ogldev_pipeline.h"
 #include "ogldev_math_3d.h"
@@ -30,7 +30,6 @@
 #include "ogldev_lights_common.h"
 #include "ogldev_app.h"
 #include "lighting_technique.h"
-
 
 #define WINDOW_WIDTH  1920
 #define WINDOW_HEIGHT 1200

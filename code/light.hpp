@@ -4,7 +4,9 @@
 struct light
 {
     glm::vec3 color;
-    float temp1; // TODO maybe not correct
-    glm::vec3 source;
-    float temp2; // TODO maybe not correct
+    float intensity;
+
+    glm::vec3 source; // directional light: the direction it travels
+                      // point light: its position
+    float temp;
 };
