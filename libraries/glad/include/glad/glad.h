@@ -1718,18 +1718,6 @@ GLAPI PFNGLGETACTIVEUNIFORMPROC glad_glGetActiveUniform;
 typedef void (APIENTRYP PFNGLGETATTACHEDSHADERSPROC)(GLuint program, GLsizei maxCount, GLsizei *count, GLuint *shaders);
 GLAPI PFNGLGETATTACHEDSHADERSPROC glad_glGetAttachedShaders;
 #define glGetAttachedShaders glad_glGetAttachedShaders
-typedef void (APIENTRYP PFNGLGETPROGRAMIVPROC)(GLuint program, GLenum pname, GLint *params);
-GLAPI PFNGLGETPROGRAMIVPROC glad_glGetProgramiv;
-#define glGetProgramiv glad_glGetProgramiv
-typedef void (APIENTRYP PFNGLGETPROGRAMINFOLOGPROC)(GLuint program, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
-GLAPI PFNGLGETPROGRAMINFOLOGPROC glad_glGetProgramInfoLog;
-#define glGetProgramInfoLog glad_glGetProgramInfoLog
-typedef void (APIENTRYP PFNGLGETSHADERIVPROC)(GLuint shader, GLenum pname, GLint *params);
-GLAPI PFNGLGETSHADERIVPROC glad_glGetShaderiv;
-#define glGetShaderiv glad_glGetShaderiv
-typedef void (APIENTRYP PFNGLGETSHADERINFOLOGPROC)(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
-GLAPI PFNGLGETSHADERINFOLOGPROC glad_glGetShaderInfoLog;
-#define glGetShaderInfoLog glad_glGetShaderInfoLog
 typedef void (APIENTRYP PFNGLGETSHADERSOURCEPROC)(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source);
 GLAPI PFNGLGETSHADERSOURCEPROC glad_glGetShaderSource;
 #define glGetShaderSource glad_glGetShaderSource
