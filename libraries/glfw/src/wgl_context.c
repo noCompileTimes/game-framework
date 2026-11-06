@@ -465,8 +465,6 @@ GLFWbool _glfwInitWGL(void)
         extensionSupportedWGL("WGL_ARB_create_context");
     _glfw.wgl.ARB_create_context_profile =
         extensionSupportedWGL("WGL_ARB_create_context_profile");
-    _glfw.wgl.EXT_create_context_es2_profile =
-        extensionSupportedWGL("WGL_EXT_create_context_es2_profile");
     _glfw.wgl.ARB_create_context_robustness =
         extensionSupportedWGL("WGL_ARB_create_context_robustness");
     _glfw.wgl.ARB_create_context_no_error =
@@ -537,16 +535,6 @@ GLFWbool _glfwCreateContextWGL(_GLFWwindow* window,
 
     if (ctxconfig->client == GLFW_OPENGL_API)
     {
-        if (ctxconfig->forward)
-        {
-            if (!_glfw.wgl.ARB_create_context)
-            {
-                _glfwInputError(GLFW_VERSION_UNAVAILABLE,
-                                "WGL: A forward compatible OpenGL context requested but WGL_ARB_create_context is unavailable");
-                return GLFW_FALSE;
-            }
-        }
-
         if (ctxconfig->profile)
         {
             if (!_glfw.wgl.ARB_create_context_profile)
@@ -560,8 +548,7 @@ GLFWbool _glfwCreateContextWGL(_GLFWwindow* window,
     else
     {
         if (!_glfw.wgl.ARB_create_context ||
-            !_glfw.wgl.ARB_create_context_profile ||
-            !_glfw.wgl.EXT_create_context_es2_profile)
+            !_glfw.wgl.ARB_create_context_profile)
         {
             _glfwInputError(GLFW_API_UNAVAILABLE,
                             "WGL: OpenGL ES requested but WGL_ARB_create_context_es2_profile is unavailable");
@@ -575,16 +562,9 @@ GLFWbool _glfwCreateContextWGL(_GLFWwindow* window,
 
         if (ctxconfig->client == GLFW_OPENGL_API)
         {
-            if (ctxconfig->forward)
-                flags |= WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
-
             if (ctxconfig->profile == GLFW_OPENGL_CORE_PROFILE)
                 mask |= WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
-            else if (ctxconfig->profile == GLFW_OPENGL_COMPAT_PROFILE)
-                mask |= WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;
         }
-        else
-            mask |= WGL_CONTEXT_ES2_PROFILE_BIT_EXT;
 
         if (ctxconfig->debug)
             flags |= WGL_CONTEXT_DEBUG_BIT_ARB;

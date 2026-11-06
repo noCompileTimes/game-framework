@@ -87,10 +87,8 @@ typedef struct _GLFWmutex       _GLFWmutex;
 #define GL_EXTENSIONS 0x1f03
 #define GL_NUM_EXTENSIONS 0x821d
 #define GL_CONTEXT_FLAGS 0x821e
-#define GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT 0x00000001
 #define GL_CONTEXT_FLAG_DEBUG_BIT 0x00000002
 #define GL_CONTEXT_PROFILE_MASK 0x9126
-#define GL_CONTEXT_COMPATIBILITY_PROFILE_BIT 0x00000002
 #define GL_CONTEXT_CORE_PROFILE_BIT 0x00000001
 #define GL_RESET_NOTIFICATION_STRATEGY_ARB 0x8256
 #define GL_LOSE_CONTEXT_ON_RESET_ARB 0x8252
@@ -217,7 +215,6 @@ struct _GLFWerror
 struct _GLFWinitconfig
 {
     bool          hatButtons;
-    int           angleType;
     int           platformID;
     PFN_vkGetInstanceProcAddr vulkanLoader;
     struct {
@@ -283,7 +280,6 @@ struct _GLFWctxconfig
     int           source;
     int           major;
     int           minor;
-    bool          forward;
     bool          debug;
     bool          noerror;
     int           profile;
@@ -331,7 +327,7 @@ struct _GLFWcontext
     int                 client;
     int                 source;
     int                 major, minor, revision;
-    GLFWbool            forward, debug, noerror;
+    GLFWbool            debug, noerror;
     int                 profile;
     int                 robustness;
     int                 release;

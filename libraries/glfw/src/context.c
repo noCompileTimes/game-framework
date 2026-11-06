@@ -97,12 +97,9 @@ GLFWbool _glfwIsValidContextConfig(const _GLFWctxconfig* ctxconfig)
 
         if (ctxconfig->profile)
         {
-            if (ctxconfig->profile != GLFW_OPENGL_CORE_PROFILE &&
-                ctxconfig->profile != GLFW_OPENGL_COMPAT_PROFILE)
+            if (ctxconfig->profile != GLFW_OPENGL_CORE_PROFILE)
             {
-                _glfwInputError(GLFW_INVALID_ENUM,
-                                "Invalid OpenGL profile 0x%08X",
-                                ctxconfig->profile);
+                _glfwInputError(GLFW_INVALID_ENUM, "Invalid OpenGL profile 0x%08X", ctxconfig->profile);
                 return GLFW_FALSE;
             }
 
@@ -112,18 +109,9 @@ GLFWbool _glfwIsValidContextConfig(const _GLFWctxconfig* ctxconfig)
                 // Desktop OpenGL context profiles are only defined for version 3.2
                 // and above
 
-                _glfwInputError(GLFW_INVALID_VALUE,
-                                "Context profiles are only defined for OpenGL version 3.2 and above");
+                _glfwInputError(GLFW_INVALID_VALUE,"Context profiles are only defined for OpenGL version 3.2 and above");
                 return GLFW_FALSE;
             }
-        }
-
-        if (ctxconfig->forward && ctxconfig->major <= 2)
-        {
-            // Forward-compatible contexts are only defined for OpenGL version 3.0 and above
-            _glfwInputError(GLFW_INVALID_VALUE,
-                            "Forward-compatibility is only defined for OpenGL version 3.0 and above");
-            return GLFW_FALSE;
         }
     }
 
@@ -437,9 +425,6 @@ GLFWbool _glfwRefreshContextAttribs(_GLFWwindow* window, const _GLFWctxconfig* c
             GLint flags;
             window->context.GetIntegerv(GL_CONTEXT_FLAGS, &flags);
 
-            if (flags & GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT)
-                window->context.forward = GLFW_TRUE;
-
             if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
                 window->context.debug = GLFW_TRUE;
             else if (glfwExtensionSupported("GL_ARB_debug_output") &&
@@ -462,18 +447,8 @@ GLFWbool _glfwRefreshContextAttribs(_GLFWwindow* window, const _GLFWctxconfig* c
             GLint mask;
             window->context.GetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
 
-            if (mask & GL_CONTEXT_COMPATIBILITY_PROFILE_BIT)
-                window->context.profile = GLFW_OPENGL_COMPAT_PROFILE;
-            else if (mask & GL_CONTEXT_CORE_PROFILE_BIT)
+            if (mask & GL_CONTEXT_CORE_PROFILE_BIT)
                 window->context.profile = GLFW_OPENGL_CORE_PROFILE;
-            else if (glfwExtensionSupported("GL_ARB_compatibility"))
-            {
-                // HACK: This is a workaround for the compatibility profile bit
-                //       not being set in the context flags if an OpenGL 3.2+
-                //       context was created without having requested a specific
-                //       version
-                window->context.profile = GLFW_OPENGL_COMPAT_PROFILE;
-            }
         }
 
         // Read back robustness strategy
@@ -483,8 +458,7 @@ GLFWbool _glfwRefreshContextAttribs(_GLFWwindow* window, const _GLFWctxconfig* c
             //       only present from 3.0 while the extension applies from 1.1
 
             GLint strategy;
-            window->context.GetIntegerv(GL_RESET_NOTIFICATION_STRATEGY_ARB,
-                                        &strategy);
+            window->context.GetIntegerv(GL_RESET_NOTIFICATION_STRATEGY_ARB, &strategy);
 
             if (strategy == GL_LOSE_CONTEXT_ON_RESET_ARB)
                 window->context.robustness = GLFW_LOSE_CONTEXT_ON_RESET;

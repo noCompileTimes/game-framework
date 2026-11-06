@@ -48,7 +48,6 @@ static GLFWallocator _glfwInitAllocator;
 static _GLFWinitconfig _glfwInitHints =
 {
     .hatButtons = true,
-    .angleType = GLFW_ANGLE_PLATFORM_TYPE_NONE,
     .platformID = GLFW_ANY_PLATFORM,
     .vulkanLoader = NULL,
     .ns =
@@ -440,9 +439,6 @@ GLFWAPI void glfwInitHint(int hint, int value)
         case GLFW_JOYSTICK_HAT_BUTTONS:
             _glfwInitHints.hatButtons = value;
             return;
-        case GLFW_ANGLE_PLATFORM_TYPE:
-            _glfwInitHints.angleType = value;
-            return;
         case GLFW_PLATFORM:
             _glfwInitHints.platformID = value;
             return;
@@ -460,8 +456,7 @@ GLFWAPI void glfwInitHint(int hint, int value)
             return;
     }
 
-    _glfwInputError(GLFW_INVALID_ENUM,
-                    "Invalid init hint 0x%08X", hint);
+    _glfwInputError(GLFW_INVALID_ENUM, "Invalid init hint 0x%08X", hint);
 }
 
 GLFWAPI void glfwInitAllocator(const GLFWallocator* allocator)

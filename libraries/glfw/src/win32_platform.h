@@ -193,14 +193,11 @@ typedef enum
 #define WGL_SAMPLES_ARB 0x2042
 #define WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB 0x20a9
 #define WGL_CONTEXT_DEBUG_BIT_ARB 0x00000001
-#define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x00000002
 #define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
 #define WGL_CONTEXT_CORE_PROFILE_BIT_ARB 0x00000001
-#define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
 #define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
 #define WGL_CONTEXT_FLAGS_ARB 0x2094
-#define WGL_CONTEXT_ES2_PROFILE_BIT_EXT 0x00000004
 #define WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB 0x00000004
 #define WGL_LOSE_CONTEXT_ON_RESET_ARB 0x8252
 #define WGL_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB 0x8256
@@ -340,7 +337,6 @@ typedef struct _GLFWlibraryWGL
     bool                                ARB_pixel_format;
     bool                                ARB_create_context;
     bool                                ARB_create_context_profile;
-    bool                                EXT_create_context_es2_profile;
     bool                                ARB_create_context_robustness;
     bool                                ARB_create_context_no_error;
     bool                                ARB_context_flush_control;
