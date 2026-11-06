@@ -28,6 +28,15 @@
 #include "resources.hpp"
 #include "text.hpp"
 
+// TODO - chekc how to align it for 16bits to be usefull in the shader for std140?
+struct light
+{
+    glm::vec3 color;
+    float temp1; // TODO maybe not correct
+    glm::vec3 position;
+    float temp2; // TODO maybe not correct
+};
+
 auto main() -> int32_t
 {
     constexpr core::window::configuration window_configuration
@@ -125,15 +134,15 @@ auto main() -> int32_t
     text_vertex_stage.destroy();
     text_fragment_stage.destroy();
 
-    const auto [geometry_vertices, geometry_elements] = load_geometry("cube.obj");
+    const auto [cube_geometry_vertices, cube_geometry_elements] = load_geometry("models/cube.obj");
 
     graphics::opengl::Buffer cube_geometry_vbo;
     cube_geometry_vbo.create();
-    cube_geometry_vbo.storage(sizeof(model_vertex) * geometry_vertices.size(), geometry_vertices.data(), 0);
+    cube_geometry_vbo.storage(sizeof(model_vertex) * cube_geometry_vertices.size(), cube_geometry_vertices.data(), 0);
 
     graphics::opengl::Buffer cube_geometry_ebo;
     cube_geometry_ebo.create();
-    cube_geometry_ebo.storage(sizeof(uint32_t) * geometry_elements.size(), geometry_elements.data(), 0);
+    cube_geometry_ebo.storage(sizeof(uint32_t) * cube_geometry_elements.size(), cube_geometry_elements.data(), 0);
 
     graphics::opengl::VertexArray cube_geometry_vao;
     cube_geometry_vao.create();
@@ -142,7 +151,28 @@ auto main() -> int32_t
     cube_geometry_vao.attach_elements(cube_geometry_ebo);
 
     cube_geometry_vao.attach_attribute({ 0, offsetof(model_vertex, position), 3, GL_FLOAT, 0 });
-    cube_geometry_vao.attach_attribute({ 1, offsetof(model_vertex, texcoord), 2, GL_FLOAT, 0 });
+    cube_geometry_vao.attach_attribute({ 1, offsetof(model_vertex, normal), 3, GL_FLOAT, 0 });
+    cube_geometry_vao.attach_attribute({ 2, offsetof(model_vertex, texcoord), 2, GL_FLOAT, 0 });
+
+    const auto [sphere_geometry_vertices, sphere_geometry_elements] = load_geometry("models/sphere.obj");
+
+    graphics::opengl::Buffer sphere_geometry_vbo;
+    sphere_geometry_vbo.create();
+    sphere_geometry_vbo.storage(sizeof(model_vertex) * sphere_geometry_vertices.size(), sphere_geometry_vertices.data(), 0);
+
+    graphics::opengl::Buffer sphere_geometry_ebo;
+    sphere_geometry_ebo.create();
+    sphere_geometry_ebo.storage(sizeof(uint32_t) * sphere_geometry_elements.size(), sphere_geometry_elements.data(), 0);
+
+    graphics::opengl::VertexArray sphere_geometry_vao;
+    sphere_geometry_vao.create();
+
+    sphere_geometry_vao.attach_vertices(sphere_geometry_vbo, sizeof(model_vertex));
+    sphere_geometry_vao.attach_elements(sphere_geometry_ebo);
+
+    sphere_geometry_vao.attach_attribute({ 0, offsetof(model_vertex, position), 3, GL_FLOAT, 0 });
+    sphere_geometry_vao.attach_attribute({ 1, offsetof(model_vertex, normal), 3, GL_FLOAT, 0 });
+    sphere_geometry_vao.attach_attribute({ 2, offsetof(model_vertex, texcoord), 2, GL_FLOAT, 0 });
 
     const auto [sprite_vertices, sprite_elements] = create_sprite({ 0, 0, 256, 256 }, true);
 
@@ -188,6 +218,15 @@ auto main() -> int32_t
     material_ubo.create();
     material_ubo.bind(GL_UNIFORM_BUFFER, 2);
     material_ubo.storage(sizeof(glm::vec3), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+    light default_light;
+    default_light.color = { 1.0f, 0.5f, 0.31f };
+    default_light.position = { 4.0f, 5.0f, 6.0f };
+
+    graphics::opengl::Buffer light_ubo;
+    light_ubo.create();
+    light_ubo.bind(GL_UNIFORM_BUFFER, 3);
+    light_ubo.storage(sizeof(light), &default_light, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::TextureSampler texture_sampler;
     texture_sampler.create();
@@ -407,6 +446,28 @@ auto main() -> int32_t
 
     glm::mat4 text_matrix { 1.0f };
 
+    static auto show_cube = true;
+
+    glfwSetKeyCallback(std::any_cast<GLFWwindow*>(window->handle()), [](GLFWwindow*, const int key, int, const int action, int)
+    {
+        if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+        {
+            show_cube = !show_cube;
+        }
+    });
+
+    auto default_texture_width  = 1;
+    auto default_texture_height = 1;
+
+    uint8_t default_pixels[3] { 255, 255, 255 };
+
+    graphics::opengl::Texture default_texture;
+    default_texture.type = GL_TEXTURE_2D;
+    default_texture.create();
+
+    default_texture.storage(default_texture_width, default_texture_height, GL_RGB8, 1);
+    default_texture.subdata(default_texture_width, default_texture_height, GL_RGB, 0, default_pixels);
+
     graphics::opengl::Framebuffer default_fbo;
                                   default_fbo.bind();
     while (window_is_running)
@@ -430,15 +491,26 @@ auto main() -> int32_t
         model_camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
         camera_ubo.subdata(0, sizeof(model_camera_matrices), model_camera_matrices);
 
-        model_program_shader.bind();
-
-        pavement_texture.bind(0);
-
-        cube_geometry_vao.bind();
-
         transform_ubo.subdata(0, sizeof(model_matrix), &model_matrix);
 
-        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, geometry_elements.size());
+        model_program_shader.bind();
+
+        if (show_cube)
+        {
+            pavement_texture.bind(0);
+
+            cube_geometry_vao.bind();
+
+            graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, cube_geometry_elements.size());
+        }
+        else
+        {
+            default_texture.bind(0);
+
+            sphere_geometry_vao.bind();
+
+            graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, sphere_geometry_elements.size());
+        }
 
         // 2D drawing
 
@@ -465,13 +537,13 @@ auto main() -> int32_t
 
         text_vao.bind();
 
-        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 400.0f, 0.0f });
+        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 70.0f, 0.0f });
         transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
 
         material_ubo.subdata(0, sizeof(glm::vec3), &red_color);
         render_text(text_vbo, "This is sample text");
 
-        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 200.0f, 0.0f });
+        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 700.0f, 0.0f });
         text_matrix = scale(text_matrix, { 0.5f, 0.5f, 0.5f });
         transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
 
@@ -501,6 +573,8 @@ auto main() -> int32_t
 
     return 0;
 }
+
+// TODO - make for the text the top left corner as the "anchor" not the bottom left corner like it is right now
 
 // TODO - remove the text_rendering.cpp from learnopengl after we are done with the basic text rendering
 
