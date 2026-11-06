@@ -6,7 +6,7 @@ layout (location = 2) in vec2 in_texcoord;
 
 layout (location = 0) out vec3 out_normal;
 layout (location = 1) out vec2 out_texcoord;
-layout (location = 2) out vec3 out_position; // TODO remove this because is just for the first draft
+layout (location = 2) out vec3 out_position; // TODO put it maybe the first to have the same as inputs
 
 layout (binding = 0, std140) uniform camera_ubo
 {
@@ -17,6 +17,7 @@ layout (binding = 0, std140) uniform camera_ubo
 layout (binding = 1, std140) uniform transform_ubo
 {
     mat4 model;
+    // TODO add the normal matrix here
 };
 
 void main()

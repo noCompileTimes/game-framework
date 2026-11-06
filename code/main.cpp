@@ -213,7 +213,7 @@ auto main() -> int32_t
 
     light default_light;
     default_light.color = { 1.0f, 0.5f, 0.31f };
-    default_light.position = { 5.0f, 5.0f, 5.0f };
+    default_light.source = { 5.0f, 5.0f, 5.0f };
 
     graphics::opengl::Buffer light_ubo;
     light_ubo.create();

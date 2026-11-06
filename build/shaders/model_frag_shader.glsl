@@ -2,7 +2,7 @@
 
 layout (location = 0) in vec3 in_normal;
 layout (location = 1) in vec2 in_texcoord;
-layout (location = 2) in vec3 in_position; // TODO remove this because is just for the first draft
+layout (location = 2) in vec3 in_position; // TODO put it maybe the first to have the same as outputs from vertex stage
 
 layout (location = 0) out vec4 out_color;
 
@@ -12,7 +12,7 @@ layout (binding = 3, std140) uniform light_ubo
 {
     vec3 color;
     float temp1;
-    vec3 position;
+    vec3 source;
     float temp2;
 } u_light;
 
@@ -22,7 +22,7 @@ void main()
     vec3 ambient_color = ambient_factor * u_light.color;
 
     vec3 normal = normalize(in_normal);
-    vec3 light_direction = normalize(u_light.position - in_position);
+    vec3 light_direction = normalize(-u_light.source);
 
     float diffuse_factor = max(dot(normal, light_direction), 0.0);
     vec3 diffuse_color = diffuse_factor * u_light.color;
