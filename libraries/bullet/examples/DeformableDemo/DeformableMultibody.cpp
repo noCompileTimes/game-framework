@@ -297,18 +297,18 @@ btMultiBody* DeformableMultibody::createFeatherstoneMultiBody_testMultiDof(btMul
     btCollisionShape* pTempBox = new btBoxShape(btVector3(linkHalfExtents[0], linkHalfExtents[1], linkHalfExtents[2]));
     pTempBox->calculateLocalInertia(linkMass, linkInertiaDiag);
     delete pTempBox;
-    
+
     //y-axis assumed up
     btVector3 parentComToCurrentCom(0, -linkHalfExtents[1] * 2.f, 0);                      //par body's COM to cur body's COM offset
     btVector3 currentPivotToCurrentCom(0, -linkHalfExtents[1], 0);                         //cur body's COM to cur body's PIV offset
     btVector3 parentComToCurrentPivot = parentComToCurrentCom - currentPivotToCurrentCom;  //par body's COM to cur body's PIV offset
-    
+
     //////
     btScalar q0 = 0.f * SIMD_PI / 180.f;
     btQuaternion quat0(btVector3(0, 1, 0).normalized(), q0);
     quat0.normalize();
     /////
-    
+
     for (int i = 0; i < numLinks; ++i)
     {
         if (!spherical)

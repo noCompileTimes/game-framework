@@ -44,6 +44,14 @@ struct geometry
             elements.emplace_back(static_cast<element_>(element + offset));
         }
     }
+
+    // TODO - maybe add a reserve method also
+
+    auto clear() -> void
+    {
+        vertices.clear();
+        elements.clear();
+    }
 };
 
 static auto load_geometry(const std::string_view filename) -> geometry<model_vertex, uint32_t>

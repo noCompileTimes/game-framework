@@ -7,6 +7,8 @@
 #include <stb_rect_pack.h>
 #include <stb_image_write.h>
 
+#include <btBulletCollisionCommon.h>
+
 #include <print>
 
 #include "backends/glfw/window_factory.hpp"
@@ -28,6 +30,8 @@
 #include "resources.hpp"
 #include "text.hpp"
 #include "light.hpp"
+
+#include "physics_debug.hpp"
 
 auto main() -> int32_t
 {
@@ -186,7 +190,7 @@ auto main() -> int32_t
     sprite_geometry_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
 
     glm::mat4 model_camera_matrices[2];
-    model_camera_matrices[0] = glm::lookAt(glm::vec3 { 0.0f, 0.0f, 5.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
+    model_camera_matrices[0] = glm::lookAt(glm::vec3 { 0.0f, 0.0f, 10.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
     model_camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
 
     glm::mat4 sprite_camera_matrices[2];
@@ -212,7 +216,7 @@ auto main() -> int32_t
     material_ubo.storage(sizeof(glm::vec3), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     light default_light;
-    default_light.color = { 1.0f, 0.5f, 0.31f };
+    default_light.color = { 1.0f, 1.0f, 1.0f };
     default_light.source = { -1.0f, -1.0f, -1.0f };
     default_light.intensity = 1.0f;
 
@@ -461,6 +465,42 @@ auto main() -> int32_t
     default_texture.storage(default_texture_width, default_texture_height, GL_RGB8, 1);
     default_texture.subdata(default_texture_width, default_texture_height, GL_RGB, 0, default_pixels);
 
+    // physics begin
+
+    btCollisionShape* bt_cube_shape = new btBoxShape({ 1.0f, 1.0f, 1.0f });
+
+    btTransform bt_cube_transform;
+    bt_cube_transform.setIdentity();
+
+    auto bt_cube_object = new btCollisionObject();
+    bt_cube_object->setCollisionShape(bt_cube_shape);
+    bt_cube_object->setWorldTransform(bt_cube_transform);
+
+    auto bt_debug_draw = new PhysicsDebug();
+
+    btCollisionConfiguration* bt_collision_configuration = new btDefaultCollisionConfiguration();
+
+    btDispatcher* bt_dispatcher = new btCollisionDispatcher(bt_collision_configuration);
+    btBroadphaseInterface* bt_broadphase = new btDbvtBroadphase();
+
+    auto bt_world = new btCollisionWorld(bt_dispatcher, bt_broadphase, bt_collision_configuration);
+    bt_world->addCollisionObject(bt_cube_object);
+    bt_world->setDebugDrawer(bt_debug_draw);
+    bt_world->debugDrawWorld();
+
+    graphics::opengl::Buffer debug_vbo;
+    debug_vbo.create();
+    debug_vbo.storage(sizeof(editor_vertex) * bt_debug_draw->geometry.vertices.size(), bt_debug_draw->geometry.vertices.data(), 0);
+
+    graphics::opengl::VertexArray debug_vao;
+    debug_vao.create();
+    debug_vao.attach_vertices(debug_vbo, sizeof(editor_vertex));
+
+    debug_vao.attach_attribute({ 0, offsetof(editor_vertex, position), 3, GL_FLOAT, 0 });
+    debug_vao.attach_attribute({ 1, offsetof(editor_vertex, color), 3, GL_FLOAT, 0 });
+
+    // physics end
+
     graphics::opengl::Framebuffer default_fbo;
                                   default_fbo.bind();
     while (window_is_running)
@@ -504,6 +544,12 @@ auto main() -> int32_t
 
             graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, sphere_geometry_elements.size());
         }
+
+        basic_program_shader.bind();
+
+        debug_vao.bind();
+
+        graphics::opengl::Commands::draw_vertices(GL_LINES, 0, bt_debug_draw->geometry.vertices.size());
 
         // 2D drawing
 
@@ -566,6 +612,8 @@ auto main() -> int32_t
 
     return 0;
 }
+
+// TODO check in general if the aabb should stayed alligned with the axis and how bullets handles the update/rotation of that | also the visual part
 
 // TODO - make for the text the top left corner as the "anchor" not the bottom left corner like it is right now
 
