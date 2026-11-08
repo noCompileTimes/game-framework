@@ -37,8 +37,8 @@ void ScreenPosToWorldRay(
 	glm::mat4 ViewMatrix,               // Camera position and orientation
 	glm::mat4 ProjectionMatrix,         // Camera parameters (ratio, field of view, near and far planes)
 	glm::vec3& out_origin,              // Ouput : Origin of the ray. /!\ Starts at the near plane, so if you want the ray to start at the camera's position instead, ignore this.
-	glm::vec3& out_direction            // Ouput : Direction, in world space, of the ray that goes "through" the mouse.
-){
+	glm::vec3& out_direction)           // Ouput : Direction, in world space, of the ray that goes "through" the mouse.
+{
 
 	// The ray Start and End positions, in Normalized Device Coordinates (Have you read Tutorial 4 ?)
 	glm::vec4 lRayStart_NDC(
@@ -53,7 +53,6 @@ void ScreenPosToWorldRay(
 		0.0,
 		1.0f
 	);
-
 
 	// The Projection matrix goes from Camera Space to NDC.
 	// So inverse(ProjectionMatrix) goes from NDC to Camera Space.
@@ -298,17 +297,14 @@ int main( void )
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
 		glm::mat4 ViewMatrix = getViewMatrix();
 
-
-
-
 		// PICKING IS DONE HERE
 		// (Instead of picking each frame if the mouse button is down, 
 		// you should probably only check if the mouse button was just released)
-		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT)){
-
-
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT))
+		{
 			glm::vec3 out_origin;
 			glm::vec3 out_direction;
+
 			ScreenPosToWorldRay(
 				1024/2, 768/2,
 				1024, 768, 

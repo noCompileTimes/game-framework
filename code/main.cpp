@@ -30,6 +30,7 @@
 #include "resources.hpp"
 #include "text.hpp"
 #include "light.hpp"
+#include "camera.hpp"
 
 #include "physics_debug.hpp"
 
@@ -48,8 +49,8 @@ auto main() -> int32_t
     const auto window = window_manager.window();
     const auto window_events = window_manager.window_events();
 
-    auto window_width = window_configuration.width;
-    auto window_height = window_configuration.height;
+    static auto window_width = window_configuration.width;
+    static auto window_height = window_configuration.height;
 
     auto window_is_running = true;
 
@@ -189,7 +190,7 @@ auto main() -> int32_t
     sprite_geometry_vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
     sprite_geometry_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
 
-    glm::mat4 model_camera_matrices[2];
+    static glm::mat4 model_camera_matrices[2];
     model_camera_matrices[0] = glm::lookAt(glm::vec3 { 0.0f, 0.0f, 10.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
     model_camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
 
@@ -443,16 +444,6 @@ auto main() -> int32_t
 
     glm::mat4 text_matrix { 1.0f };
 
-    static auto show_cube = true;
-
-    glfwSetKeyCallback(std::any_cast<GLFWwindow*>(window->handle()), [](GLFWwindow*, const int key, int, const int action, int)
-    {
-        if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-        {
-            show_cube = !show_cube;
-        }
-    });
-
     auto default_texture_width  = 1;
     auto default_texture_height = 1;
 
@@ -483,14 +474,15 @@ auto main() -> int32_t
     btDispatcher* bt_dispatcher = new btCollisionDispatcher(bt_collision_configuration);
     btBroadphaseInterface* bt_broadphase = new btDbvtBroadphase();
 
-    auto bt_world = new btCollisionWorld(bt_dispatcher, bt_broadphase, bt_collision_configuration);
+    static auto bt_world = new btCollisionWorld(bt_dispatcher, bt_broadphase, bt_collision_configuration);
     bt_world->addCollisionObject(bt_cube_object);
     bt_world->setDebugDrawer(bt_debug_draw);
-    bt_world->debugDrawWorld();
+
+    constexpr uint32_t debug_vertices_capacity = 10000; // TODO grow the buffer if the debug drawer produces more lines
 
     graphics::opengl::Buffer debug_vbo;
     debug_vbo.create();
-    debug_vbo.storage(sizeof(editor_vertex) * bt_debug_draw->geometry.vertices.size(), bt_debug_draw->geometry.vertices.data(), 0);
+    debug_vbo.storage(sizeof(editor_vertex) * debug_vertices_capacity, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::VertexArray debug_vao;
     debug_vao.create();
@@ -501,10 +493,66 @@ auto main() -> int32_t
 
     // physics end
 
+    // input begin
+
+    static auto show_cube = true;
+
+    glfwSetKeyCallback(std::any_cast<GLFWwindow*>(window->handle()), [](GLFWwindow*, const int key, int, const int action, int)
+    {
+        if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+        {
+            show_cube = !show_cube;
+        }
+    });
+
+    glfwSetMouseButtonCallback(std::any_cast<GLFWwindow*>(window->handle()), [](GLFWwindow* glfw_window, const int button, int action, int)
+    {
+        if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
+        {
+            double mouse_x;
+            double mouse_y;
+
+            glfwGetCursorPos(glfw_window, &mouse_x, &mouse_y);
+
+            glm::vec3 out_origin;
+            glm::vec3 out_direction;
+
+            // glfw gives the cursor from the top-left corner, the function expects it from the bottom-left
+            screen_pos_to_world_ray(
+                static_cast<int>(mouse_x), window_height - static_cast<int>(mouse_y),
+                window_width, window_height,
+                model_camera_matrices[0],
+                model_camera_matrices[1],
+                out_origin,
+                out_direction
+            );
+
+            glm::vec3 out_end = out_origin + out_direction * 1000.0f;
+
+            btCollisionWorld::ClosestRayResultCallback result_callback(btVector3(out_origin.x, out_origin.y, out_origin.z), btVector3(out_end.x, out_end.y, out_end.z));
+            bt_world->rayTest(btVector3(out_origin.x, out_origin.y, out_origin.z), btVector3(out_end.x, out_end.y, out_end.z), result_callback);
+
+            if (result_callback.hasHit())
+            {
+                std::println("the cube is hit");
+            }
+        }
+    });
+
+    // input end
+
     graphics::opengl::Framebuffer default_fbo;
                                   default_fbo.bind();
     while (window_is_running)
     {
+        // test area - begin
+
+        bt_world->debugDrawWorld();
+
+        debug_vbo.subdata(0, sizeof(editor_vertex) * bt_debug_draw->geometry.vertices.size(), bt_debug_draw->geometry.vertices.data());
+
+        // test area - end
+
         // update
 
          model_matrix = rotate(glm::mat4(1.0), static_cast<float>(glfwGetTime()), glm::vec3{ 0.0f, 1.0f, 0.0f });
@@ -526,6 +574,13 @@ auto main() -> int32_t
 
         transform_ubo.subdata(0, sizeof(model_matrix), &model_matrix);
 
+        bt_cube_transform = bt_cube_object->getWorldTransform();
+        bt_cube_transform.setFromOpenGLMatrix(&model_matrix[0].x);
+
+        bt_cube_object->setWorldTransform(bt_cube_transform);
+
+        bt_world->updateAabbs(); // the broadphase keeps its own aabbs, refresh them after moving objects so rayTest sees the new transform
+
         model_program_shader.bind();
 
         if (show_cube)
@@ -546,6 +601,9 @@ auto main() -> int32_t
         }
 
         basic_program_shader.bind();
+
+        glm::mat4 collider_matrix { 1.0f };
+        transform_ubo.subdata(0, sizeof(collider_matrix), &collider_matrix);
 
         debug_vao.bind();
 
@@ -612,8 +670,6 @@ auto main() -> int32_t
 
     return 0;
 }
-
-// TODO check in general if the aabb should stayed alligned with the axis and how bullets handles the update/rotation of that | also the visual part
 
 // TODO - make for the text the top left corner as the "anchor" not the bottom left corner like it is right now
 

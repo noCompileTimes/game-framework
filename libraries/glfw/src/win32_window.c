@@ -815,10 +815,6 @@ static LRESULT CALLBACK windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM l
                 button = GLFW_MOUSE_BUTTON_RIGHT;
             else if (uMsg == WM_MBUTTONDOWN || uMsg == WM_MBUTTONUP)
                 button = GLFW_MOUSE_BUTTON_MIDDLE;
-            else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON1)
-                button = GLFW_MOUSE_BUTTON_4;
-            else
-                button = GLFW_MOUSE_BUTTON_5;
 
             if (uMsg == WM_LBUTTONDOWN || uMsg == WM_RBUTTONDOWN ||
                 uMsg == WM_MBUTTONDOWN || uMsg == WM_XBUTTONDOWN)

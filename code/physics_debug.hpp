@@ -36,7 +36,7 @@ public:
 
     int getDebugMode() const override
     {
-        return DBG_DrawAabb /* | DBG_DrawWireframe */; // TODO check if DBG_DrawWireframe is needed also
+        return DBG_DrawAabb | DBG_DrawWireframe;
     }
 
     virtual void clearLines()
