@@ -1,6 +1,9 @@
 #pragma once
 
-void screen_pos_to_world_ray(
+#include <glm/glm.hpp>
+
+// inline: the function is defined in a header, so every .cpp that includes it gets a copy; inline lets the linker merge them (ODR)
+inline void screen_pos_to_world_ray(
 	int mouseX, int mouseY,             // Mouse position, in pixels, from bottom-left corner of the window
 	int screenWidth, int screenHeight,  // Window size, in pixels
 	glm::mat4 ViewMatrix,               // Camera position and orientation

@@ -9,6 +9,7 @@
 
 #include <btBulletCollisionCommon.h>
 
+#include <algorithm>
 #include <print>
 
 #include "backends/glfw/window_factory.hpp"
@@ -458,14 +459,15 @@ auto main() -> int32_t
 
     // physics begin
 
-    btCollisionShape* bt_cube_shape = new btBoxShape({ 1.0f, 1.0f, 1.0f });
+    static btCollisionShape* bt_cube_shape = new btBoxShape({ 1.0f, 1.0f, 1.0f });
+    static btCollisionShape* bt_sphere_shape = new btSphereShape(1.0f);
 
-    btTransform bt_cube_transform;
-    bt_cube_transform.setIdentity();
+    btTransform bt_object_transform;
+    bt_object_transform.setIdentity();
 
-    auto bt_cube_object = new btCollisionObject();
-    bt_cube_object->setCollisionShape(bt_cube_shape);
-    bt_cube_object->setWorldTransform(bt_cube_transform);
+    static auto bt_collision_object = new btCollisionObject();
+    bt_collision_object->setCollisionShape(bt_cube_shape);
+    bt_collision_object->setWorldTransform(bt_object_transform);
 
     auto bt_debug_draw = new PhysicsDebug();
 
@@ -475,7 +477,7 @@ auto main() -> int32_t
     btBroadphaseInterface* bt_broadphase = new btDbvtBroadphase();
 
     static auto bt_world = new btCollisionWorld(bt_dispatcher, bt_broadphase, bt_collision_configuration);
-    bt_world->addCollisionObject(bt_cube_object);
+    bt_world->addCollisionObject(bt_collision_object);
     bt_world->setDebugDrawer(bt_debug_draw);
 
     constexpr uint32_t debug_vertices_capacity = 10000; // TODO grow the buffer if the debug drawer produces more lines
@@ -502,6 +504,15 @@ auto main() -> int32_t
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
             show_cube = !show_cube;
+
+            if (show_cube)
+            {
+                bt_collision_object->setCollisionShape(bt_cube_shape);
+            }
+            else
+            {
+                bt_collision_object->setCollisionShape(bt_sphere_shape);
+            }
         }
     });
 
@@ -514,13 +525,20 @@ auto main() -> int32_t
 
             glfwGetCursorPos(glfw_window, &mouse_x, &mouse_y);
 
+            // the cursor is in screen coordinates, while window_width/window_height come from the framebuffer (on_resize)
+            // with display scaling (e.g. 150%) they differ, so use the window size in screen coordinates to match the cursor
+            int screen_width;
+            int screen_height;
+
+            glfwGetWindowSize(glfw_window, &screen_width, &screen_height);
+
             glm::vec3 out_origin;
             glm::vec3 out_direction;
 
             // glfw gives the cursor from the top-left corner, the function expects it from the bottom-left
             screen_pos_to_world_ray(
-                static_cast<int>(mouse_x), window_height - static_cast<int>(mouse_y),
-                window_width, window_height,
+                static_cast<int>(mouse_x), screen_height - static_cast<int>(mouse_y),
+                screen_width, screen_height,
                 model_camera_matrices[0],
                 model_camera_matrices[1],
                 out_origin,
@@ -545,14 +563,6 @@ auto main() -> int32_t
                                   default_fbo.bind();
     while (window_is_running)
     {
-        // test area - begin
-
-        bt_world->debugDrawWorld();
-
-        debug_vbo.subdata(0, sizeof(editor_vertex) * bt_debug_draw->geometry.vertices.size(), bt_debug_draw->geometry.vertices.data());
-
-        // test area - end
-
         // update
 
          model_matrix = rotate(glm::mat4(1.0), static_cast<float>(glfwGetTime()), glm::vec3{ 0.0f, 1.0f, 0.0f });
@@ -574,12 +584,19 @@ auto main() -> int32_t
 
         transform_ubo.subdata(0, sizeof(model_matrix), &model_matrix);
 
-        bt_cube_transform = bt_cube_object->getWorldTransform();
-        bt_cube_transform.setFromOpenGLMatrix(&model_matrix[0].x);
+        bt_object_transform.setFromOpenGLMatrix(&model_matrix[0].x);
 
-        bt_cube_object->setWorldTransform(bt_cube_transform);
+        bt_collision_object->setWorldTransform(bt_object_transform);
 
         bt_world->updateAabbs(); // the broadphase keeps its own aabbs, refresh them after moving objects so rayTest sees the new transform
+
+        // debug draw after the physics update, so the lines show this frame's transform and aabbs (not the previous frame's)
+        bt_world->debugDrawWorld();
+
+        // clamp to the buffer capacity so we never write past the end of debug_vbo
+        const auto debug_vertices_count = std::min<size_t>(bt_debug_draw->geometry.vertices.size(), debug_vertices_capacity);
+
+        debug_vbo.subdata(0, sizeof(editor_vertex) * debug_vertices_count, bt_debug_draw->geometry.vertices.data());
 
         model_program_shader.bind();
 
@@ -607,7 +624,7 @@ auto main() -> int32_t
 
         debug_vao.bind();
 
-        graphics::opengl::Commands::draw_vertices(GL_LINES, 0, bt_debug_draw->geometry.vertices.size());
+        graphics::opengl::Commands::draw_vertices(GL_LINES, 0, static_cast<int32_t>(debug_vertices_count));
 
         // 2D drawing
 
@@ -702,6 +719,14 @@ auto main() -> int32_t
 // TODO - resolve the flipping of the y from the ortho matrix (need to recheck all the sprites/fonts)
 
 // TODO - make a specific texture sampler for texts
+
+// TODO - move the libraries link part inside the modules it is the case (for example: glm in mathematis, glad in graphics, bullet in physics, etc)
+
+// TODO - make a new Physics module
+// TODO - make a Physics class on top of bulletsdk classes, maybe it will be more generic, and later on we can replace it with some other framework or our own minimal implementation
+
+// TODO - make the on_resize callback to use something from the window (glfwGetWindowSize(glfw_window, &screen_width, &screen_height)) not the size from the framebuffer
+// TODO - in case in glfw use use on_resize the window size, remove the framebuffer callbacks from it
 
 // TODO check the benefits of this
 /*
