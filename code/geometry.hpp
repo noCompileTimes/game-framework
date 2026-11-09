@@ -4,44 +4,31 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include "core/rect.hpp"
+#include "vertex_types.hpp"
 
-struct model_vertex
-{
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texcoord;
-};
+template <typename Vertex>
+concept vertex_type = std::is_trivially_copyable_v<Vertex> && std::is_standard_layout_v<Vertex>;
 
-struct sprite_vertex
-{
-    core::vec2 position;
-    core::vec2 texcoord;
-};
+template <typename Element>
+concept element_type = std::same_as<Element, uint16_t> || std::same_as<Element, uint32_t>;
 
-struct editor_vertex
-{
-    glm::vec3 position;
-    glm::vec3 color; // TODO create a rgb struct and use it here
-};
-
-template <typename vertex_, typename element_> // TODO maybe use the C++ way with V, E?
+template <vertex_type Vertex, element_type Element>
 struct geometry
 {
-    std::vector<vertex_>  vertices;
-    std::vector<element_> elements;
+    std::vector<Vertex>  vertices;
+    std::vector<Element> elements;
 
     // TODO add some functions to be able to expend the geometry easy, something like an append
 
     auto append(const geometry& other) -> void
     {
-        const auto offset = static_cast<element_>(vertices.size());
+        const auto offset = static_cast<Element>(vertices.size());
 
         vertices.insert(vertices.end(), other.vertices.begin(), other.vertices.end());
 
         for (const auto element : other.elements)
         {
-            elements.emplace_back(static_cast<element_>(element + offset));
+            elements.emplace_back(static_cast<Element>(element + offset));
         }
     }
 
@@ -87,54 +74,4 @@ static auto load_geometry(const std::string_view filename) -> geometry<model_ver
     }
 
     return { };
-}
-
-// TODO add a new version of create sprite which takes an x, y, w, h and some size for the texture?
-
-// TODO check if this flip_vertical parameter it makes what stbi_set_flip_vertically_on_load does for stb image on load
-// flip_vertical = true  -> for textures stored bottom-up (e.g. framebuffer / render target textures)
-// flip_vertical = false -> for textures loaded with stb_image (stored top-down)
-static auto create_sprite(const core::rect& position, const bool flip_vertical) -> geometry<sprite_vertex, uint32_t>
-{
-    const auto v_top    = flip_vertical ? 1.0f : 0.0f;
-    const auto v_bottom = flip_vertical ? 0.0f : 1.0f;
-
-    geometry<sprite_vertex, uint32_t> geometry
-    {
-        {
-            { position.min, { 0.0f, v_top } },
-            { { position.max.x, position.min.y }, { 1.0f, v_top } },
-            {  position.max, { 1.0f, v_bottom } },
-            { { position.min.x, position.max.y }, { 0.0f, v_bottom } }
-        },
-        {
-            0, 2, 1,
-            0, 3, 2
-        }
-    };
-
-    return geometry;
-}
-
-static auto create_rectangle(const core::rect& position, const glm::vec3& color) -> geometry<editor_vertex, uint32_t>
-{
-    geometry<editor_vertex, uint32_t> geometry
-    {
-        // TODO adding the 0.5f padding in here? makes sense? check with the claude about this 0.5f to be sure
-        {
-            { { position.min.x, position.min.y, 0.0f }, color },
-            { { position.max.x, position.min.y, 0.0f }, color },
-            { { position.max.x, position.max.y, 0.0f }, color },
-            { { position.min.x, position.max.y, 0.0f }, color }
-
-        },
-        {
-            0, 1,
-            1, 2,
-            2, 3,
-            3, 0
-        }
-    };
-
-    return geometry;
 }

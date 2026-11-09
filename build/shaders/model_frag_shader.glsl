@@ -13,7 +13,6 @@ layout (binding = 3, std140) uniform light_ubo
     vec3 color;
     float intensity;
     vec3 source;
-    float temp2;
 } u_light;
 
 void main()
@@ -28,7 +27,7 @@ void main()
     vec3 light_direction = normalize(-u_light.source); // source is the direction the light travels, negate it to point towards the light
 
     float diffuse_factor = max(dot(normal, light_direction), 0.0);
-    vec3 diffuse_color = diffuse_factor * u_light.color * u_light.intensity;
+    vec3  diffuse_color  = diffuse_factor * u_light.color * u_light.intensity;
 
     out_color = vec4(ambient_color + diffuse_color, 1.0) * texture(u_albedo_texture, in_texcoord);
 }

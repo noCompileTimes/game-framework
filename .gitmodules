@@ -10,3 +10,6 @@
 [submodule "modules/mathematics"]
 	path = modules/mathematics
 	url = https://github.com/noCompileTimes/mathematics-module.git
+[submodule "modules/physics"]
+	path = modules/physics
+	url = https://github.com/noCompileTimes/physics-module.git

@@ -6,12 +6,6 @@
 
 #include <freetype/freetype.h>
 
-struct text_vertex
-{
-    core::vec2 position;
-    core::vec2 texcoord;
-};
-
 struct text_character
 {
     graphics::opengl::Texture texture;

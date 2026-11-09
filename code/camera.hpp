@@ -2,36 +2,29 @@
 
 #include <glm/glm.hpp>
 
-// inline: the function is defined in a header, so every .cpp that includes it gets a copy; inline lets the linker merge them (ODR)
-inline void screen_pos_to_world_ray(
-	int mouseX, int mouseY,             // Mouse position, in pixels, from bottom-left corner of the window
-	int screenWidth, int screenHeight,  // Window size, in pixels
-	glm::mat4 ViewMatrix,               // Camera position and orientation
-	glm::mat4 ProjectionMatrix,         // Camera parameters (ratio, field of view, near and far planes)
-	glm::vec3& out_origin,              // Ouput : Origin of the ray. /!\ Starts at the near plane, so if you want the ray to start at the camera's position instead, ignore this.
-	glm::vec3& out_direction)           // Ouput : Direction, in world space, of the ray that goes "through" the mouse.
+// TODO optimize this function (example: not calculating the inverse everytime? etc)
+inline void screen_pos_to_world_ray(int mouse_x, int mouse_y, int screen_width, int screen_height, glm::mat4 view, glm::mat4 projection, glm::vec3& out_origin, glm::vec3& out_direction)
 {
-	// The ray Start and End positions, in Normalized Device Coordinates (Have you read Tutorial 4 ?)
-	glm::vec4 lRayStart_NDC(
-		((float)mouseX/(float)screenWidth  - 0.5f) * 2.0f, // [0,1024] -> [-1,1]
-		((float)mouseY/(float)screenHeight - 0.5f) * 2.0f, // [0, 768] -> [-1,1]
+    // The ray Start and End positions, in Normalized Device Coordinates (Have you read Tutorial 4 ?)
+    glm::vec4 lRayStart_NDC(
+        ((float)mouse_x/(float)screen_width  - 0.5f) * 2.0f, // [0,1024] -> [-1,1]
+		((float)mouse_y/(float)screen_height - 0.5f) * 2.0f, // [0, 768] -> [-1,1]
 		-1.0, // The near plane maps to Z=-1 in Normalized Device Coordinates
-		1.0f
-	);
+		1.0f);
+
 	glm::vec4 lRayEnd_NDC(
-		((float)mouseX/(float)screenWidth  - 0.5f) * 2.0f,
-		((float)mouseY/(float)screenHeight - 0.5f) * 2.0f,
+		((float)mouse_x/(float)screen_width  - 0.5f) * 2.0f,
+		((float)mouse_y/(float)screen_height - 0.5f) * 2.0f,
 		0.0,
-		1.0f
-	);
+		1.0f);
 
 	// The Projection matrix goes from Camera Space to NDC.
 	// So inverse(ProjectionMatrix) goes from NDC to Camera Space.
-	glm::mat4 InverseProjectionMatrix = glm::inverse(ProjectionMatrix);
+	glm::mat4 InverseProjectionMatrix = glm::inverse(projection);
 
 	// The View Matrix goes from World Space to Camera Space.
 	// So inverse(ViewMatrix) goes from Camera Space to World Space.
-	glm::mat4 InverseViewMatrix = glm::inverse(ViewMatrix);
+	glm::mat4 InverseViewMatrix = glm::inverse(view);
 
 	glm::vec4 lRayStart_camera = InverseProjectionMatrix * lRayStart_NDC;    lRayStart_camera/=lRayStart_camera.w;
 	glm::vec4 lRayStart_world  = InverseViewMatrix       * lRayStart_camera; lRayStart_world /=lRayStart_world .w;

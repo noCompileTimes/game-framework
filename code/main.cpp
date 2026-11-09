@@ -15,6 +15,7 @@
 #include "backends/glfw/window_factory.hpp"
 
 #include "core/window_manager.hpp"
+#include "core/physics_debug.hpp"
 #include "core/file.hpp"
 #include "core/rgba.hpp"
 
@@ -27,13 +28,12 @@
 #include "graphics/opengl/texture_sampler.hpp"
 #include "graphics/opengl/framebuffer.hpp"
 
-#include "geometry.hpp"
+#include "data/light.hpp"
+
+#include "geometry_utils.hpp"
 #include "resources.hpp"
 #include "text.hpp"
-#include "light.hpp"
 #include "camera.hpp"
-
-#include "physics_debug.hpp"
 
 auto main() -> int32_t
 {
@@ -53,7 +53,7 @@ auto main() -> int32_t
     static auto window_width = window_configuration.width;
     static auto window_height = window_configuration.height;
 
-    auto window_is_running = true;
+    static auto window_is_running = true;
 
     window_events->callbacks.on_close = [&]
     {
@@ -217,7 +217,7 @@ auto main() -> int32_t
     material_ubo.bind(GL_UNIFORM_BUFFER, 2);
     material_ubo.storage(sizeof(glm::vec3), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
-    light default_light;
+    data::light default_light;
     default_light.color = { 1.0f, 1.0f, 1.0f };
     default_light.source = { -1.0f, -1.0f, -1.0f };
     default_light.intensity = 1.0f;
@@ -225,7 +225,7 @@ auto main() -> int32_t
     graphics::opengl::Buffer light_ubo;
     light_ubo.create();
     light_ubo.bind(GL_UNIFORM_BUFFER, 3);
-    light_ubo.storage(sizeof(light), &default_light, GL_DYNAMIC_STORAGE_BIT);
+    light_ubo.storage(sizeof(data::light), &default_light, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::TextureSampler texture_sampler;
     texture_sampler.create();
@@ -469,7 +469,7 @@ auto main() -> int32_t
     bt_collision_object->setCollisionShape(bt_cube_shape);
     bt_collision_object->setWorldTransform(bt_object_transform);
 
-    auto bt_debug_draw = new PhysicsDebug();
+    auto bt_debug_draw = new core::PhysicsDebug();
 
     btCollisionConfiguration* bt_collision_configuration = new btDefaultCollisionConfiguration();
 
@@ -514,6 +514,11 @@ auto main() -> int32_t
                 bt_collision_object->setCollisionShape(bt_sphere_shape);
             }
         }
+
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        {
+            window_is_running = false;
+        }
     });
 
     glfwSetMouseButtonCallback(std::any_cast<GLFWwindow*>(window->handle()), [](GLFWwindow* glfw_window, const int button, int action, int)
@@ -552,7 +557,7 @@ auto main() -> int32_t
 
             if (result_callback.hasHit())
             {
-                std::println("the cube is hit");
+                std::println("object is hit");
             }
         }
     });
@@ -594,9 +599,9 @@ auto main() -> int32_t
         bt_world->debugDrawWorld();
 
         // clamp to the buffer capacity so we never write past the end of debug_vbo
-        const auto debug_vertices_count = std::min<size_t>(bt_debug_draw->geometry.vertices.size(), debug_vertices_capacity);
+        const auto debug_vertices_count = std::min<size_t>(bt_debug_draw->vertices.size(), debug_vertices_capacity);
 
-        debug_vbo.subdata(0, sizeof(editor_vertex) * debug_vertices_count, bt_debug_draw->geometry.vertices.data());
+        debug_vbo.subdata(0, sizeof(core::vec3) * debug_vertices_count, bt_debug_draw->vertices.data());
 
         model_program_shader.bind();
 
@@ -624,7 +629,7 @@ auto main() -> int32_t
 
         debug_vao.bind();
 
-        graphics::opengl::Commands::draw_vertices(GL_LINES, 0, static_cast<int32_t>(debug_vertices_count));
+        graphics::opengl::Commands::draw_vertices(GL_LINES, 0, static_cast<int32_t>(debug_vertices_count / 2));
 
         // 2D drawing
 
@@ -688,6 +693,8 @@ auto main() -> int32_t
     return 0;
 }
 
+// TODO - check on bullet sdk #if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
+
 // TODO - make for the text the top left corner as the "anchor" not the bottom left corner like it is right now
 
 // TODO - remove the text_rendering.cpp from learnopengl after we are done with the basic text rendering
@@ -722,7 +729,6 @@ auto main() -> int32_t
 
 // TODO - move the libraries link part inside the modules it is the case (for example: glm in mathematis, glad in graphics, bullet in physics, etc)
 
-// TODO - make a new Physics module
 // TODO - make a Physics class on top of bulletsdk classes, maybe it will be more generic, and later on we can replace it with some other framework or our own minimal implementation
 
 // TODO - make the on_resize callback to use something from the window (glfwGetWindowSize(glfw_window, &screen_width, &screen_height)) not the size from the framebuffer
