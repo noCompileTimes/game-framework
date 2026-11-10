@@ -15,7 +15,7 @@
 #include "backends/glfw/window_factory.hpp"
 
 #include "core/window_manager.hpp"
-#include "core/physics_debug.hpp"
+#include "core/physics.hpp"
 #include "core/file.hpp"
 #include "core/rgba.hpp"
 
@@ -469,18 +469,12 @@ auto main() -> int32_t
     bt_collision_object->setCollisionShape(bt_cube_shape);
     bt_collision_object->setWorldTransform(bt_object_transform);
 
-    auto bt_debug_draw = new core::PhysicsDebug();
+    static core::Physics physics;
+                         physics.init();
 
-    btCollisionConfiguration* bt_collision_configuration = new btDefaultCollisionConfiguration();
+    physics.add_collision_object(bt_collision_object);
 
-    btDispatcher* bt_dispatcher = new btCollisionDispatcher(bt_collision_configuration);
-    btBroadphaseInterface* bt_broadphase = new btDbvtBroadphase();
-
-    static auto bt_world = new btCollisionWorld(bt_dispatcher, bt_broadphase, bt_collision_configuration);
-    bt_world->addCollisionObject(bt_collision_object);
-    bt_world->setDebugDrawer(bt_debug_draw);
-
-    constexpr uint32_t debug_vertices_capacity = 10000; // TODO grow the buffer if the debug drawer produces more lines
+    constexpr uint32_t debug_vertices_capacity = 10000;
 
     graphics::opengl::Buffer debug_vbo;
     debug_vbo.create();
@@ -537,25 +531,15 @@ auto main() -> int32_t
 
             glfwGetWindowSize(glfw_window, &screen_width, &screen_height);
 
-            glm::vec3 out_origin;
-            glm::vec3 out_direction;
+            core::vec3 out_origin;
+            core::vec3 out_direction;
 
             // glfw gives the cursor from the top-left corner, the function expects it from the bottom-left
-            screen_pos_to_world_ray(
-                static_cast<int>(mouse_x), screen_height - static_cast<int>(mouse_y),
-                screen_width, screen_height,
-                model_camera_matrices[0],
-                model_camera_matrices[1],
-                out_origin,
-                out_direction
-            );
+            screen_pos_to_world_ray(static_cast<int>(mouse_x), screen_height - static_cast<int>(mouse_y),
+                screen_width, screen_height,model_camera_matrices[0],model_camera_matrices[1],
+                out_origin,out_direction);
 
-            glm::vec3 out_end = out_origin + out_direction * 1000.0f;
-
-            btCollisionWorld::ClosestRayResultCallback result_callback(btVector3(out_origin.x, out_origin.y, out_origin.z), btVector3(out_end.x, out_end.y, out_end.z));
-            bt_world->rayTest(btVector3(out_origin.x, out_origin.y, out_origin.z), btVector3(out_end.x, out_end.y, out_end.z), result_callback);
-
-            if (result_callback.hasHit())
+            if (const auto collision_object = physics.raycast(out_origin, out_direction); collision_object != nullptr)
             {
                 std::println("object is hit");
             }
@@ -593,15 +577,12 @@ auto main() -> int32_t
 
         bt_collision_object->setWorldTransform(bt_object_transform);
 
-        bt_world->updateAabbs(); // the broadphase keeps its own aabbs, refresh them after moving objects so rayTest sees the new transform
-
-        // debug draw after the physics update, so the lines show this frame's transform and aabbs (not the previous frame's)
-        bt_world->debugDrawWorld();
+        physics.update();
 
         // clamp to the buffer capacity so we never write past the end of debug_vbo
-        const auto debug_vertices_count = std::min<size_t>(bt_debug_draw->vertices.size(), debug_vertices_capacity);
+        const auto debug_vertices_count = std::min<size_t>(physics.debug()->vertices.size(), debug_vertices_capacity);
 
-        debug_vbo.subdata(0, sizeof(core::vec3) * debug_vertices_count, bt_debug_draw->vertices.data());
+        debug_vbo.subdata(0, sizeof(core::vec3) * debug_vertices_count, physics.debug()->vertices.data());
 
         model_program_shader.bind();
 
@@ -726,10 +707,6 @@ auto main() -> int32_t
 // TODO - resolve the flipping of the y from the ortho matrix (need to recheck all the sprites/fonts)
 
 // TODO - make a specific texture sampler for texts
-
-// TODO - move the libraries link part inside the modules it is the case (for example: glm in mathematis, glad in graphics, bullet in physics, etc)
-
-// TODO - make a Physics class on top of bulletsdk classes, maybe it will be more generic, and later on we can replace it with some other framework or our own minimal implementation
 
 // TODO - make the on_resize callback to use something from the window (glfwGetWindowSize(glfw_window, &screen_width, &screen_height)) not the size from the framebuffer
 // TODO - in case in glfw use use on_resize the window size, remove the framebuffer callbacks from it

@@ -30,7 +30,6 @@ using namespace glm;
 #include <common/objloader.hpp>
 #include <common/vboindexer.hpp>
 
-
 void ScreenPosToWorldRay(
 	int mouseX, int mouseY,             // Mouse position, in pixels, from bottom-left corner of the window
 	int screenWidth, int screenHeight,  // Window size, in pixels
@@ -39,7 +38,6 @@ void ScreenPosToWorldRay(
 	glm::vec3& out_origin,              // Ouput : Origin of the ray. /!\ Starts at the near plane, so if you want the ray to start at the camera's position instead, ignore this.
 	glm::vec3& out_direction)           // Ouput : Direction, in world space, of the ray that goes "through" the mouse.
 {
-
 	// The ray Start and End positions, in Normalized Device Coordinates (Have you read Tutorial 4 ?)
 	glm::vec4 lRayStart_NDC(
 		((float)mouseX/(float)screenWidth  - 0.5f) * 2.0f, // [0,1024] -> [-1,1]
@@ -54,28 +52,14 @@ void ScreenPosToWorldRay(
 		1.0f
 	);
 
-	// The Projection matrix goes from Camera Space to NDC.
-	// So inverse(ProjectionMatrix) goes from NDC to Camera Space.
-	glm::mat4 InverseProjectionMatrix = glm::inverse(ProjectionMatrix);
-	
-	// The View Matrix goes from World Space to Camera Space.
-	// So inverse(ViewMatrix) goes from Camera Space to World Space.
-	glm::mat4 InverseViewMatrix = glm::inverse(ViewMatrix);
-	
-	glm::vec4 lRayStart_camera = InverseProjectionMatrix * lRayStart_NDC;    lRayStart_camera/=lRayStart_camera.w;
-	glm::vec4 lRayStart_world  = InverseViewMatrix       * lRayStart_camera; lRayStart_world /=lRayStart_world .w;
-	glm::vec4 lRayEnd_camera   = InverseProjectionMatrix * lRayEnd_NDC;      lRayEnd_camera  /=lRayEnd_camera  .w;
-	glm::vec4 lRayEnd_world    = InverseViewMatrix       * lRayEnd_camera;   lRayEnd_world   /=lRayEnd_world   .w;
-
-
-	// Faster way (just one inverse)
-	//glm::mat4 M = glm::inverse(ProjectionMatrix * ViewMatrix);
-	//glm::vec4 lRayStart_world = M * lRayStart_NDC; lRayStart_world/=lRayStart_world.w;
-	//glm::vec4 lRayEnd_world   = M * lRayEnd_NDC  ; lRayEnd_world  /=lRayEnd_world.w;
+	// ProjectionMatrix * ViewMatrix goes from World Space to Clip Space.
+	// So its inverse goes from NDC back to World Space (just one inverse).
+	glm::mat4 M = glm::inverse(ProjectionMatrix * ViewMatrix);
+	glm::vec4 lRayStart_world = M * lRayStart_NDC; lRayStart_world/=lRayStart_world.w;
+	glm::vec4 lRayEnd_world   = M * lRayEnd_NDC  ; lRayEnd_world  /=lRayEnd_world.w;
 
 
 	glm::vec3 lRayDir_world(lRayEnd_world - lRayStart_world);
-	lRayDir_world = glm::normalize(lRayDir_world);
 
 
 	out_origin = glm::vec3(lRayStart_world);
@@ -92,11 +76,6 @@ int main( void )
 		getchar();
 		return -1;
 	}
-
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 
 	// Open a window and create its OpenGL context
 	window = glfwCreateWindow( 1024, 768, "Misc 05 - Bullet version", NULL, NULL);
@@ -194,8 +173,6 @@ int main( void )
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned short), &indices[0] , GL_STATIC_DRAW);
 
-
-
 	// Generate positions & rotations for 100 monkeys
 	std::vector<glm::vec3> positions(100);
 	std::vector<glm::quat> orientations(100);
@@ -205,12 +182,9 @@ int main( void )
 		
 	}
 
-
 	// Get a handle for our "LightPosition" uniform
 	glUseProgram(programID);
 	GLuint LightID = glGetUniformLocation(programID, "LightPosition_worldspace");
-
-
 
 	// Initialize Bullet. This strictly follows http://bulletphysics.org/mediawiki-1.5.8/index.php/Hello_World, 
 	// even though we won't use most of this stuff.
@@ -228,10 +202,6 @@ int main( void )
 	// The world.
 	btDiscreteDynamicsWorld* dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
 	dynamicsWorld->setGravity(btVector3(0,-9.81f,0));
-
-
-	
- 
 
 	std::vector<btRigidBody*> rigidbodies;
 
@@ -307,10 +277,10 @@ int main( void )
 
 			ScreenPosToWorldRay(
 				1024/2, 768/2,
-				1024, 768, 
-				ViewMatrix, 
-				ProjectionMatrix, 
-				out_origin, 
+				1024, 768,
+				ViewMatrix,
+				ProjectionMatrix,
+				out_origin,
 				out_direction
 			);	
 			
@@ -460,42 +430,3 @@ int main( void )
 
 	return 0;
 }
-
-//// Helper class; draws the world as seen by Bullet.
-//// This is very handy to see it Bullet's world matches yours.
-//// This example uses the old OpenGL API for simplicity, 
-//// so you'll have to remplace GLFW_OPENGL_CORE_PROFILE by
-//// GLFW_OPENGL_COMPAT_PROFILE in glfwWindowHint()
-//// How to use this class :
-//// Declare an instance of the class :
-//// BulletDebugDrawer_DeprecatedOpenGL mydebugdrawer;
-//// dynamicsWorld->setDebugDrawer(&mydebugdrawer);
-//// Each frame, call it :
-//// mydebugdrawer.SetMatrices(ViewMatrix, ProjectionMatrix);
-//// dynamicsWorld->debugDrawWorld();
-//
-//class BulletDebugDrawer_DeprecatedOpenGL : public btIDebugDraw{
-//public:
-//	void SetMatrices(glm::mat4 pViewMatrix, glm::mat4 pProjectionMatrix){
-//		glUseProgram(0); // Use Fixed-function pipeline (no shaders)
-//		glMatrixMode(GL_MODELVIEW);
-//		glLoadMatrixf(&pViewMatrix[0][0]);
-//		glMatrixMode(GL_PROJECTION);
-//		glLoadMatrixf(&pProjectionMatrix[0][0]);
-//	}
-//	virtual void drawLine(const btVector3& from,const btVector3& to,const btVector3& color){
-//		glColor3f(color.x(), color.y(), color.z());
-//		glBegin(GL_LINES);
-//			glVertex3f(from.x(), from.y(), from.z());
-//			glVertex3f(to.x(), to.y(), to.z());
-//		glEnd();
-//	}
-//	virtual void drawContactPoint(const btVector3 &,const btVector3 &,btScalar,int,const btVector3 &){}
-//	virtual void reportErrorWarning(const char *){}
-//	virtual void draw3dText(const btVector3 &,const char *){}
-//	virtual void setDebugMode(int p){
-//		m = p;
-//	}
-//	int getDebugMode(void) const {return 3;}
-//	int m;
-//};

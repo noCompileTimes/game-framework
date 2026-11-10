@@ -1,44 +1,39 @@
 #pragma once
 
+#include "core/vec3.hpp"
+
 #include <glm/glm.hpp>
 
-// TODO optimize this function (example: not calculating the inverse everytime? etc)
-inline void screen_pos_to_world_ray(int mouse_x, int mouse_y, int screen_width, int screen_height, glm::mat4 view, glm::mat4 projection, glm::vec3& out_origin, glm::vec3& out_direction)
+inline auto screen_pos_to_world_ray(const int32_t mouse_x, const int32_t mouse_y, const int32_t screen_width,
+                                    const int32_t screen_height, const glm::mat4& view, const glm::mat4& projection,
+                                    core::vec3& out_origin, core::vec3& out_direction) -> void
 {
-    // The ray Start and End positions, in Normalized Device Coordinates (Have you read Tutorial 4 ?)
-    glm::vec4 lRayStart_NDC(
-        ((float)mouse_x/(float)screen_width  - 0.5f) * 2.0f, // [0,1024] -> [-1,1]
-		((float)mouse_y/(float)screen_height - 0.5f) * 2.0f, // [0, 768] -> [-1,1]
-		-1.0, // The near plane maps to Z=-1 in Normalized Device Coordinates
-		1.0f);
+    // mouse position (from the bottom-left corner) to normalized device coordinates [-1, 1]
+    const auto ndc_x = (static_cast<float>(mouse_x) / static_cast<float>(screen_width)  - 0.5f) * 2.0f;
+    const auto ndc_y = (static_cast<float>(mouse_y) / static_cast<float>(screen_height) - 0.5f) * 2.0f;
 
-	glm::vec4 lRayEnd_NDC(
-		((float)mouse_x/(float)screen_width  - 0.5f) * 2.0f,
-		((float)mouse_y/(float)screen_height - 0.5f) * 2.0f,
-		0.0,
-		1.0f);
+    // the near plane maps to z = -1, z = 0 is just another point further along the ray (only used for the direction)
+    const glm::vec4 ray_start_ndc { ndc_x, ndc_y, -1.0f, 1.0f };
+    const glm::vec4 ray_end_ndc   { ndc_x, ndc_y,  0.0f, 1.0f };
 
-	// The Projection matrix goes from Camera Space to NDC.
-	// So inverse(ProjectionMatrix) goes from NDC to Camera Space.
-	glm::mat4 InverseProjectionMatrix = glm::inverse(projection);
+    // projection * view goes from world space to clip space, so its inverse goes from ndc back to world space
+    const auto inverse_view_projection = glm::inverse(projection * view);
 
-	// The View Matrix goes from World Space to Camera Space.
-	// So inverse(ViewMatrix) goes from Camera Space to World Space.
-	glm::mat4 InverseViewMatrix = glm::inverse(view);
+    auto ray_start_world = inverse_view_projection * ray_start_ndc;
+         ray_start_world /= ray_start_world.w;
 
-	glm::vec4 lRayStart_camera = InverseProjectionMatrix * lRayStart_NDC;    lRayStart_camera/=lRayStart_camera.w;
-	glm::vec4 lRayStart_world  = InverseViewMatrix       * lRayStart_camera; lRayStart_world /=lRayStart_world .w;
-	glm::vec4 lRayEnd_camera   = InverseProjectionMatrix * lRayEnd_NDC;      lRayEnd_camera  /=lRayEnd_camera  .w;
-	glm::vec4 lRayEnd_world    = InverseViewMatrix       * lRayEnd_camera;   lRayEnd_world   /=lRayEnd_world   .w;
+    auto ray_end_world = inverse_view_projection * ray_end_ndc;
+         ray_end_world /= ray_end_world.w;
 
-	// Faster way (just one inverse)
-	//glm::mat4 M = glm::inverse(ProjectionMatrix * ViewMatrix);
-	//glm::vec4 lRayStart_world = M * lRayStart_NDC; lRayStart_world/=lRayStart_world.w;
-	//glm::vec4 lRayEnd_world   = M * lRayEnd_NDC  ; lRayEnd_world  /=lRayEnd_world.w;
+    const auto ray_direction_world = normalize(glm::vec3(ray_end_world - ray_start_world));
 
-	glm::vec3 lRayDir_world(lRayEnd_world - lRayStart_world);
-	lRayDir_world = glm::normalize(lRayDir_world);
-
-	out_origin = glm::vec3(lRayStart_world);
-	out_direction = glm::normalize(lRayDir_world);
+    out_origin    = { ray_start_world.x, ray_start_world.y, ray_start_world.z };
+    out_direction = { ray_direction_world.x, ray_direction_world.y, ray_direction_world.z };
 }
+
+// TODO this should go into the physics module?
+// if yes - we should return a ray structure for the origin and direction
+//        - we should add mat4 into the math in order to not include glm in the physics module
+// TODO optimize this function (example: cache the inverse view projection when the camera does not change)
+// TODO this assumes the 3D scene fills the whole window, if we render it into a part of it (editor viewport, split screen)
+//      we need to pass the viewport offset and size, subtract the offset from the mouse position and use the viewport size for the ndc conversion
