@@ -674,12 +674,6 @@ auto main() -> int32_t
     return 0;
 }
 
-// TODO - check on bullet sdk #if defined(BT_USE_SSE_IN_API) && defined(BT_USE_SSE)
-
-// TODO - make for the text the top left corner as the "anchor" not the bottom left corner like it is right now
-
-// TODO - remove the text_rendering.cpp from learnopengl after we are done with the basic text rendering
-
 // TODO - use the range buffer binding
 // TODO - create a light opengl functions loader
 // TODO - use buffer storage for buffer also
@@ -691,9 +685,7 @@ auto main() -> int32_t
 // TODO - check and understand why in some cases we need create_sprite with flip_vertically true and sometimes false
 // TODO - update all the years for license files 2025 - 2026
 
-// TODO - remove glfwWaitEvents, glfwWaitEventsTimeout, glfwPostEmptyEvent from glfw
 // TODO - remove glfwHideWindow from glfw and all the internal function related to this
-// TODO - remove empty test from glfw
 
 // TODO - check if the RoboticsLearning can be removed from bullet together with all the robotics stuff we will not ever use
 // TODO - check which modules we will not use at any time in the future in the stb nothings
@@ -706,17 +698,5 @@ auto main() -> int32_t
 
 // TODO - resolve the flipping of the y from the ortho matrix (need to recheck all the sprites/fonts)
 
-// TODO - make a specific texture sampler for texts
-
 // TODO - make the on_resize callback to use something from the window (glfwGetWindowSize(glfw_window, &screen_width, &screen_height)) not the size from the framebuffer
 // TODO - in case in glfw use use on_resize the window size, remove the framebuffer callbacks from it
-
-// TODO check the benefits of this
-/*
-// declare an interface block; see 'Advanced GLSL' for what these are.
-out VS_OUT {
-    vec3 FragPos;
-    vec3 Normal;
-    vec2 TexCoords;
-} vs_out;
-*/

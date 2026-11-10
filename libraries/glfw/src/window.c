@@ -31,7 +31,6 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
-#include <float.h>
 #include <math.h>
 
 //////////////////////////////////////////////////////////////////////////
@@ -1103,8 +1102,7 @@ GLFWAPI GLFWframebuffersizefun glfwSetFramebufferSizeCallback(GLFWwindow* handle
     return cbfun;
 }
 
-GLFWAPI GLFWwindowcontentscalefun glfwSetWindowContentScaleCallback(GLFWwindow* handle,
-                                                                    GLFWwindowcontentscalefun cbfun)
+GLFWAPI GLFWwindowcontentscalefun glfwSetWindowContentScaleCallback(GLFWwindow* handle, GLFWwindowcontentscalefun cbfun)
 {
     _GLFW_REQUIRE_INIT_OR_RETURN(NULL);
 
@@ -1120,31 +1118,3 @@ GLFWAPI void glfwPollEvents(void)
     _GLFW_REQUIRE_INIT();
     _glfw.platform.pollEvents();
 }
-
-GLFWAPI void glfwWaitEvents(void)
-{
-    _GLFW_REQUIRE_INIT();
-    _glfw.platform.waitEvents();
-}
-
-GLFWAPI void glfwWaitEventsTimeout(double timeout)
-{
-    _GLFW_REQUIRE_INIT();
-    assert(isfinite(timeout));
-    assert(timeout >= 0.0);
-
-    if (!isfinite(timeout) || timeout < 0.0)
-    {
-        _glfwInputError(GLFW_INVALID_VALUE, "Invalid time %f", timeout);
-        return;
-    }
-
-    _glfw.platform.waitEventsTimeout(timeout);
-}
-
-GLFWAPI void glfwPostEmptyEvent(void)
-{
-    _GLFW_REQUIRE_INIT();
-    _glfw.platform.postEmptyEvent();
-}
-

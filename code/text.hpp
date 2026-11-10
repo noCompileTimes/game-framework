@@ -17,6 +17,8 @@ struct text_character
 
 static std::map<GLchar, text_character> font_characters;
 
+static auto font_ascender = 0; // distance in pixels from the baseline to the top of the tallest glyphs
+
 static auto render_text(const graphics::opengl::Buffer& vbo, std::string text) -> void
 {
     auto x = 0.0f;
@@ -25,7 +27,8 @@ static auto render_text(const graphics::opengl::Buffer& vbo, std::string text) -
     {
         auto [texture, size, bearing, advance] = font_characters[*c];
 
-        constexpr auto y = 0.0f;
+        // the baseline sits at the font ascender, so the text anchor (0, 0) is the top-left corner instead of the baseline
+        const auto y = static_cast<float>(font_ascender);
 
         const auto xpos = x + bearing.x;
         const auto ypos = y - bearing.y;
@@ -72,6 +75,8 @@ static auto load_font(const std::string_view filename) -> int32_t
 
     FT_Set_Pixel_Sizes(ft_face, 0, 48);
 
+    font_ascender = static_cast<int32_t>(ft_face->size->metrics.ascender >> 6); // 26.6 fixed point to pixels
+
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     for (unsigned char c = 0; c < 128; c++)
@@ -103,3 +108,10 @@ static auto load_font(const std::string_view filename) -> int32_t
 
     return 0;
 }
+
+// TODO - fix the text with top left "anchor", it seems that it has some padding/margin on top of the text
+// TODO - make a specific texture sampler for texts out of these
+// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
