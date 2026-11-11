@@ -51,6 +51,9 @@ subject to the following restrictions:
 ///for debug drawing
 
 //for debug rendering
+#include <ostream>
+#include <print>
+
 #include "BulletCollision/CollisionShapes/btBoxShape.h"
 #include "BulletCollision/CollisionShapes/btCapsuleShape.h"
 #include "BulletCollision/CollisionShapes/btCompoundShape.h"
@@ -186,10 +189,11 @@ void btCollisionWorld::updateSingleAabb(btCollisionObject* colObj)
 		if (reportMe && m_debugDrawer)
 		{
 			reportMe = false;
-			m_debugDrawer->reportErrorWarning("Overflow in AABB, object removed from simulation");
-			m_debugDrawer->reportErrorWarning("If you can reproduce this, please email bugs@continuousphysics.com\n");
-			m_debugDrawer->reportErrorWarning("Please include above information, your Platform, version of OS.\n");
-			m_debugDrawer->reportErrorWarning("Thanks.\n");
+
+			std::println("Overflow in AABB, object removed from simulation");
+			std::println("If you can reproduce this, please email bugs@continuousphysics.com");
+			std::println("Please include above information, your Platform, version of OS.");
+			std::println("Thanks.");
 		}
 	}
 }

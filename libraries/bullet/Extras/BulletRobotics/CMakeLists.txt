@@ -278,14 +278,9 @@ ADD_DEFINITIONS(-DPHYSICS_SERVER_DIRECT)
 
 ADD_LIBRARY(BulletRobotics ${BulletRobotics_SRCS})
 
-SET_TARGET_PROPERTIES(BulletRobotics PROPERTIES VERSION ${BULLET_VERSION})
-SET_TARGET_PROPERTIES(BulletRobotics PROPERTIES SOVERSION ${BULLET_VERSION})
-
 IF (BUILD_SHARED_LIBS)
 	TARGET_LINK_LIBRARIES(BulletRobotics BulletInverseDynamicsUtils BulletWorldImporter BulletFileLoader BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamics LinearMath Bullet3Common)
 ENDIF (BUILD_SHARED_LIBS)
-
-  
 
 INSTALL (
     DIRECTORY ${CMAKE_SOURCE_DIR}/examples/

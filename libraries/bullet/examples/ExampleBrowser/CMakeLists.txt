@@ -25,7 +25,6 @@ ELSE(WIN32)
      		ENDIF(APPLE)
 ENDIF(WIN32)
 
-
 ADD_LIBRARY(BulletExampleBrowserLib
 	OpenGLExampleBrowser.cpp
 	OpenGLGuiHelper.cpp
@@ -41,33 +40,26 @@ ADD_LIBRARY(BulletExampleBrowserLib
 	../Utils/b3ERPCFMHelper.hpp
 	../Utils/b3ReferenceFrameHelper.hpp
 	${GwenGUISupport_SRCS}
-	${GwenGUISupport_HDRS}
-	
-)
+	${GwenGUISupport_HDRS})
 
-SET_TARGET_PROPERTIES(BulletExampleBrowserLib PROPERTIES VERSION ${BULLET_VERSION})
-SET_TARGET_PROPERTIES(BulletExampleBrowserLib PROPERTIES SOVERSION ${BULLET_VERSION})
 IF (BUILD_SHARED_LIBS)
 		IF (WIN32)
                 TARGET_LINK_LIBRARIES(
                         BulletExampleBrowserLib Bullet3Common BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamicsUtils
                         BulletInverseDynamics LinearMath OpenGLWindow gwen BussIK
-                        ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
-                )
+                        ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
 		ELSE(WIN32)
         IF(APPLE)
                  TARGET_LINK_LIBRARIES(
                                 BulletExampleBrowserLib Bullet3Common BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamicsUtils
                                 BulletInverseDynamics LinearMath OpenGLWindow gwen BussIK
-                                ${COCOA} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY}
-                 )
+                                ${COCOA} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
 				ELSE(APPLE)
                  FIND_PACKAGE(Threads)
                  TARGET_LINK_LIBRARIES(
                                 BulletExampleBrowserLib Bullet3Common BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamicsUtils
                                 BulletInverseDynamics LinearMath OpenGLWindow gwen BussIK
-                                ${CMAKE_THREAD_LIBS_INIT} ${DL}
-                        )
+                                ${CMAKE_THREAD_LIBS_INIT} ${DL})
         ENDIF(APPLE)
 	ENDIF(WIN32)
 ENDIF(BUILD_SHARED_LIBS)

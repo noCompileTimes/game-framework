@@ -11,11 +11,7 @@ ADD_LIBRARY(
 	btBulletXmlWorldImporter.h
 	string_split.cpp
 	string_split.h
-	${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/tinyxml2/tinyxml2.cpp
-)
-
-SET_TARGET_PROPERTIES(BulletXmlWorldImporter  PROPERTIES VERSION ${BULLET_VERSION})
-SET_TARGET_PROPERTIES(BulletXmlWorldImporter PROPERTIES SOVERSION ${BULLET_VERSION})
+	${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/tinyxml2/tinyxml2.cpp)
 
 IF (BUILD_SHARED_LIBS)
 	TARGET_LINK_LIBRARIES(BulletXmlWorldImporter BulletWorldImporter BulletDynamics BulletCollision BulletFileLoader LinearMath)

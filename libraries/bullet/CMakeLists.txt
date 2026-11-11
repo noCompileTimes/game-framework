@@ -5,7 +5,6 @@ cmake_policy(SET CMP0017 NEW)
 SET(MSVC_INCREMENTAL_DEFAULT ON)
 
 PROJECT(BULLET_PHYSICS)
-FILE (STRINGS "VERSION" BULLET_VERSION)
 
 IF(COMMAND cmake_policy)
    cmake_policy(SET CMP0003 NEW)
@@ -496,10 +495,7 @@ list (APPEND BULLET_LIBRARIES BulletCollision)
 list (APPEND BULLET_LIBRARIES BulletDynamics)
 list (APPEND BULLET_LIBRARIES BulletSoftBody)
 set (BULLET_USE_FILE ${BULLET_CONFIG_CMAKE_PATH}/UseBullet.cmake)
-configure_file 	( ${CMAKE_CURRENT_SOURCE_DIR}/BulletConfig.cmake.in
-					${CMAKE_CURRENT_BINARY_DIR}/BulletConfig.cmake
-					@ONLY ESCAPE_QUOTES
-				)
+
 OPTION(INSTALL_CMAKE_FILES "Install generated CMake files" ON)
 
 IF (INSTALL_CMAKE_FILES)

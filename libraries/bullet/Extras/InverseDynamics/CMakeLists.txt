@@ -15,11 +15,7 @@ IDRandomUtil.cpp
 RandomTreeCreator.cpp
 SimpleTreeCreator.cpp
 MultiBodyNameMap.cpp
-User2InternalIndex.cpp
-)
-
-SET_TARGET_PROPERTIES(BulletInverseDynamicsUtils PROPERTIES VERSION ${BULLET_VERSION})
-SET_TARGET_PROPERTIES(BulletInverseDynamicsUtils PROPERTIES SOVERSION ${BULLET_VERSION})
+User2InternalIndex.cpp)
 
 IF (BUILD_SHARED_LIBS)
 	TARGET_LINK_LIBRARIES(BulletInverseDynamicsUtils BulletInverseDynamics BulletDynamics BulletCollision Bullet3Common LinearMath)

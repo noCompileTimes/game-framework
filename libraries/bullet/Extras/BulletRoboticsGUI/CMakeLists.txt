@@ -149,27 +149,17 @@ IF(BUILD_ENET)
 
   set(BulletRoboticsGUI_INCLUDES
     ${BulletRoboticsGUI_INCLUDES}
-    ${BulletRoboticsGUI_ENET_INCLUDES}
-	)
-
-
+    ${BulletRoboticsGUI_ENET_INCLUDES})
 
 ENDIF(BUILD_ENET)
 
-
 ADD_DEFINITIONS(-DPHYSICS_SERVER_DIRECT)
 
-
 ADD_LIBRARY(BulletRoboticsGUI ${BulletRoboticsGUI_SRCS})
-
-SET_TARGET_PROPERTIES(BulletRoboticsGUI PROPERTIES VERSION ${BULLET_VERSION})
-SET_TARGET_PROPERTIES(BulletRoboticsGUI PROPERTIES SOVERSION ${BULLET_VERSION})
 
 IF (BUILD_SHARED_LIBS)
 	TARGET_LINK_LIBRARIES(BulletRoboticsGUI  BulletExampleBrowserLib BulletRobotics  BulletInverseDynamicsUtils BulletWorldImporter BulletFileLoader BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamics LinearMath Bullet3Common)
 ENDIF (BUILD_SHARED_LIBS)
-
-  
 
 	INSTALL(TARGETS
 		BulletRoboticsGUI
@@ -190,7 +180,5 @@ IF(NOT MSVC)
       FILES
       ${CMAKE_CURRENT_BINARY_DIR}/bullet_robotics_gui.pc
       DESTINATION
-      ${PKGCONFIG_INSTALL_PREFIX}
-    )
+      ${PKGCONFIG_INSTALL_PREFIX})
 ENDIF(NOT MSVC)
-

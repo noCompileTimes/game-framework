@@ -66,10 +66,8 @@ ENDIF(WIN32)
 
 ADD_EXECUTABLE(App_RobotSimulator  ${RobotSimulator_SRCS})
 
-SET_TARGET_PROPERTIES(App_RobotSimulator PROPERTIES VERSION ${BULLET_VERSION})
 SET_TARGET_PROPERTIES(App_RobotSimulator PROPERTIES DEBUG_POSTFIX "_d")
 SET_TARGET_PROPERTIES(App_RobotSimulator PROPERTIES COMPILE_DEFINITIONS "B3_USE_ROBOTSIM_GUI")
-
 
 TARGET_LINK_LIBRARIES(App_RobotSimulator BulletRobotics BulletExampleBrowserLib BulletFileLoader BulletWorldImporter BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamicsUtils BulletInverseDynamics LinearMath OpenGLWindow gwen Bullet3Common)
 
@@ -98,9 +96,7 @@ SET(RobotSimulator_NoGUI_SRCS
 
 ADD_EXECUTABLE(App_RobotSimulator_NoGUI  ${RobotSimulator_NoGUI_SRCS})
 
-SET_TARGET_PROPERTIES(App_RobotSimulator_NoGUI PROPERTIES VERSION ${BULLET_VERSION})
 SET_TARGET_PROPERTIES(App_RobotSimulator_NoGUI PROPERTIES DEBUG_POSTFIX "_d")
-
 
 TARGET_LINK_LIBRARIES(App_RobotSimulator_NoGUI BulletRobotics BulletFileLoader BulletWorldImporter BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamicsUtils BulletInverseDynamics LinearMath Bullet3Common)
 
@@ -135,9 +131,7 @@ SET(App_HelloBulletRobotics_SRCS
 
 ADD_EXECUTABLE(App_HelloBulletRobotics  ${App_HelloBulletRobotics_SRCS})
 
-SET_TARGET_PROPERTIES(App_HelloBulletRobotics PROPERTIES VERSION ${BULLET_VERSION})
 SET_TARGET_PROPERTIES(App_HelloBulletRobotics PROPERTIES DEBUG_POSTFIX "_d")
-
 
 TARGET_LINK_LIBRARIES(App_HelloBulletRobotics BulletRobotics BulletFileLoader BulletWorldImporter BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamicsUtils BulletInverseDynamics LinearMath Bullet3Common)
 

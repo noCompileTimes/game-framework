@@ -249,13 +249,10 @@ SET(BulletCollision_HDRS
 	${CollisionDispatch_HDRS}
 	${CollisionShapes_HDRS}
 	${Gimpact_HDRS}
-	${NarrowPhaseCollision_HDRS}
-)
-
+	${NarrowPhaseCollision_HDRS})
 
 ADD_LIBRARY(BulletCollision ${BulletCollision_SRCS} ${BulletCollision_HDRS})
-SET_TARGET_PROPERTIES(BulletCollision PROPERTIES VERSION ${BULLET_VERSION})
-SET_TARGET_PROPERTIES(BulletCollision PROPERTIES SOVERSION ${BULLET_VERSION})
+
 IF (BUILD_SHARED_LIBS)
   TARGET_LINK_LIBRARIES(BulletCollision LinearMath)
 ENDIF (BUILD_SHARED_LIBS)

@@ -31,12 +31,9 @@ SET(ConvexDecomposition_HDRS
 	raytri.h
 	vlookup.h
 	bestfit.h
-	cd_hull.h
-)
+	cd_hull.h)
 
 ADD_LIBRARY(ConvexDecomposition ${ConvexDecomposition_SRCS} ${ConvexDecomposition_HDRS})
-SET_TARGET_PROPERTIES(ConvexDecomposition PROPERTIES VERSION ${BULLET_VERSION})
-SET_TARGET_PROPERTIES(ConvexDecomposition PROPERTIES SOVERSION ${BULLET_VERSION})
 
 IF (BUILD_SHARED_LIBS)
   TARGET_LINK_LIBRARIES(ConvexDecomposition BulletCollision LinearMath)
