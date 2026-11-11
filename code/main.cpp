@@ -1,14 +1,5 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include <stb_rect_pack.h>
 #include <stb_image_write.h>
-
-#include <algorithm>
-#include <print>
 
 #include "backends/glfw/window_factory.hpp"
 
@@ -26,6 +17,7 @@
 #include "graphics/opengl/texture_sampler.hpp"
 #include "graphics/opengl/framebuffer.hpp"
 
+#include "data/camera.hpp"
 #include "data/light.hpp"
 
 #include "geometry_utils.hpp"
@@ -189,18 +181,18 @@ auto main() -> int32_t
     sprite_geometry_vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
     sprite_geometry_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
 
-    static glm::mat4 model_camera_matrices[2];
-    model_camera_matrices[0] = glm::lookAt(glm::vec3 { 0.0f, 0.0f, 10.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
-    model_camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
+    static data::camera model_camera_data;
+    model_camera_data.view       = lookAt(glm::vec3 { 0.0f, 0.0f, 10.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
+    model_camera_data.projection = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
 
-    glm::mat4 sprite_camera_matrices[2];
-    sprite_camera_matrices[0] = glm::mat4(1.0f);
-    sprite_camera_matrices[1] = glm::ortho(0.0f, static_cast<float>(window_width), static_cast<float>(window_height), 0.0f, 0.0f, 1.0f);
+    data::camera sprite_camera_data;
+    sprite_camera_data.view       = glm::mat4(1.0f);
+    sprite_camera_data.projection = glm::ortho(0.0f, static_cast<float>(window_width), static_cast<float>(window_height), 0.0f, 0.0f, 1.0f);
 
     graphics::opengl::Buffer camera_ubo;
     camera_ubo.create();
     camera_ubo.bind(GL_UNIFORM_BUFFER, 0);
-    camera_ubo.storage(sizeof(model_camera_matrices), model_camera_matrices, GL_DYNAMIC_STORAGE_BIT);
+    camera_ubo.storage(sizeof(data::camera), &model_camera_data, GL_DYNAMIC_STORAGE_BIT);
 
     glm::mat4 model_matrix { 1.0f };
     glm::mat4 sprite_matrix { 1.0f };
@@ -389,8 +381,8 @@ auto main() -> int32_t
 
     // rectangles
 
-    sprite_camera_matrices[1] = glm::ortho(0.0f, static_cast<float>(atlas_width), static_cast<float>(atlas_height), 0.0f, 0.0f, 1.0f);
-    camera_ubo.subdata(0, sizeof(sprite_camera_matrices), sprite_camera_matrices);
+    sprite_camera_data.projection = glm::ortho(0.0f, static_cast<float>(atlas_width), static_cast<float>(atlas_height), 0.0f, 0.0f, 1.0f);
+    camera_ubo.subdata(0, sizeof(data::camera), &sprite_camera_data);
 
     sprite_program_shader.bind();
 
@@ -534,8 +526,7 @@ auto main() -> int32_t
 
             // glfw gives the cursor from the top-left corner, the function expects it from the bottom-left
             screen_pos_to_world_ray(static_cast<int>(mouse_x), screen_height - static_cast<int>(mouse_y),
-                screen_width, screen_height,model_camera_matrices[0],model_camera_matrices[1],
-                out_origin,out_direction);
+                screen_width, screen_height, model_camera_data.view, model_camera_data.projection,out_origin,out_direction);
 
             if (const auto collision_object = physics.raycast(out_origin, out_direction); collision_object != nullptr)
             {
@@ -566,8 +557,8 @@ auto main() -> int32_t
 
         // models
 
-        model_camera_matrices[1] = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
-        camera_ubo.subdata(0, sizeof(model_camera_matrices), model_camera_matrices);
+        model_camera_data.projection = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
+        camera_ubo.subdata(0, sizeof(data::camera), &model_camera_data);
 
         transform_ubo.subdata(0, sizeof(model_matrix), &model_matrix);
 
@@ -616,8 +607,8 @@ auto main() -> int32_t
 
         // sprites
 
-        sprite_camera_matrices[1] = glm::ortho(0.0f, static_cast<float>(window_width), static_cast<float>(window_height), 0.0f, 0.0f, 1.0f);
-        camera_ubo.subdata(0, sizeof(sprite_camera_matrices), sprite_camera_matrices);
+        sprite_camera_data.projection = glm::ortho(0.0f, static_cast<float>(window_width), static_cast<float>(window_height), 0.0f, 0.0f, 1.0f);
+        camera_ubo.subdata(0, sizeof(data::camera), &sprite_camera_data);
 
         sprite_program_shader.bind();
 
@@ -673,15 +664,16 @@ auto main() -> int32_t
 }
 
 // TODO - use the range buffer binding
+
 // TODO - create a light opengl functions loader
-// TODO - use buffer storage for buffer also
-// TODO - decide which version to keep for shader stage type parameter
-// TODO - fix the precompile headers for graphics module
+
+// TODO - decide which version to keep for shader stage type parameter | with the constructor or the function
+
 // TODO - name the shader files as the variables
 // TODO - add all the shaders in one folder in the build
 
 // TODO - check and understand why in some cases we need create_sprite with flip_vertically true and sometimes false
-// TODO - update all the years for license files 2025 - 2026
+// TODO - update all the years for license files 2025 - 2026 in modules and game framework (just in these, no other places)
 
 // TODO - remove glfwHideWindow from glfw and all the internal function related to this
 

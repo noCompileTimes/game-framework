@@ -2,8 +2,6 @@
 
 #include <stb_image.h>
 
-#include <string_view>
-
 struct texture_data
 {
     int32_t  width;

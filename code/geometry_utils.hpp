@@ -4,6 +4,8 @@
 
 #include "geometry.hpp"
 
+#include "vertex_types.hpp"
+
 // TODO add a new version of create sprite which takes an x, y, w, h and some size for the texture?
 
 // TODO check if this flip_vertical parameter it makes what stbi_set_flip_vertically_on_load does for stb image on load
@@ -52,4 +54,39 @@ static auto create_rectangle(const core::rect& position, const core::rgb& color)
     };
 
     return geometry;
+}
+
+static auto load_geometry(const std::string_view filename) -> geometry<model_vertex, uint32_t>
+{
+    Assimp::Importer importer;
+
+    if (const auto scene = importer.ReadFile(filename.data(), 0); scene != nullptr)
+    {
+        geometry<model_vertex, uint32_t> geometry;
+
+        const auto mesh = scene->mMeshes[0];
+
+        for (auto i = 0; i < mesh->mNumVertices; i++)
+        {
+            const auto& position = mesh->mVertices[i];
+            const auto& normal = mesh->mNormals[i];
+            const auto& texcoord = mesh->mTextureCoords[0][i];
+
+            geometry.vertices.emplace_back(model_vertex { { position.x, position.y, position.z },  { normal.x, normal.y, normal.z }, { texcoord.x, texcoord.y } });
+        }
+
+        for (auto i = 0; i < mesh->mNumFaces; i++)
+        {
+            const auto& face = mesh->mFaces[i];
+
+            for (auto j = 0; j < face.mNumIndices; j++)
+            {
+                geometry.elements.emplace_back(face.mIndices[j]);
+            }
+        }
+
+        return geometry;
+    }
+
+    return { };
 }

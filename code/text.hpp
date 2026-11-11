@@ -1,11 +1,5 @@
 #pragma once
 
-#include <map>
-
-#include <string_view>
-
-#include <freetype/freetype.h>
-
 struct text_character
 {
     graphics::opengl::Texture texture;

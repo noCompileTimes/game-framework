@@ -10,9 +10,9 @@ layout (binding = 0) uniform sampler2D u_albedo_texture;
 
 layout (binding = 3, std140) uniform light_ubo
 {
-    vec3 color;
+    vec3  color;
     float intensity;
-    vec3 source;
+    vec3  source;
 } u_light;
 
 void main()

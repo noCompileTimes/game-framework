@@ -2,8 +2,6 @@
 
 #include "core/vec3.hpp"
 
-#include <glm/glm.hpp>
-
 inline auto screen_pos_to_world_ray(const int32_t mouse_x, const int32_t mouse_y, const int32_t screen_width,
                                     const int32_t screen_height, const glm::mat4& view, const glm::mat4& projection,
                                     core::vec3& out_origin, core::vec3& out_direction) -> void
