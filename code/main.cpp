@@ -7,8 +7,6 @@
 #include <stb_rect_pack.h>
 #include <stb_image_write.h>
 
-#include <btBulletCollisionCommon.h>
-
 #include <algorithm>
 #include <print>
 
