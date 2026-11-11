@@ -39,7 +39,6 @@
 
 #include <cstddef>
 
-
 namespace sf
 {
 class RenderTarget;
