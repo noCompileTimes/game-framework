@@ -8,5 +8,3 @@ namespace data
         glm::mat4 projection;
     };
 }
-
-// TODO maybe the data structures can go into the graphics? because they are mostly for the shaders (ubo)

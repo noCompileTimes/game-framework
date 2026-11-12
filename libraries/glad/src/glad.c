@@ -300,10 +300,8 @@ PFNGLBLENDEQUATIONPROC glad_glBlendEquation = NULL;
 PFNGLBLENDEQUATIONSEPARATEPROC glad_glBlendEquationSeparate = NULL;
 PFNGLBLENDEQUATIONSEPARATEIPROC glad_glBlendEquationSeparatei = NULL;
 PFNGLBLENDEQUATIONIPROC glad_glBlendEquationi = NULL;
-PFNGLBLENDFUNCPROC glad_glBlendFunc = NULL;
 PFNGLBLENDFUNCSEPARATEPROC glad_glBlendFuncSeparate = NULL;
 PFNGLBLENDFUNCSEPARATEIPROC glad_glBlendFuncSeparatei = NULL;
-PFNGLBLENDFUNCIPROC glad_glBlendFunci = NULL;
 PFNGLBLITNAMEDFRAMEBUFFERPROC glad_glBlitNamedFramebuffer = NULL;
 PFNGLCHECKNAMEDFRAMEBUFFERSTATUSPROC glad_glCheckNamedFramebufferStatus = NULL;
 PFNGLCLAMPCOLORPROC glad_glClampColor = NULL;
@@ -814,7 +812,6 @@ static void load_GL_VERSION_1_0(GLADloadproc load) {
 	glad_glEnable = (PFNGLENABLEPROC)load("glEnable");
 	glad_glFinish = (PFNGLFINISHPROC)load("glFinish");
 	glad_glFlush = (PFNGLFLUSHPROC)load("glFlush");
-	glad_glBlendFunc = (PFNGLBLENDFUNCPROC)load("glBlendFunc");
 	glad_glLogicOp = (PFNGLLOGICOPPROC)load("glLogicOp");
 	glad_glStencilFunc = (PFNGLSTENCILFUNCPROC)load("glStencilFunc");
 	glad_glStencilOp = (PFNGLSTENCILOPPROC)load("glStencilOp");
@@ -1112,7 +1109,6 @@ static void load_GL_VERSION_4_0(GLADloadproc load) {
 	glad_glMinSampleShading = (PFNGLMINSAMPLESHADINGPROC)load("glMinSampleShading");
 	glad_glBlendEquationi = (PFNGLBLENDEQUATIONIPROC)load("glBlendEquationi");
 	glad_glBlendEquationSeparatei = (PFNGLBLENDEQUATIONSEPARATEIPROC)load("glBlendEquationSeparatei");
-	glad_glBlendFunci = (PFNGLBLENDFUNCIPROC)load("glBlendFunci");
 	glad_glBlendFuncSeparatei = (PFNGLBLENDFUNCSEPARATEIPROC)load("glBlendFuncSeparatei");
 	glad_glDrawArraysIndirect = (PFNGLDRAWARRAYSINDIRECTPROC)load("glDrawArraysIndirect");
 	glad_glDrawElementsIndirect = (PFNGLDRAWELEMENTSINDIRECTPROC)load("glDrawElementsIndirect");

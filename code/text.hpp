@@ -2,6 +2,8 @@
 
 #include "text_character.hpp"
 
+#include "graphics/opengl/pipeline.hpp"
+
 static auto font_ascender = 0; // distance in pixels from the baseline to the top of the tallest glyphs
 
 static std::map<GLchar, text_character> font_characters;
@@ -64,7 +66,7 @@ static auto load_font(const std::string_view filename) -> int32_t
 
     font_ascender = static_cast<int32_t>(ft_face->size->metrics.ascender >> 6); // 26.6 fixed point to pixels
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    graphics::opengl::Pipeline::pixel_store(GL_UNPACK_ALIGNMENT, 1);
 
     for (unsigned char c = 0; c < 128; c++)
     {
@@ -90,6 +92,8 @@ static auto load_font(const std::string_view filename) -> int32_t
         font_characters.insert(std::make_pair(c, character));
     }
 
+    graphics::opengl::Pipeline::pixel_store(GL_UNPACK_ALIGNMENT, 4);
+
     FT_Done_Face(ft_face);
     FT_Done_FreeType(ft_library);
 
@@ -97,3 +101,4 @@ static auto load_font(const std::string_view filename) -> int32_t
 }
 
 // TODO - fix the text with top left "anchor", it seems that it has some padding/margin on top of the text
+// TODO - optimization | put all the characters inside the vertex buffer object

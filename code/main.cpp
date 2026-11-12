@@ -17,7 +17,10 @@
 #include "graphics/opengl/texture_sampler.hpp"
 #include "graphics/opengl/framebuffer.hpp"
 
+#include "data/binding.hpp"
 #include "data/camera.hpp"
+#include "data/transform.hpp"
+#include "data/material.hpp"
 #include "data/light.hpp"
 
 #include "geometry_utils.hpp"
@@ -191,7 +194,7 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer camera_ubo;
     camera_ubo.create();
-    camera_ubo.bind(GL_UNIFORM_BUFFER, 0);
+    camera_ubo.bind(GL_UNIFORM_BUFFER, data::binding::camera);
     camera_ubo.storage(sizeof(data::camera), &model_camera_data, GL_DYNAMIC_STORAGE_BIT);
 
     glm::mat4 model_matrix { 1.0f };
@@ -199,22 +202,24 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer transform_ubo;
     transform_ubo.create();
-    transform_ubo.bind(GL_UNIFORM_BUFFER, 1);
-    transform_ubo.storage(sizeof(model_matrix), &model_matrix, GL_DYNAMIC_STORAGE_BIT);
+    transform_ubo.bind(GL_UNIFORM_BUFFER, data::binding::transform);
+    transform_ubo.storage(sizeof(data::transform), &model_matrix, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::Buffer material_ubo;
     material_ubo.create();
-    material_ubo.bind(GL_UNIFORM_BUFFER, 2);
-    material_ubo.storage(sizeof(glm::vec3), nullptr, GL_DYNAMIC_STORAGE_BIT);
+    material_ubo.bind(GL_UNIFORM_BUFFER, data::binding::material);
+    material_ubo.storage(sizeof(data::material), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
-    data::light default_light;
-    default_light.color = { 1.0f, 1.0f, 1.0f };
-    default_light.source = { -1.0f, -1.0f, -1.0f };
-    default_light.intensity = 1.0f;
+    data::light default_light
+    {
+        .color = { 1.0f, 1.0f, 1.0f },
+        .intensity = 1.0f,
+        .source = { -1.0f, -1.0f, -1.0f }
+    };
 
     graphics::opengl::Buffer light_ubo;
     light_ubo.create();
-    light_ubo.bind(GL_UNIFORM_BUFFER, 3);
+    light_ubo.bind(GL_UNIFORM_BUFFER, data::binding::light);
     light_ubo.storage(sizeof(data::light), &default_light, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::TextureSampler text_sampler;
@@ -259,8 +264,6 @@ auto main() -> int32_t
 
     text_vao.attach_attribute({ 0, offsetof(text_vertex, position), 2, GL_FLOAT, 0 });
     text_vao.attach_attribute({ 1, offsetof(text_vertex, texcoord), 2, GL_FLOAT, 0 });
-
-    // TODO - optimization | put all the characters inside the vertex buffer object
 
     // fonts - end
 
@@ -380,10 +383,7 @@ auto main() -> int32_t
     graphics::opengl::Commands::viewport(0, 0, atlas_width, atlas_height);
 
     graphics::opengl::Pipeline::enable(GL_BLEND);
-    // color: normal alpha blending, alpha: keep coverage correct on a transparent background (avoids alpha * alpha)
-    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    // TODO use the glBlendFuncSeparatei seems to work directly with the framebuffer?
-    // TODO check the glBlendFunc if is still usable or not
+    graphics::opengl::Pipeline::blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     // rectangles
 
@@ -432,9 +432,6 @@ auto main() -> int32_t
     }
 
     // atlas output - end
-
-    // TODO check if this is still necesary
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glm::vec3  red_color { 1.0f, 0.0f, 0.0f };
     glm::vec3 blue_color { 0.0f, 0.0f, 1.0f };
@@ -679,11 +676,10 @@ auto main() -> int32_t
 
 // TODO - decide which version to keep for shader stage type parameter | with the constructor or the function
 
-// TODO - name the shader files as the variables
-// TODO - add all the shaders in one folder in the build
+// TODO - name the shader files as the variables - CLAUDE
 
 // TODO - check and understand why in some cases we need create_sprite with flip_vertically true and sometimes false
-// TODO - update all the years for license files 2025 - 2026 in modules and game framework (just in these, no other places)
+// TODO - update all the years for license files 2025 - 2026 in modules and game framework (just in these, no other places)  - CLAUDE
 
 // TODO - remove glfwHideWindow from glfw and all the internal function related to this
 
