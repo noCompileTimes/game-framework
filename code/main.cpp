@@ -217,11 +217,17 @@ auto main() -> int32_t
     light_ubo.bind(GL_UNIFORM_BUFFER, 3);
     light_ubo.storage(sizeof(data::light), &default_light, GL_DYNAMIC_STORAGE_BIT);
 
+    graphics::opengl::TextureSampler text_sampler;
+    text_sampler.create();
+    text_sampler.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    text_sampler.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    text_sampler.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    text_sampler.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
     graphics::opengl::TextureSampler texture_sampler;
     texture_sampler.create();
     texture_sampler.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     texture_sampler.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    texture_sampler.bind(0);
 
     texture_data pavement_image = load_texture("textures/pavement_albedo.png");
 
@@ -555,6 +561,8 @@ auto main() -> int32_t
 
         graphics::opengl::Pipeline::enable(GL_DEPTH_TEST);
 
+        texture_sampler.bind(0);
+
         // models
 
         model_camera_data.projection = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
@@ -621,6 +629,8 @@ auto main() -> int32_t
         graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, sprite_elements.size());
 
         // texts
+
+        text_sampler.bind(0);
 
         text_program_shader.bind();
 

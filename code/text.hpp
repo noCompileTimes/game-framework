@@ -1,17 +1,10 @@
 #pragma once
 
-struct text_character
-{
-    graphics::opengl::Texture texture;
-
-    glm::ivec2   size;      // size of glyph
-    glm::ivec2   bearing;   // offset from baseline to left/top of glyph
-    unsigned int advance;   // horizontal offset to advance to next glyph
-};
-
-static std::map<GLchar, text_character> font_characters;
+#include "text_character.hpp"
 
 static auto font_ascender = 0; // distance in pixels from the baseline to the top of the tallest glyphs
+
+static std::map<GLchar, text_character> font_characters;
 
 static auto render_text(const graphics::opengl::Buffer& vbo, std::string text) -> void
 {
@@ -104,8 +97,3 @@ static auto load_font(const std::string_view filename) -> int32_t
 }
 
 // TODO - fix the text with top left "anchor", it seems that it has some padding/margin on top of the text
-// TODO - make a specific texture sampler for texts out of these
-// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
