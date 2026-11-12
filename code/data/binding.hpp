@@ -2,7 +2,7 @@
 
 namespace data
 {
-    enum binding : uint32_t
+    enum class binding : uint32_t
     {
         // vertex stage
         camera,

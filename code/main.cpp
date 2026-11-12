@@ -194,7 +194,7 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer camera_ubo;
     camera_ubo.create();
-    camera_ubo.bind(GL_UNIFORM_BUFFER, data::binding::camera);
+    camera_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::camera));
     camera_ubo.storage(sizeof(data::camera), &model_camera_data, GL_DYNAMIC_STORAGE_BIT);
 
     glm::mat4 model_matrix { 1.0f };
@@ -202,12 +202,12 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer transform_ubo;
     transform_ubo.create();
-    transform_ubo.bind(GL_UNIFORM_BUFFER, data::binding::transform);
+    transform_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::transform));
     transform_ubo.storage(sizeof(data::transform), &model_matrix, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::Buffer material_ubo;
     material_ubo.create();
-    material_ubo.bind(GL_UNIFORM_BUFFER, data::binding::material);
+    material_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::material));
     material_ubo.storage(sizeof(data::material), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     data::light default_light
@@ -219,7 +219,7 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer light_ubo;
     light_ubo.create();
-    light_ubo.bind(GL_UNIFORM_BUFFER, data::binding::light);
+    light_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::light));
     light_ubo.storage(sizeof(data::light), &default_light, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::TextureSampler text_sampler;
@@ -672,7 +672,7 @@ auto main() -> int32_t
 
 // VERSION 2
 
-
+// TODO - make a to_base function which wraps std::to_underlying
 
 // VERSION 1
 
