@@ -670,6 +670,12 @@ auto main() -> int32_t
     return 0;
 }
 
+// VERSION 2
+
+
+
+// VERSION 1
+
 // TODO - use the range buffer binding
 
 // TODO - create a light opengl functions loader
