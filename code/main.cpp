@@ -210,10 +210,17 @@ auto main() -> int32_t
     text_sampler.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     text_sampler.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    graphics::opengl::TextureSampler texture_sampler;
-    texture_sampler.create();
-    texture_sampler.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    texture_sampler.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    graphics::opengl::TextureSampler sprite_sampler;
+    sprite_sampler.create();
+    sprite_sampler.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    sprite_sampler.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    sprite_sampler.parameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    sprite_sampler.parameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    graphics::opengl::TextureSampler model_sampler;
+    model_sampler.create();
+    model_sampler.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    model_sampler.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     texture_data pavement_image = load_texture("textures/pavement_albedo.png");
 
@@ -265,15 +272,25 @@ auto main() -> int32_t
     constexpr auto rectangles_count = 4;
     stbrp_rect rectangles[rectangles_count] { };
 
+    constexpr auto atlas_padding = 2;
+
     for (auto i = 0; i < images_data.size(); i++)
     {
         const auto& image_data = images_data[i];
 
-        rectangles[i].w = image_data.width;
-        rectangles[i].h = image_data.height;
+        rectangles[i].w = image_data.width  + atlas_padding;
+        rectangles[i].h = image_data.height + atlas_padding;
     }
 
     auto all_packed = stbrp_pack_rects(&stbrp_context, rectangles, rectangles_count);
+
+    for (auto& rectangle : rectangles)
+    {
+        rectangle.x += atlas_padding / 2;
+        rectangle.y += atlas_padding / 2;
+        rectangle.w -= atlas_padding;
+        rectangle.h -= atlas_padding;
+    }
 
     printf("Packing status: %s\n\n", all_packed ? "All packed successfully!" : "Some rectangles did not fit.");
 
@@ -390,6 +407,7 @@ auto main() -> int32_t
     camera_ubo.subdata(0, sizeof(data::camera), &sprite_camera_data);
 
     sprite_program_shader.bind();
+    sprite_sampler.bind(0);
 
     rectangles_vao.bind();
 
@@ -558,7 +576,7 @@ auto main() -> int32_t
 
         graphics::opengl::Pipeline::enable(GL_DEPTH_TEST);
 
-        texture_sampler.bind(0);
+        model_sampler.bind(0);
 
         // models
 
@@ -610,6 +628,8 @@ auto main() -> int32_t
 
         graphics::opengl::Pipeline::disable(GL_DEPTH_TEST);
 
+        sprite_sampler.bind(0);
+
         // sprites
 
         sprite_camera_data.projection = glm::ortho(0.0f, static_cast<float>(window_width), static_cast<float>(window_height), 0.0f, 0.0f, 1.0f);
@@ -651,9 +671,11 @@ auto main() -> int32_t
 
     pavement_texture.destroy();
 
-    texture_sampler.destroy();
+      text_sampler.destroy();
+     model_sampler.destroy();
+    sprite_sampler.destroy();
 
-    cube_geometry_vao.destroy();
+      cube_geometry_vao.destroy();
     sprite_geometry_vao.destroy();
 
     cube_geometry_vbo.destroy();
