@@ -18,8 +18,11 @@ public:
     geometry<sprite_vertex, uint32_t> rectangles_geometry;
 
 private:
-    uint32_t _width;
-    uint32_t _height;
+    uint32_t _width;  // TODO are we using this?
+    uint32_t _height; // TODO are we using this?
 };
 
 // TODO maybe the drawing can be in another class? like SpriteAtlasPackerDrawer? think of it
+
+// TODO lets be sure always that width equals height - we always want square textures - better for performance
+// TODO maybe if we can also have them as power of two? - hope I used the right terms
