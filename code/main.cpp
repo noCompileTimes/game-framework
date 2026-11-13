@@ -165,25 +165,6 @@ auto main() -> int32_t
     sphere_geometry_vao.attach_attribute({ 1, offsetof(model_vertex, normal), 3, GL_FLOAT, 0 });
     sphere_geometry_vao.attach_attribute({ 2, offsetof(model_vertex, texcoord), 2, GL_FLOAT, 0 });
 
-    const auto [sprite_vertices, sprite_elements] = create_sprite({ 0, 0, 256, 256 }, true);
-
-    graphics::opengl::Buffer sprite_geometry_vbo;
-    sprite_geometry_vbo.create();
-    sprite_geometry_vbo.storage(sizeof(sprite_vertex) * sprite_vertices.size(), sprite_vertices.data(), 0);
-
-    graphics::opengl::Buffer sprite_geometry_ebo;
-    sprite_geometry_ebo.create();
-    sprite_geometry_ebo.storage(sizeof(uint32_t) * sprite_elements.size(), sprite_elements.data(), 0);
-
-    graphics::opengl::VertexArray sprite_geometry_vao;
-    sprite_geometry_vao.create();
-
-    sprite_geometry_vao.attach_vertices(sprite_geometry_vbo, sizeof(sprite_vertex));
-    sprite_geometry_vao.attach_elements(sprite_geometry_ebo);
-
-    sprite_geometry_vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
-    sprite_geometry_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
-
     static data::camera model_camera_data;
     model_camera_data.view       = lookAt(glm::vec3 { 0.0f, 0.0f, 10.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
     model_camera_data.projection = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
@@ -273,7 +254,7 @@ auto main() -> int32_t
 
     stbrp_context stbrp_context;
 
-    auto atlas_width = 1024;
+    auto atlas_width  = 1024;
     auto atlas_height = 1024;
 
     constexpr auto atlas_nodes_count = 1024;
@@ -317,6 +298,25 @@ auto main() -> int32_t
             printf("Rect FAILED to pack [Size: %dx%d]\n", rectangles[i].w, rectangles[i].h);
         }
     }
+
+    const auto [sprite_vertices, sprite_elements] = create_sprite({ 0, 0, static_cast<float>(atlas_width), static_cast<float>(atlas_height) }, true);
+
+    graphics::opengl::Buffer sprite_geometry_vbo;
+    sprite_geometry_vbo.create();
+    sprite_geometry_vbo.storage(sizeof(sprite_vertex) * sprite_vertices.size(), sprite_vertices.data(), 0);
+
+    graphics::opengl::Buffer sprite_geometry_ebo;
+    sprite_geometry_ebo.create();
+    sprite_geometry_ebo.storage(sizeof(uint32_t) * sprite_elements.size(), sprite_elements.data(), 0);
+
+    graphics::opengl::VertexArray sprite_geometry_vao;
+    sprite_geometry_vao.create();
+
+    sprite_geometry_vao.attach_vertices(sprite_geometry_vbo, sizeof(sprite_vertex));
+    sprite_geometry_vao.attach_elements(sprite_geometry_ebo);
+
+    sprite_geometry_vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
+    sprite_geometry_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
 
     // rectangles packing - end
 
@@ -382,8 +382,7 @@ auto main() -> int32_t
 
     graphics::opengl::Commands::viewport(0, 0, atlas_width, atlas_height);
 
-    graphics::opengl::Pipeline::enable(GL_BLEND);
-    graphics::opengl::Pipeline::blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    graphics::opengl::Pipeline::disable(GL_BLEND);
 
     // rectangles
 
@@ -423,15 +422,16 @@ auto main() -> int32_t
 
     if (auto* pixels = static_cast<uint8_t*>(framebuffer_pbo.map(0, buffer_size, GL_MAP_READ_BIT)))
     {
-        stbi_write_png("sprite_atlas.png",
-                       atlas_width, atlas_height, channels,
-                       pixels + atlas_width * channels * (atlas_height - 1),
-                       -atlas_width * channels);
+        stbi_flip_vertically_on_write(1);
+        stbi_write_png("textures/sprite_atlas.png", atlas_width, atlas_height, channels, pixels, atlas_width * channels);
 
         framebuffer_pbo.unmap();
     }
 
     // atlas output - end
+
+    graphics::opengl::Pipeline::enable(GL_BLEND);
+    graphics::opengl::Pipeline::blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     glm::vec3  red_color { 1.0f, 0.0f, 0.0f };
     glm::vec3 blue_color { 0.0f, 0.0f, 1.0f };
@@ -633,13 +633,13 @@ auto main() -> int32_t
 
         text_vao.bind();
 
-        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 70.0f, 0.0f });
+        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 700.0f, 0.0f });
         transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
 
         material_ubo.subdata(0, sizeof(glm::vec3), &red_color);
         render_text(text_vbo, "This is sample text");
 
-        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 700.0f, 0.0f });
+        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 800.0f, 0.0f });
         text_matrix = scale(text_matrix, { 0.5f, 0.5f, 0.5f });
         transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
 
