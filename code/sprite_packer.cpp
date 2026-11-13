@@ -25,6 +25,10 @@ auto SpritePacker::init(const std::string_view folder, const uint32_t width, con
         rectangles[i].h = image_data.height + atlas_padding;
     }
 
+    // stbrp_pack_rects places the rectangles sorted by height then width (and gives them back in our order after),
+    // images with the exact same size (ex: blue_hand_peace and green_hand_peace) are a tie for that sort and qsort is not stable,
+    // so their placement in the atlas is arbitrary (the result is still correct, the txt keeps the file name order)
+    // TODO if we want a predictable visual order in the atlas, define STBRP_SORT (in stb.c) with a stable sort
     const auto all_packed = stbrp_pack_rects(&stbrp_context, rectangles.data(), rectangles_count);
     printf("Packing status: %s\n\n", all_packed ? "All packed successfully!" : "Some rectangles did not fit.");
 

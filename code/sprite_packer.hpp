@@ -21,3 +21,5 @@ private:
     uint32_t _width;
     uint32_t _height;
 };
+
+// TODO maybe the drawing can be in another class? like SpriteAtlasPackerDrawer? think of it
