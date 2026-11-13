@@ -23,6 +23,7 @@
 #include "data/material.hpp"
 #include "data/light.hpp"
 
+#include "sprite_packer.hpp"
 #include "geometry_utils.hpp"
 #include "resources.hpp"
 #include "text.hpp"
@@ -257,7 +258,8 @@ auto main() -> int32_t
 
     // rectangles packing - begin
 
-    auto images_data = load_textures({ "textures/body/blue_circle.png", "textures/body/blue_square.png", "textures/body/blue_rhombus.png", "textures/body/blue_squircle.png" });
+    std::string folder_name = "textures/characters";
+    auto images_data = load_textures(folder_name);
 
     stbrp_context stbrp_context;
 
@@ -269,8 +271,8 @@ auto main() -> int32_t
 
     stbrp_init_target(&stbrp_context, atlas_width, atlas_height, atlas_nodes, atlas_nodes_count);
 
-    constexpr auto rectangles_count = 4;
-    stbrp_rect rectangles[rectangles_count] { };
+    const auto rectangles_count = static_cast<int32_t>(images_data.size());
+    std::vector<stbrp_rect> rectangles(rectangles_count);
 
     constexpr auto atlas_padding = 2;
 
@@ -282,7 +284,7 @@ auto main() -> int32_t
         rectangles[i].h = image_data.height + atlas_padding;
     }
 
-    auto all_packed = stbrp_pack_rects(&stbrp_context, rectangles, rectangles_count);
+    auto all_packed = stbrp_pack_rects(&stbrp_context, rectangles.data(), rectangles_count);
 
     for (auto& rectangle : rectangles)
     {
@@ -297,7 +299,7 @@ auto main() -> int32_t
     geometry<sprite_vertex, uint32_t> rectangles_geometry;
 
     std::ofstream output_file;
-    output_file.open("rectangles.txt", std::ios::trunc); // TODO check what this ios::trunc does
+    output_file.open(folder_name + ".txt", std::ios::trunc); // TODO check what this ios::trunc does
     // TODO have the extension as sprites
 
     for (auto i = 0; i < rectangles_count; ++i)
@@ -441,7 +443,7 @@ auto main() -> int32_t
     if (auto* pixels = static_cast<uint8_t*>(framebuffer_pbo.map(0, buffer_size, GL_MAP_READ_BIT)))
     {
         stbi_flip_vertically_on_write(1);
-        stbi_write_png("textures/sprite_atlas.png", atlas_width, atlas_height, channels, pixels, atlas_width * channels);
+        stbi_write_png((folder_name + "_atlas.png").c_str(), atlas_width, atlas_height, channels, pixels, atlas_width * channels);
 
         framebuffer_pbo.unmap();
     }
@@ -713,7 +715,8 @@ auto main() -> int32_t
 
 // TODO - check if the RoboticsLearning can be removed from bullet together with all the robotics stuff we will not ever use
 // TODO - check which modules we will not use at any time in the future in the stb nothings
-// TODO - remove unnecessary formats loading from stb_image
+
+// TODO - remove unnecessary formats loading from stb_image also from stb_image_write
 
 // TODO - have this #define GL_COLOR_ATTACHMENT0 0x8CE0 as a variable representing the albedo?
 // TODO - remove everything (functions) related to GL_POINTS | we will never render points or something like this
@@ -723,4 +726,5 @@ auto main() -> int32_t
 // TODO - resolve the flipping of the y from the ortho matrix (need to recheck all the sprites/fonts)
 
 // TODO - make the on_resize callback to use something from the window (glfwGetWindowSize(glfw_window, &screen_width, &screen_height)) not the size from the framebuffer
+
 // TODO - in case in glfw use use on_resize the window size, remove the framebuffer callbacks from it

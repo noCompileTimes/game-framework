@@ -12,7 +12,6 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <algorithm>
-#include <print>
+#include <filesystem>
 
 #include <map>
