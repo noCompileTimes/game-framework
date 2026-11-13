@@ -1,6 +1,6 @@
 project(stb)
 
-add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME})
 
-target_include_directories(${PROJECT_NAME} INTERFACE .)
-target_compile_definitions(${PROJECT_NAME} INTERFACE STB_IMAGE_IMPLEMENTATION STB_IMAGE_WRITE_IMPLEMENTATION STB_RECT_PACK_IMPLEMENTATION)
+target_include_directories(${PROJECT_NAME} PUBLIC .)
+            target_sources(${PROJECT_NAME} PUBLIC stb.c)

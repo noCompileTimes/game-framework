@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stb_image.h>
-
 #include "texture_data.hpp"
 
 static auto load_texture(const std::string_view filename) -> texture_data

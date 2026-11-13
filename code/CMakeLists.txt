@@ -4,4 +4,4 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${CM
     target_link_libraries(${PROJECT_NAME} PRIVATE graphics-module platforms-module mathematics-module physics-module utilities-module)
     target_link_libraries(${PROJECT_NAME} PRIVATE assimp freetype glm stb) # imgui
 
-           target_sources(${PROJECT_NAME} PRIVATE main.cpp)
+           target_sources(${PROJECT_NAME} PRIVATE main.cpp sprite_packer.cpp)

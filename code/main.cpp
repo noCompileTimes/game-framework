@@ -1,6 +1,3 @@
-#include <stb_rect_pack.h>
-#include <stb_image_write.h>
-
 #include "backends/glfw/window_factory.hpp"
 
 #include "core/window_manager.hpp"
@@ -259,64 +256,11 @@ auto main() -> int32_t
     // rectangles packing - begin
 
     std::string folder_name = "textures/characters";
-    auto images_data = load_textures(folder_name);
-
-    stbrp_context stbrp_context;
-
     auto atlas_width  = 1024;
     auto atlas_height = 1024;
 
-    constexpr auto atlas_nodes_count = 1024;
-    stbrp_node atlas_nodes[atlas_nodes_count];
-
-    stbrp_init_target(&stbrp_context, atlas_width, atlas_height, atlas_nodes, atlas_nodes_count);
-
-    const auto rectangles_count = static_cast<int32_t>(images_data.size());
-    std::vector<stbrp_rect> rectangles(rectangles_count);
-
-    constexpr auto atlas_padding = 2;
-
-    for (auto i = 0; i < images_data.size(); i++)
-    {
-        const auto& image_data = images_data[i];
-
-        rectangles[i].w = image_data.width  + atlas_padding;
-        rectangles[i].h = image_data.height + atlas_padding;
-    }
-
-    auto all_packed = stbrp_pack_rects(&stbrp_context, rectangles.data(), rectangles_count);
-
-    for (auto& rectangle : rectangles)
-    {
-        rectangle.x += atlas_padding / 2;
-        rectangle.y += atlas_padding / 2;
-        rectangle.w -= atlas_padding;
-        rectangle.h -= atlas_padding;
-    }
-
-    printf("Packing status: %s\n\n", all_packed ? "All packed successfully!" : "Some rectangles did not fit.");
-
-    geometry<sprite_vertex, uint32_t> rectangles_geometry;
-
-    std::ofstream output_file;
-    output_file.open(folder_name + ".txt", std::ios::trunc); // TODO check what this ios::trunc does
-    // TODO have the extension as sprites
-
-    for (auto i = 0; i < rectangles_count; ++i)
-    {
-        if (rectangles[i].was_packed)
-        {
-            // TODO move this sprite atlas write into a separate function/class
-            // TODO find a better/best way to write this in a file
-            output_file << rectangles[i].x << " " << rectangles[i].y << " " << rectangles[i].w << " " << rectangles[i].h << std::endl;
-
-            rectangles_geometry.append(create_sprite({ 0, 0,  static_cast<float>(rectangles[i].w), static_cast<float>(rectangles[i].h) }, false));
-        }
-        else
-        {
-            printf("Rect FAILED to pack [Size: %dx%d]\n", rectangles[i].w, rectangles[i].h);
-        }
-    }
+    SpritePacker sprite_packer;
+    sprite_packer.init(folder_name, atlas_width, atlas_height);
 
     const auto [sprite_vertices, sprite_elements] = create_sprite({ 0, 0, static_cast<float>(atlas_width), static_cast<float>(atlas_height) }, true);
 
@@ -366,11 +310,11 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer rectangles_vbo;
     rectangles_vbo.create();
-    rectangles_vbo.storage(sizeof(sprite_vertex) * rectangles_geometry.vertices.size(), rectangles_geometry.vertices.data(), 0);
+    rectangles_vbo.storage(sizeof(sprite_vertex) * sprite_packer.rectangles_geometry.vertices.size(), sprite_packer.rectangles_geometry.vertices.data(), 0);
 
     graphics::opengl::Buffer rectangles_ebo;
     rectangles_ebo.create();
-    rectangles_ebo.storage(sizeof(uint32_t) * rectangles_geometry.elements.size(), rectangles_geometry.elements.data(), 0);
+    rectangles_ebo.storage(sizeof(uint32_t) * sprite_packer.rectangles_geometry.elements.size(), sprite_packer.rectangles_geometry.elements.data(), 0);
 
     graphics::opengl::VertexArray rectangles_vao;
     rectangles_vao.create();
@@ -413,9 +357,9 @@ auto main() -> int32_t
 
     rectangles_vao.bind();
 
-    for (auto i = 0; i < images_data.size(); i++)
+    for (auto i = 0; i < sprite_packer.images_data.size(); i++)
     {
-        auto& rectangle = rectangles[i];
+        auto& rectangle = sprite_packer.rectangles[i];
 
         // TODO remove it if not needed later on
         auto parent_matrix = translate(glm::mat4(1.0f), { 0.0, 0.0, 0 });
@@ -427,7 +371,7 @@ auto main() -> int32_t
         rectangle_texture.type = GL_TEXTURE_2D;
         rectangle_texture.create();
         rectangle_texture.storage(rectangle.w, rectangle.h, GL_RGBA8, 1);
-        rectangle_texture.subdata(rectangle.w, rectangle.h, GL_RGBA, 0, images_data[i].pixels);
+        rectangle_texture.subdata(rectangle.w, rectangle.h, GL_RGBA, 0, sprite_packer.images_data[i].pixels);
         rectangle_texture.bind(0); // TODO use a constant here? like albedo?
 
         graphics::opengl::Commands::draw_elements(GL_TRIANGLES, i * 6, 6);
