@@ -195,6 +195,8 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
         stbi_image_free(image.pixels);
     }
 
+    // TODO when we will have a resource/graphics manager maybe reuse these instead of delete? maybe it will save some time or something else
+
     sprites_vao.destroy();
     sprites_ebo.destroy();
     sprites_vbo.destroy();
