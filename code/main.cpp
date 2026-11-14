@@ -3,7 +3,6 @@
 #include "core/window_manager.hpp"
 #include "core/physics.hpp"
 #include "core/file.hpp"
-#include "core/rgba.hpp"
 
 #include "graphics/opengl/buffer.hpp"
 #include "graphics/opengl/vertex_array.hpp"
@@ -45,6 +44,12 @@ auto main() -> int32_t
     static auto window_height = window_configuration.height;
 
     static auto window_is_running = true;
+
+    window_events->callbacks.on_resize = [&](const uint32_t width, const uint32_t height)
+    {
+        window_width  = width;
+        window_height = height;
+    };
 
     window_events->callbacks.on_close = [&]
     {
@@ -238,7 +243,7 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer text_vbo;
     text_vbo.create();
-    text_vbo.storage(1000 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+    text_vbo.storage(1000 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT); // TODO here the buffer is to big?
 
     //graphics::opengl::Buffer text_ebo;
     //text_ebo.create();
@@ -253,146 +258,40 @@ auto main() -> int32_t
 
     // fonts - end
 
-    // rectangles packing - begin
-
-    std::string folder_name = "textures/characters";
-    auto atlas_width  = 1024;
-    auto atlas_height = 1024;
-
-    SpritePacker sprite_packer;
-    sprite_packer.init(folder_name, atlas_width, atlas_height);
-
-    const auto [sprite_vertices, sprite_elements] = create_sprite({ 0, 0, static_cast<float>(atlas_width), static_cast<float>(atlas_height) }, true);
-
-    graphics::opengl::Buffer sprite_geometry_vbo;
-    sprite_geometry_vbo.create();
-    sprite_geometry_vbo.storage(sizeof(sprite_vertex) * sprite_vertices.size(), sprite_vertices.data(), 0);
-
-    graphics::opengl::Buffer sprite_geometry_ebo;
-    sprite_geometry_ebo.create();
-    sprite_geometry_ebo.storage(sizeof(uint32_t) * sprite_elements.size(), sprite_elements.data(), 0);
-
-    graphics::opengl::VertexArray sprite_geometry_vao;
-    sprite_geometry_vao.create();
-
-    sprite_geometry_vao.attach_vertices(sprite_geometry_vbo, sizeof(sprite_vertex));
-    sprite_geometry_vao.attach_elements(sprite_geometry_ebo);
-
-    sprite_geometry_vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
-    sprite_geometry_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
-
-    // rectangles packing - end
-
-    // framebuffer - begin
-
-    graphics::opengl::Texture framebuffer_texture;
-    framebuffer_texture.type = GL_TEXTURE_2D;
-    framebuffer_texture.create();
-    framebuffer_texture.storage(atlas_width, atlas_height, GL_RGBA8, 1);
-
-    //graphics::opengl::Renderbuffer renderbuffer;
-    //renderbuffer.create();
-    //renderbuffer.storage(atlas_width, atlas_height, GL_DEPTH_COMPONENT24);
-
-    graphics::opengl::Framebuffer framebuffer;
-    framebuffer.create();
-    framebuffer.attach(framebuffer_texture, GL_COLOR_ATTACHMENT0, 0);
-    //framebuffer.attach(renderbuffer, GL_DEPTH_ATTACHMENT);
-
-    // framebuffer - end
-
-    graphics::opengl::Buffer framebuffer_pbo;
-    framebuffer_pbo.create();
-    framebuffer_pbo.storage(atlas_width * atlas_height * 4, nullptr, GL_MAP_READ_BIT);
-    framebuffer_pbo.bind(GL_PIXEL_PACK_BUFFER);
-
-    // rectangles
-
-    graphics::opengl::Buffer rectangles_vbo;
-    rectangles_vbo.create();
-    rectangles_vbo.storage(sizeof(sprite_vertex) * sprite_packer.rectangles_geometry.vertices.size(), sprite_packer.rectangles_geometry.vertices.data(), 0);
-
-    graphics::opengl::Buffer rectangles_ebo;
-    rectangles_ebo.create();
-    rectangles_ebo.storage(sizeof(uint32_t) * sprite_packer.rectangles_geometry.elements.size(), sprite_packer.rectangles_geometry.elements.data(), 0);
-
-    graphics::opengl::VertexArray rectangles_vao;
-    rectangles_vao.create();
-
-    rectangles_vao.attach_vertices(rectangles_vbo, sizeof(sprite_vertex));
-    rectangles_vao.attach_elements(rectangles_ebo);
-
-    rectangles_vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
-    rectangles_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
-
-    window_events->callbacks.on_resize = [&](const uint32_t width, const uint32_t height)
-    {
-        window_width  = width;
-        window_height = height;
-    };
-
-    core::rgba framebuffer_color { 0.0f, 0.0f, 0.0f, 0.0f };
-
-    graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
-
-    graphics::opengl::Pipeline::disable(GL_MULTISAMPLE);
-
     // atlas output - begin
 
-    framebuffer.clear(&framebuffer_color.r, 0);
-    //framebuffer.clear(1.0f);
-    framebuffer.bind();
+    SpritePacker characters_packer { "textures/characters", 1024, 1024 };
+    characters_packer.init();
+    characters_packer.build(sprite_program_shader, sprite_sampler, camera_ubo, transform_ubo);
 
-    graphics::opengl::Commands::viewport(0, 0, atlas_width, atlas_height);
-
-    graphics::opengl::Pipeline::disable(GL_BLEND);
-
-    // rectangles
-
-    sprite_camera_data.projection = glm::ortho(0.0f, static_cast<float>(atlas_width), static_cast<float>(atlas_height), 0.0f, 0.0f, 1.0f);
-    camera_ubo.subdata(0, sizeof(data::camera), &sprite_camera_data);
-
-    sprite_program_shader.bind();
-    sprite_sampler.bind(0);
-
-    rectangles_vao.bind();
-
-    for (auto i = 0; i < sprite_packer.images_data.size(); i++)
-    {
-        auto& rectangle = sprite_packer.rectangles[i];
-
-        // TODO remove it if not needed later on
-        auto parent_matrix = translate(glm::mat4(1.0f), { 0.0, 0.0, 0 });
-
-        auto rectangle_matrix = translate(parent_matrix, { rectangle.x, rectangle.y, 0.0f });
-        transform_ubo.subdata(0, sizeof(glm::mat4), &rectangle_matrix);
-
-        graphics::opengl::Texture rectangle_texture; // TODO cache this into a set/map to not recreate it everytime if is the same size
-        rectangle_texture.type = GL_TEXTURE_2D;
-        rectangle_texture.create();
-        rectangle_texture.storage(rectangle.w, rectangle.h, GL_RGBA8, 1);
-        rectangle_texture.subdata(rectangle.w, rectangle.h, GL_RGBA, 0, sprite_packer.images_data[i].pixels);
-        rectangle_texture.bind(0); // TODO use a constant here? like albedo?
-
-        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, i * 6, 6);
-
-        rectangle_texture.destroy();
-    }
-
-    auto channels = 4;
-    auto buffer_size = atlas_width * atlas_height * channels;
-
-    graphics::opengl::Commands::read_pixels(0, 0, atlas_width, atlas_height, GL_RGBA, GL_UNSIGNED_BYTE, buffer_size);
-
-    if (auto* pixels = static_cast<uint8_t*>(framebuffer_pbo.map(0, buffer_size, GL_MAP_READ_BIT)))
-    {
-        stbi_flip_vertically_on_write(1);
-        stbi_write_png((folder_name + "_atlas.png").c_str(), atlas_width, atlas_height, channels, pixels, atlas_width * channels);
-
-        framebuffer_pbo.unmap();
-    }
+    SpritePacker characters_faces_packer { "textures/characters_faces", 512, 512 };
+    characters_faces_packer.init();
+    characters_faces_packer.build(sprite_program_shader, sprite_sampler, camera_ubo, transform_ubo);
 
     // atlas output - end
+
+    // atlas viewer - begin
+
+    const auto [atlas_viewer_vertices, atlas_viewer_elements] = create_sprite({ 0, 0, 256, 256 }, true);
+
+    graphics::opengl::Buffer atlas_viewer_geometry_vbo;
+    atlas_viewer_geometry_vbo.create();
+    atlas_viewer_geometry_vbo.storage(sizeof(sprite_vertex) * atlas_viewer_vertices.size(), atlas_viewer_vertices.data(), 0);
+
+    graphics::opengl::Buffer atlas_viewer_geometry_ebo;
+    atlas_viewer_geometry_ebo.create();
+    atlas_viewer_geometry_ebo.storage(sizeof(uint32_t) * atlas_viewer_elements.size(), atlas_viewer_elements.data(), 0);
+
+    graphics::opengl::VertexArray atlas_viewer_geometry_vao;
+    atlas_viewer_geometry_vao.create();
+
+    atlas_viewer_geometry_vao.attach_vertices(atlas_viewer_geometry_vbo, sizeof(sprite_vertex));
+    atlas_viewer_geometry_vao.attach_elements(atlas_viewer_geometry_ebo);
+
+    atlas_viewer_geometry_vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
+    atlas_viewer_geometry_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
+
+    // atlas viewer - end
 
     graphics::opengl::Pipeline::enable(GL_BLEND);
     graphics::opengl::Pipeline::blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -449,6 +348,7 @@ auto main() -> int32_t
     // input begin
 
     static auto show_cube = true;
+    static auto show_body = true;
 
     glfwSetKeyCallback(std::any_cast<GLFWwindow*>(window->handle()), [](GLFWwindow*, const int key, int, const int action, int)
     {
@@ -469,6 +369,11 @@ auto main() -> int32_t
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         {
             window_is_running = false;
+        }
+
+        if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
+        {
+            show_body = !show_body;
         }
     });
 
@@ -583,13 +488,24 @@ auto main() -> int32_t
 
         sprite_program_shader.bind();
 
-        framebuffer_texture.bind(0);
+        // atlas viewer - begin
 
-        sprite_geometry_vao.bind();
+        if (show_body)
+        {
+            characters_packer.texture.bind(0);
+        }
+        else
+        {
+            characters_faces_packer.texture.bind(0);
+        }
 
         transform_ubo.subdata(0, sizeof(sprite_matrix), &sprite_matrix);
 
-        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, sprite_elements.size());
+        atlas_viewer_geometry_vao.bind();
+
+        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, atlas_viewer_elements.size());
+
+        // atlas viewer - end
 
         // texts
 
@@ -622,13 +538,13 @@ auto main() -> int32_t
     sprite_sampler.destroy();
 
       cube_geometry_vao.destroy();
-    sprite_geometry_vao.destroy();
+    atlas_viewer_geometry_vao.destroy();
 
     cube_geometry_vbo.destroy();
     cube_geometry_ebo.destroy();
 
-    sprite_geometry_vbo.destroy();
-    sprite_geometry_ebo.destroy();
+    atlas_viewer_geometry_vbo.destroy();
+    atlas_viewer_geometry_ebo.destroy();
 
     model_program_shader.destroy();
     sprite_program_shader.destroy();

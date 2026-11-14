@@ -4,22 +4,36 @@
 #include "vertex_types.hpp"
 #include "texture_data.hpp"
 
+#include "graphics/opengl/texture.hpp"
+#include "graphics/opengl/shader_program.hpp"
+#include "graphics/opengl/texture_sampler.hpp"
+#include "graphics/opengl/buffer.hpp"
+
 // TODO maybe call it SpriteAtlasPacker? - check the english
 // TODO maybe at some point this can be extended from a tool class
 class SpritePacker
 {
 public:
-    auto  init(std::string_view folder, uint32_t width, uint32_t height) -> void;
-    auto build() -> void;
+    SpritePacker(const std::string& folder, uint32_t width, uint32_t height);
 
-    std::vector<texture_data> images_data;
-    std::vector<stbrp_rect>   rectangles;
+    auto init() -> void; // TODO maybe call this pack or packing? because it kind of does that
+    auto build(const graphics::opengl::ShaderProgram&  shader,   // TODO at some point use a resource/graphics manager to query for this shaders/samplers/uniform buffers
+               const graphics::opengl::TextureSampler& sampler,
+               const graphics::opengl::Buffer& camera_ubo,
+               const graphics::opengl::Buffer& transform_ubo) -> void;
 
-    geometry<sprite_vertex, uint32_t> rectangles_geometry;
+    graphics::opengl::Texture texture; // TODO when we will have a resource/graphics manager, this should be private
 
 private:
-    uint32_t _width;  // TODO are we using this?
-    uint32_t _height; // TODO are we using this?
+    geometry<sprite_vertex, uint32_t> _geometry;
+
+    std::vector<texture_data> _images;
+    std::vector<stbrp_rect>   _rectangles;
+
+    std::string _folder;
+
+    uint32_t _width;
+    uint32_t _height;
 };
 
 // TODO maybe the drawing can be in another class? like SpriteAtlasPackerDrawer? think of it
