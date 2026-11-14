@@ -22,6 +22,7 @@ public:
                const graphics::opengl::Buffer& camera_ubo,
                const graphics::opengl::Buffer& transform_ubo) -> void;
 
+    // top of the atlas is at v = 1 (flipped compared to the png/txt) - see the uv comment in init()
     graphics::opengl::Texture texture; // TODO when we will have a resource/graphics manager, this should be private
 
 private:

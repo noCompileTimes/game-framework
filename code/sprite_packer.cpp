@@ -57,9 +57,17 @@ auto SpritePacker::init() -> void
     }
 
     std::ofstream output_file;
-    output_file.open(std::string(_folder) + ".txt", std::ios::trunc);
-    // TODO check what this ios::trunc does
+    output_file.open(std::string(_folder) + ".txt");
     // TODO have the extension as sprites
+
+    // the txt rects (x y w h) are in pixels with the origin at the top-left of the atlas png
+    // when turning a rect into UVs, the v axis depends on which texture you sample:
+    //  - the png loaded with stbi_load (no vertical flip): row 0 is the top, so
+    //      u0 = x / W, u1 = (x + w) / W, v_top = y / H, v_bottom = (y + h) / H
+    //  - SpritePacker::texture (rendered by build()): the top of the atlas sits at v = 1 (opengl bottom-up), so
+    //      u0 = x / W, u1 = (x + w) / W, v_top = 1 - y / H, v_bottom = 1 - (y + h) / H
+    //    this is why the atlas viewer in main uses create_sprite(..., true)
+    // mixing these up draws the sprites upside down (and takes the wrong rows from the atlas)
 
     for (auto i = 0; i < rectangles_count; ++i)
     {
@@ -106,30 +114,26 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
     framebuffer_pbo.storage(buffer_size, nullptr, GL_MAP_READ_BIT);
     framebuffer_pbo.bind(GL_PIXEL_PACK_BUFFER);
 
-    // rectangles
+    // sprites
 
-    graphics::opengl::Buffer rectangles_vbo;
-    rectangles_vbo.create();
-    rectangles_vbo.storage(sizeof(sprite_vertex) * _geometry.vertices.size(), _geometry.vertices.data(), 0);
+    graphics::opengl::Buffer sprites_vbo;
+    sprites_vbo.create();
+    sprites_vbo.storage(sizeof(sprite_vertex) * _geometry.vertices.size(), _geometry.vertices.data(), 0);
 
-    graphics::opengl::Buffer rectangles_ebo;
-    rectangles_ebo.create();
-    rectangles_ebo.storage(sizeof(uint32_t) * _geometry.elements.size(), _geometry.elements.data(), 0);
+    graphics::opengl::Buffer sprites_ebo;
+    sprites_ebo.create();
+    sprites_ebo.storage(sizeof(uint32_t) * _geometry.elements.size(), _geometry.elements.data(), 0);
 
-    graphics::opengl::VertexArray rectangles_vao;
-    rectangles_vao.create();
+    graphics::opengl::VertexArray sprites_vao;
+    sprites_vao.create();
 
-    rectangles_vao.attach_vertices(rectangles_vbo, sizeof(sprite_vertex));
-    rectangles_vao.attach_elements(rectangles_ebo);
+    sprites_vao.attach_vertices(sprites_vbo, sizeof(sprite_vertex));
+    sprites_vao.attach_elements(sprites_ebo);
 
-    rectangles_vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
-    rectangles_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
+    sprites_vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
+    sprites_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
 
     constexpr core::rgba framebuffer_color { 0.0f, 0.0f, 0.0f, 0.0f };
-
-    graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
-
-    graphics::opengl::Pipeline::disable(GL_MULTISAMPLE); // TODO check if this is really necesary for the atlas output
 
     framebuffer.clear(&framebuffer_color.r, 0);
     //framebuffer.clear(1.0f);
@@ -148,9 +152,11 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
     camera_ubo.subdata(0, sizeof(data::camera), &sprite_camera_data);
 
     shader.bind();
+    // TODO use a dedicated GL_NEAREST sampler for the packing pass - the shared sprite sampler is GL_LINEAR, which is only
+    //      an exact copy while every quad lands on whole pixels at 1:1 scale (any half pixel offset or scaling blurs the atlas)
     sampler.bind(0);
 
-    rectangles_vao.bind();
+    sprites_vao.bind();
 
     for (auto i = 0; i < _images.size(); i++)
     {
@@ -184,5 +190,15 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
         framebuffer_pbo.unmap();
     }
 
-    // TODO we need to delete the buffers and other temp opengl objects?
+    for (const auto& image : _images)
+    {
+        stbi_image_free(image.pixels);
+    }
+
+    sprites_vao.destroy();
+    sprites_ebo.destroy();
+    sprites_vbo.destroy();
+
+    framebuffer_pbo.destroy();
+    framebuffer.destroy();
 }

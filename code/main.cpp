@@ -293,6 +293,9 @@ auto main() -> int32_t
 
     // atlas viewer - end
 
+    graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
+
+    graphics::opengl::Pipeline::enable(GL_MULTISAMPLE);
     graphics::opengl::Pipeline::enable(GL_BLEND);
     graphics::opengl::Pipeline::blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -350,7 +353,7 @@ auto main() -> int32_t
     static auto show_cube = true;
     static auto show_body = true;
 
-    glfwSetKeyCallback(std::any_cast<GLFWwindow*>(window->handle()), [](GLFWwindow*, const int key, int, const int action, int)
+    glfwSetKeyCallback(std::any_cast<GLFWwindow*>(window->handle()), [](GLFWwindow*, const int32_t key, int32_t, const int32_t action, int32_t)
     {
         if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
         {
