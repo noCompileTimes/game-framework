@@ -202,3 +202,5 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
     framebuffer_pbo.destroy();
     framebuffer.destroy();
 }
+
+// TODO remove the stbi_image_free from stbi_image and just use the default there, no custom allocator
