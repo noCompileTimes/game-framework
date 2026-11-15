@@ -20,10 +20,12 @@
 #include "data/light.hpp"
 
 #include "sprite_packer.hpp"
+#include "sprite_renderer.hpp"
 #include "geometry_utils.hpp"
 #include "resources.hpp"
 #include "text.hpp"
 #include "camera.hpp"
+#include "sprite.hpp"
 
 auto main() -> int32_t
 {
@@ -225,7 +227,7 @@ auto main() -> int32_t
     model_sampler.parameter(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     model_sampler.parameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    texture_data pavement_image = load_texture("textures/pavement_albedo.png");
+    image_data pavement_image = load_image("textures/pavement_albedo.png");
 
     graphics::opengl::Texture pavement_texture;
     pavement_texture.type = GL_TEXTURE_2D;
@@ -269,6 +271,60 @@ auto main() -> int32_t
     characters_faces_packer.build(sprite_program_shader, sprite_sampler, camera_ubo, transform_ubo);
 
     // atlas output - end
+
+    // sprite atlas reading - begin
+
+    std::ifstream sprite_atlas_file { "textures/characters.txt" };
+
+    std::string texture_filename;
+    sprite_atlas_file >> texture_filename;
+
+    auto sprite_atlas_image = load_image(texture_filename);
+
+    uint32_t rectangles_count;
+    sprite_atlas_file >> rectangles_count;
+
+    std::vector<sprite> sprites;
+
+    geometry<sprite_vertex, uint32_t> sprites_geometry;
+
+    for (auto i = 0; i < rectangles_count; i++)
+    {
+        sprite sprite;
+        sprite_atlas_file >> sprite.x >> sprite.y >> sprite.w >> sprite.h;
+
+        sprites.emplace_back(sprite);
+
+        // TODO this can be made in another for loop after we are done with the reading? make sense?
+        sprites_geometry.append(create_sprite({ 0, 0, sprite.w, sprite.h },
+            sprite.x, sprite.y, sprite.w, sprite.h,
+            sprite_atlas_image.width, sprite_atlas_image.height, false));
+    }
+
+    graphics::opengl::Buffer sprites_vbo;
+    sprites_vbo.create();
+    sprites_vbo.storage(sizeof(sprite_vertex) * sprites_geometry.vertices.size(), sprites_geometry.vertices.data(), 0);
+
+    graphics::opengl::Buffer sprites_ebo;
+    sprites_ebo.create();
+    sprites_ebo.storage(sizeof(uint32_t) * sprites_geometry.elements.size(), sprites_geometry.elements.data(), 0);
+
+    graphics::opengl::VertexArray sprites_vao;
+    sprites_vao.create();
+
+    sprites_vao.attach_vertices(sprites_vbo, sizeof(sprite_vertex));
+    sprites_vao.attach_elements(sprites_ebo);
+
+    sprites_vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
+    sprites_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
+
+    graphics::opengl::Texture sprite_atlas_texture;
+    sprite_atlas_texture.type = GL_TEXTURE_2D;
+    sprite_atlas_texture.create();
+    sprite_atlas_texture.storage(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA8, 1);
+    sprite_atlas_texture.subdata(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA, 0, sprite_atlas_image.pixels);
+
+    // sprite atlas reading - end
 
     // atlas viewer - begin
 
@@ -400,7 +456,7 @@ auto main() -> int32_t
             core::vec3 out_direction;
 
             // glfw gives the cursor from the top-left corner, the function expects it from the bottom-left
-            screen_pos_to_world_ray(static_cast<int>(mouse_x), screen_height - static_cast<int>(mouse_y),
+            screen_pos_to_world_ray(static_cast<int32_t>(mouse_x), screen_height - static_cast<int32_t>(mouse_y),
                 screen_width, screen_height, model_camera_data.view, model_camera_data.projection,out_origin,out_direction);
 
             if (const auto collision_object = physics.raycast(out_origin, out_direction); collision_object != nullptr)
@@ -490,6 +546,17 @@ auto main() -> int32_t
         camera_ubo.subdata(0, sizeof(data::camera), &sprite_camera_data);
 
         sprite_program_shader.bind();
+
+        // sprites drawing - begin
+
+        sprite_atlas_texture.bind(0);
+        sprites_vao.bind();
+
+        render_sprite(1550.0f, 450.0f, 41, false,  transform_ubo);
+        render_sprite(1495.0f, 536.0f, 44, false, transform_ubo);
+        render_sprite(1765.0f, 536.0f, 44, true, transform_ubo);
+
+        // sprites drawing - end
 
         // atlas viewer - begin
 

@@ -2,7 +2,7 @@
 
 #include "geometry.hpp"
 #include "vertex_types.hpp"
-#include "texture_data.hpp"
+#include "image_data.hpp"
 
 #include "graphics/opengl/texture.hpp"
 #include "graphics/opengl/shader_program.hpp"
@@ -28,8 +28,8 @@ public:
 private:
     geometry<sprite_vertex, uint32_t> _geometry;
 
-    std::vector<texture_data> _images;
-    std::vector<stbrp_rect>   _rectangles;
+    std::vector<image_data> _images;
+    std::vector<stbrp_rect> _rectangles;
 
     std::string _folder;
 

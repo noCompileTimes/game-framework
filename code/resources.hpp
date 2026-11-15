@@ -1,10 +1,10 @@
 #pragma once
 
-#include "texture_data.hpp"
+#include "image_data.hpp"
 
-static auto load_texture(const std::string_view filename) -> texture_data
+static auto load_image(const std::string_view filename) -> image_data
 {
-    texture_data data { };
+    image_data data { };
 
     data.pixels = stbi_load(filename.data(), &data.width, &data.height, &data.channels, 0);
 
@@ -16,19 +16,19 @@ static auto load_texture(const std::string_view filename) -> texture_data
     return data;
 }
 
-static auto load_textures(const std::vector<std::string_view>& filenames) -> std::vector<texture_data>
+static auto load_images(const std::vector<std::string_view>& filenames) -> std::vector<image_data>
 {
-    std::vector<texture_data> data;
+    std::vector<image_data> data;
 
     for (const auto& filename : filenames)
     {
-        data.emplace_back(load_texture(filename));
+        data.emplace_back(load_image(filename));
     }
 
     return data;
 }
 
-static auto load_textures(const std::string_view folder) -> std::vector<texture_data>
+static auto load_textures(const std::string_view folder) -> std::vector<image_data>
 {
     std::vector<std::filesystem::path> filenames;
 
@@ -51,11 +51,11 @@ static auto load_textures(const std::string_view folder) -> std::vector<texture_
 
     std::ranges::sort(filenames);
 
-    std::vector<texture_data> data;
+    std::vector<image_data> data;
 
     for (const auto& filename : filenames)
     {
-        data.emplace_back(load_texture(filename.string()));
+        data.emplace_back(load_image(filename.string()));
     }
 
     return data;

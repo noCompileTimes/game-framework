@@ -60,6 +60,11 @@ auto SpritePacker::init() -> void
     output_file.open(std::string(_folder) + ".txt");
     // TODO have the extension as sprites
 
+    // TODO maybe strip the "textures/" part from it
+    output_file << _folder + "_atlas.png" << std::endl;
+
+    output_file << rectangles_count << std::endl;
+
     // the txt rects (x y w h) are in pixels with the origin at the top-left of the atlas png
     // when turning a rect into UVs, the v axis depends on which texture you sample:
     //  - the png loaded with stbi_load (no vertical flip): row 0 is the top, so
@@ -175,6 +180,7 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
         rectangle_texture.subdata(rectangle.w, rectangle.h, GL_RGBA, 0, _images[i].pixels);
         rectangle_texture.bind(0); // TODO use a constant here? like albedo?
 
+        // TODO make a constant somewhere for this 6 to know about the elements of a sprite
         graphics::opengl::Commands::draw_elements(GL_TRIANGLES, i * 6, 6);
 
         rectangle_texture.destroy();
