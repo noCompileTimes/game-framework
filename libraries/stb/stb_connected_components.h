@@ -102,7 +102,6 @@ extern size_t stbcc_grid_sizeof(void);
 // initialize the grid, value of map[] is 0 = traversable, non-0 is solid
 extern void stbcc_init_grid(stbcc_grid *g, unsigned char *map, int w, int h);
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //
 //  main functionality

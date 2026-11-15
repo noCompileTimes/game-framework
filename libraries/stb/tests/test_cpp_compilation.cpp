@@ -70,9 +70,6 @@ void my_free(void *) { }
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize2.h"
 
-//#include "stretchy_buffer.h"  // deprecating
-
-
 // avoid unused-function complaints
 void dummy2(void)
 {
@@ -81,7 +78,6 @@ void dummy2(void)
    stb_easy_font_width(NULL);
    stb_easy_font_height(NULL);
 }
-
 
 ////////////////////////////////////////////////////////////
 //
@@ -170,7 +166,6 @@ int insert_chars(STB_TEXTEDIT_STRING *str, int pos, STB_TEXTEDIT_CHARTYPE *newte
 #define STB_TEXTEDIT_IMPLEMENTATION
 #include "stb_textedit.h"
 
-
 void dummy3(void)
 {
   stb_textedit_click(0,0,0,0);
@@ -180,5 +175,3 @@ void dummy3(void)
   stb_textedit_initialize_state(0,0);
   stb_textedit_paste(0,0,0,0);
 }
-
-#include "stb_c_lexer.h"
