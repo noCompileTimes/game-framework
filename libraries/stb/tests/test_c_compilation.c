@@ -21,7 +21,6 @@
 #include "stb_image_write.h"
 #include "stb_perlin.h"
 #include "stb_c_lexer.h"
-#include "stb_divide.h"
 #include "stb_rect_pack.h"
 #include "stb_dxt.h"
 #include "stb_include.h"
@@ -40,7 +39,6 @@ void STBTE_DRAW_TILE(int x0, int y0, unsigned short id, int highlight, float *da
 }
 
 #define STB_TILEMAP_EDITOR_IMPLEMENTATION
-//#include "stb_tilemap_editor.h"   // @TODO: it's broken
 
 int quicktest(void)
 {
