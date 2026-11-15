@@ -534,9 +534,9 @@ _GLFWjoystick* _glfwAllocJoystick(const char* name,
 //
 void _glfwFreeJoystick(_GLFWjoystick* js)
 {
-    _glfw_free(js->axes);
-    _glfw_free(js->buttons);
-    _glfw_free(js->hats);
+    free(js->axes);
+    free(js->buttons);
+    free(js->hats);
     memset(js, 0, sizeof(_GLFWjoystick));
 }
 
@@ -932,7 +932,7 @@ GLFWAPI void glfwDestroyCursor(GLFWcursor* handle)
         *prev = cursor->next;
     }
 
-    _glfw_free(cursor);
+    free(cursor);
 }
 
 GLFWAPI void glfwSetCursor(GLFWwindow* windowHandle, GLFWcursor* cursorHandle)

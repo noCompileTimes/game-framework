@@ -99,11 +99,11 @@ static void closeJoystick(_GLFWjoystick* js)
     _glfwInputJoystick(js, GLFW_DISCONNECTED);
 
     for (int i = 0;  i < CFArrayGetCount(js->ns.axes);  i++)
-        _glfw_free((void*) CFArrayGetValueAtIndex(js->ns.axes, i));
+        free((void*) CFArrayGetValueAtIndex(js->ns.axes, i));
     CFRelease(js->ns.axes);
 
     for (int i = 0;  i < CFArrayGetCount(js->ns.buttons);  i++)
-        _glfw_free((void*) CFArrayGetValueAtIndex(js->ns.buttons, i));
+        free((void*) CFArrayGetValueAtIndex(js->ns.buttons, i));
     CFRelease(js->ns.buttons);
 
     for (int i = 0;  i < CFArrayGetCount(js->ns.hats);  i++)

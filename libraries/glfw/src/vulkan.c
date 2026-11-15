@@ -155,7 +155,7 @@ GLFWbool _glfwInitVulkan(int mode)
                         "Vulkan: Failed to query instance extensions: %s",
                         _glfwGetVulkanResultString(err));
 
-        _glfw_free(ep);
+        free(ep);
         _glfwTerminateVulkan();
         return GLFW_FALSE;
     }
@@ -180,7 +180,7 @@ GLFWbool _glfwInitVulkan(int mode)
             _glfw.vk.EXT_headless_surface = true;
     }
 
-    _glfw_free(ep);
+    free(ep);
 
     _glfw.vk.available = GLFW_TRUE;
 

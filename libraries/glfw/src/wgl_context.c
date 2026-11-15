@@ -67,7 +67,6 @@ static int choosePixelFormatWGL(_GLFWwindow* window,
                                 const _GLFWfbconfig* fbconfig)
 {
     _GLFWfbconfig* usableConfigs;
-    const _GLFWfbconfig* closest;
     int i, pixelFormat, nativeCount, usableCount = 0, attribCount = 0;
     int attribs[40];
     int values[sizeof(attribs) / sizeof(attribs[0])];
@@ -153,7 +152,7 @@ static int choosePixelFormatWGL(_GLFWwindow* window,
                 _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
                                     "WGL: Failed to retrieve pixel format attributes");
 
-                _glfw_free(usableConfigs);
+                free(usableConfigs);
                 return 0;
             }
 
@@ -216,10 +215,9 @@ static int choosePixelFormatWGL(_GLFWwindow* window,
                                      sizeof(PIXELFORMATDESCRIPTOR),
                                      &pfd))
             {
-                _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
-                                    "WGL: Failed to describe pixel format");
+                _glfwInputErrorWin32(GLFW_PLATFORM_ERROR, "WGL: Failed to describe pixel format");
 
-                _glfw_free(usableConfigs);
+                free(usableConfigs);
                 return 0;
             }
 
@@ -229,8 +227,7 @@ static int choosePixelFormatWGL(_GLFWwindow* window,
                 continue;
             }
 
-            if (!(pfd.dwFlags & PFD_GENERIC_ACCELERATED) &&
-                (pfd.dwFlags & PFD_GENERIC_FORMAT))
+            if (!(pfd.dwFlags & PFD_GENERIC_ACCELERATED) && pfd.dwFlags & PFD_GENERIC_FORMAT)
             {
                 continue;
             }
@@ -267,22 +264,22 @@ static int choosePixelFormatWGL(_GLFWwindow* window,
         _glfwInputError(GLFW_API_UNAVAILABLE,
                         "WGL: The driver does not appear to support OpenGL");
 
-        _glfw_free(usableConfigs);
+        free(usableConfigs);
         return 0;
     }
 
-    closest = _glfwChooseFBConfig(fbconfig, usableConfigs, usableCount);
+    const _GLFWfbconfig* closest = _glfwChooseFBConfig(fbconfig, usableConfigs, usableCount);
     if (!closest)
     {
         _glfwInputError(GLFW_FORMAT_UNAVAILABLE,
                         "WGL: Failed to find a suitable pixel format");
 
-        _glfw_free(usableConfigs);
+        free(usableConfigs);
         return 0;
     }
 
     pixelFormat = (int) closest->handle;
-    _glfw_free(usableConfigs);
+    free(usableConfigs);
 
     return pixelFormat;
 }

@@ -78,13 +78,12 @@ static GLFWbool refreshVideoModes(_GLFWmonitor* monitor)
 
     qsort(modes, modeCount, sizeof(GLFWvidmode), compareVideoModes);
 
-    _glfw_free(monitor->modes);
+    free(monitor->modes);
     monitor->modes = modes;
     monitor->modeCount = modeCount;
 
     return GLFW_TRUE;
 }
-
 
 //////////////////////////////////////////////////////////////////////////
 //////                         GLFW event API                       //////
@@ -191,8 +190,8 @@ void _glfwFreeMonitor(_GLFWmonitor* monitor)
     _glfwFreeGammaArrays(&monitor->originalRamp);
     _glfwFreeGammaArrays(&monitor->currentRamp);
 
-    _glfw_free(monitor->modes);
-    _glfw_free(monitor);
+    free(monitor->modes);
+    free(monitor);
 }
 
 // Allocates red, green and blue value arrays of the specified size
@@ -209,9 +208,9 @@ void _glfwAllocGammaArrays(GLFWgammaramp* ramp, unsigned int size)
 //
 void _glfwFreeGammaArrays(GLFWgammaramp* ramp)
 {
-    _glfw_free(ramp->red);
-    _glfw_free(ramp->green);
-    _glfw_free(ramp->blue);
+    free(ramp->red);
+    free(ramp->green);
+    free(ramp->blue);
 
     memset(ramp, 0, sizeof(GLFWgammaramp));
 }
@@ -507,7 +506,7 @@ GLFWAPI void glfwSetGamma(GLFWmonitor* handle, float gamma)
     ramp.size = original->size;
 
     glfwSetGammaRamp(handle, &ramp);
-    _glfw_free(values);
+    free(values);
 }
 
 GLFWAPI const GLFWgammaramp* glfwGetGammaRamp(GLFWmonitor* handle)

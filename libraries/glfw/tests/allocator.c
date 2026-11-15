@@ -38,8 +38,8 @@ static const char* function_name = NULL;
 struct allocator_stats
 {
     size_t total;
-    size_t current;
-    size_t maximum;
+    size_t allocations;
+    size_t reallocations;
 };
 
 static void error_callback(int error, const char* description)
@@ -53,31 +53,14 @@ static void* allocate(size_t size, void* user)
     assert(size > 0);
 
     stats->total += size;
-    stats->current += size;
-    if (stats->current > stats->maximum)
-        stats->maximum = stats->current;
+    stats->allocations++;
 
-    printf("%s: allocate %zu bytes (current %zu maximum %zu total %zu)\n",
-           function_name, size, stats->current, stats->maximum, stats->total);
+    printf("%s: allocate %zu bytes (allocations %zu total %zu)\n",
+           function_name, size, stats->allocations, stats->total);
 
-    size_t* real_block = malloc(size + sizeof(size_t));
-    assert(real_block != NULL);
-    *real_block = size;
-    return real_block + 1;
-}
-
-static void deallocate(void* block, void* user)
-{
-    struct allocator_stats* stats = user;
+    void* block = malloc(size);
     assert(block != NULL);
-
-    size_t* real_block = (size_t*) block - 1;
-    stats->current -= *real_block;
-
-    printf("%s: deallocate %zu bytes (current %zu maximum %zu total %zu)\n",
-           function_name, *real_block, stats->current, stats->maximum, stats->total);
-
-    free(real_block);
+    return block;
 }
 
 static void* reallocate(void* block, size_t size, void* user)
@@ -86,19 +69,15 @@ static void* reallocate(void* block, size_t size, void* user)
     assert(block != NULL);
     assert(size > 0);
 
-    size_t* real_block = (size_t*) block - 1;
     stats->total += size;
-    stats->current += size - *real_block;
-    if (stats->current > stats->maximum)
-        stats->maximum = stats->current;
+    stats->reallocations++;
 
-    printf("%s: reallocate %zu bytes to %zu bytes (current %zu maximum %zu total %zu)\n",
-           function_name, *real_block, size, stats->current, stats->maximum, stats->total);
+    printf("%s: reallocate to %zu bytes (reallocations %zu total %zu)\n",
+           function_name, size, stats->reallocations, stats->total);
 
-    real_block = realloc(real_block, size + sizeof(size_t));
-    assert(real_block != NULL);
-    *real_block = size;
-    return real_block + 1;
+    void* resized = realloc(block, size);
+    assert(resized != NULL);
+    return resized;
 }
 
 int main(void)
@@ -107,7 +86,6 @@ int main(void)
     const GLFWallocator allocator =
     {
         .allocate = allocate,
-        .deallocate = deallocate,
         .reallocate = reallocate,
         .user = &stats
     };

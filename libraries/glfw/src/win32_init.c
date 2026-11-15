@@ -428,7 +428,7 @@ WCHAR* _glfwCreateWideStringFromUTF8Win32(const char* source)
     {
         _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
                              "Win32: Failed to convert string from UTF-8");
-        _glfw_free(target);
+        free(target);
         return NULL;
     }
 
@@ -454,9 +454,8 @@ char* _glfwCreateUTF8FromWideStringWin32(const WCHAR* source)
 
     if (!WideCharToMultiByte(CP_UTF8, 0, source, -1, target, size, NULL, NULL))
     {
-        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
-                             "Win32: Failed to convert string to UTF-8");
-        _glfw_free(target);
+        _glfwInputErrorWin32(GLFW_PLATFORM_ERROR, "Win32: Failed to convert string to UTF-8");
+        free(target);
         return NULL;
     }
 
@@ -687,8 +686,8 @@ void _glfwTerminateWin32(void)
     if (_glfw.win32.mainWindowClass)
         UnregisterClassW(MAKEINTATOM(_glfw.win32.mainWindowClass), _glfw.win32.instance);
 
-    _glfw_free(_glfw.win32.clipboardString);
-    _glfw_free(_glfw.win32.rawInput);
+    free(_glfw.win32.clipboardString);
+    free(_glfw.win32.rawInput);
 
     _glfwTerminateWGL();
 

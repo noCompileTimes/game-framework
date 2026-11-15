@@ -203,7 +203,7 @@ static GLFWbool supportsXInput(const GUID* guid)
 
     if (GetRawInputDeviceList(ridl, &count, sizeof(RAWINPUTDEVICELIST)) == (UINT) -1)
     {
-        _glfw_free(ridl);
+        free(ridl);
         return GLFW_FALSE;
     }
 
@@ -248,7 +248,7 @@ static GLFWbool supportsXInput(const GUID* guid)
         }
     }
 
-    _glfw_free(ridl);
+    free(ridl);
     return result;
 }
 
@@ -264,7 +264,7 @@ static void closeJoystick(_GLFWjoystick* js)
         IDirectInputDevice8_Release(js->win32.device);
     }
 
-    _glfw_free(js->win32.objects);
+    free(js->win32.objects);
     _glfwFreeJoystick(js);
 }
 
@@ -428,7 +428,7 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
                         "Win32: Failed to enumerate device objects");
 
         IDirectInputDevice8_Release(device);
-        _glfw_free(data.objects);
+        free(data.objects);
         return DIENUM_CONTINUE;
     }
 
@@ -445,7 +445,7 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
                         "Win32: Failed to convert joystick name to UTF-8");
 
         IDirectInputDevice8_Release(device);
-        _glfw_free(data.objects);
+        free(data.objects);
         return DIENUM_STOP;
     }
 
@@ -473,7 +473,7 @@ static BOOL CALLBACK deviceCallback(const DIDEVICEINSTANCE* di, void* user)
     if (!js)
     {
         IDirectInputDevice8_Release(device);
-        _glfw_free(data.objects);
+        free(data.objects);
         return DIENUM_STOP;
     }
 

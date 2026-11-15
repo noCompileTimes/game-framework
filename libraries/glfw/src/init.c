@@ -72,13 +72,6 @@ static void* defaultAllocate(size_t size, void* user)
     return malloc(size);
 }
 
-// The deallocation function used when no custom allocator is set
-//
-static void defaultDeallocate(void* block, void* user)
-{
-    free(block);
-}
-
 // The reallocation function used when no custom allocator is set
 //
 static void* defaultReallocate(void* block, size_t size, void* user)
@@ -106,11 +99,11 @@ static void terminate(void)
         _glfwFreeMonitor(monitor);
     }
 
-    _glfw_free(_glfw.monitors);
+    free(_glfw.monitors);
     _glfw.monitors = NULL;
     _glfw.monitorCount = 0;
 
-    _glfw_free(_glfw.mappings);
+    free(_glfw.mappings);
     _glfw.mappings = NULL;
     _glfw.mappingCount = 0;
 
@@ -124,7 +117,7 @@ static void terminate(void)
     {
         _GLFWerror* error = _glfw.errorListHead;
         _glfw.errorListHead = error->next;
-        _glfw_free(error);
+        free(error);
     }
 
     _glfwPlatformDestroyTls(&_glfw.contextSlot);
@@ -183,8 +176,6 @@ char** _glfwParseUriList(char* text, int* count)
 
     while ((line = strtok(text, "\r\n")))
     {
-        char* path;
-
         text = NULL;
 
         if (line[0] == '#')
@@ -200,7 +191,7 @@ char** _glfwParseUriList(char* text, int* count)
 
         (*count)++;
 
-        path = _glfw_calloc(strlen(line) + 1, 1);
+        char* path = _glfw_calloc(strlen(line) + 1, 1);
         paths = _glfw_realloc(paths, *count * sizeof(char*));
         paths[*count - 1] = path;
 
@@ -245,25 +236,21 @@ void* _glfw_calloc(size_t count, size_t size)
 {
     if (count && size)
     {
-        void* block;
-
         if (count > SIZE_MAX / size)
         {
             _glfwInputError(GLFW_INVALID_VALUE, "Allocation size overflow");
             return NULL;
         }
 
-        block = _glfw.allocator.allocate(count * size, _glfw.allocator.user);
+        void* block = _glfw.allocator.allocate(count * size, _glfw.allocator.user);
         if (block)
             return memset(block, 0, count * size);
-        else
-        {
-            _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
-            return NULL;
-        }
-    }
-    else
+
+        _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
         return NULL;
+    }
+
+    return NULL;
 }
 
 void* _glfw_realloc(void* block, size_t size)
@@ -273,27 +260,19 @@ void* _glfw_realloc(void* block, size_t size)
         void* resized = _glfw.allocator.reallocate(block, size, _glfw.allocator.user);
         if (resized)
             return resized;
-        else
-        {
-            _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
-            return NULL;
-        }
-    }
-    else if (block)
-    {
-        _glfw_free(block);
+
+        _glfwInputError(GLFW_OUT_OF_MEMORY, NULL);
         return NULL;
     }
-    else
-        return _glfw_calloc(1, size);
-}
 
-void _glfw_free(void* block)
-{
     if (block)
-        _glfw.allocator.deallocate(block, _glfw.allocator.user);
-}
+    {
+        free(block);
+        return NULL;
+    }
 
+    return _glfw_calloc(1, size);
+}
 
 //////////////////////////////////////////////////////////////////////////
 //////                         GLFW event API                       //////
@@ -373,7 +352,6 @@ void _glfwInputError(int code, const char* format, ...)
         _glfwErrorCallback(code, description);
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 //////                        GLFW public API                       //////
 //////////////////////////////////////////////////////////////////////////
@@ -391,7 +369,6 @@ GLFWAPI int glfwInit(void)
     {
         _glfw.allocator.allocate   = defaultAllocate;
         _glfw.allocator.reallocate = defaultReallocate;
-        _glfw.allocator.deallocate = defaultDeallocate;
     }
 
     if (!_glfwSelectPlatform(_glfw.hints.init.platformID, &_glfw.platform))
@@ -463,7 +440,7 @@ GLFWAPI void glfwInitAllocator(const GLFWallocator* allocator)
 {
     if (allocator)
     {
-        if (allocator->allocate && allocator->reallocate && allocator->deallocate)
+        if (allocator->allocate && allocator->reallocate)
             _glfwInitAllocator = *allocator;
         else
             _glfwInputError(GLFW_INVALID_VALUE, "Missing function in allocator");

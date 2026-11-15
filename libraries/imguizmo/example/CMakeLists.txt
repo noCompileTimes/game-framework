@@ -4,8 +4,7 @@ FetchContent_Declare(
     stb
     GIT_REPOSITORY https://github.com/nothings/stb.git
     GIT_TAG master
-    GIT_SHALLOW TRUE
-)
+    GIT_SHALLOW TRUE)
 FetchContent_MakeAvailable(stb)
 target_include_directories(imgui PUBLIC ${stb_SOURCE_DIR})]]
 

@@ -1388,8 +1388,8 @@ typedef struct GLFWcursor GLFWcursor;
  *  flagged as initialized, as well as during @ref glfwTerminate after the library is no
  *  longer flagged as initialized.
  *
- *  Any memory allocated via this function will be deallocated via the same allocator
- *  during library termination or earlier.
+ *  Any memory allocated via this function will be released with the C runtime `free`
+ *  during library termination or earlier, so it must come directly from `malloc`.
  *
  *  Any memory allocated via this function must be suitably aligned for any object type.
  *  If you are using C99 or earlier, this alignment is platform-dependent but will be the
@@ -1441,8 +1441,8 @@ typedef void* (* GLFWallocatefun)(size_t size, void* user);
  *  flagged as initialized, as well as during @ref glfwTerminate after the library is no
  *  longer flagged as initialized.
  *
- *  Any memory allocated via this function will be deallocated via the same allocator
- *  during library termination or earlier.
+ *  Any memory allocated via this function will be released with the C runtime `free`
+ *  during library termination or earlier, so it must come directly from `realloc`.
  *
  *  Any memory allocated via this function must be suitably aligned for any object type.
  *  If you are using C99 or earlier, this alignment is platform-dependent but will be the
@@ -1480,48 +1480,6 @@ typedef void* (* GLFWallocatefun)(size_t size, void* user);
  *  @ingroup init
  */
 typedef void* (* GLFWreallocatefun)(void* block, size_t size, void* user);
-
-/*! @brief The function pointer type for memory deallocation callbacks.
- *
- *  This is the function pointer type for memory deallocation callbacks.
- *  A memory deallocation callback function has the following signature:
- *  @code
- *  void function_name(void* block, void* user)
- *  @endcode
- *
- *  This function may deallocate the specified memory block.  This memory block
- *  will have been allocated with the same allocator.
- *
- *  This function must support being called during @ref glfwInit but before the library is
- *  flagged as initialized, as well as during @ref glfwTerminate after the library is no
- *  longer flagged as initialized.
- *
- *  The block address will never be `NULL`.  Deallocations of `NULL` are filtered out
- *  before reaching the custom allocator.
- *
- *  If this function returns `NULL`, GLFW will emit @ref GLFW_OUT_OF_MEMORY.
- *
- *  This function must not call any GLFW function.
- *
- *  @param[in] block The address of the memory block to deallocate.
- *  @param[in] user The user-defined pointer from the allocator.
- *
- *  @pointer_lifetime The specified memory block will not be accessed by GLFW
- *  after this function is called.
- *
- *  @reentrancy This function should not call any GLFW function.
- *
- *  @thread_safety This function must support being called from any thread that calls GLFW
- *  functions.
- *
- *  @sa @ref init_allocator
- *  @sa @ref GLFWallocator
- *
- *  @since Added in version 3.4.
- *
- *  @ingroup init
- */
-typedef void (* GLFWdeallocatefun)(void* block, void* user);
 
 /*! @brief The function pointer type for error callbacks.
  *
@@ -2102,16 +2060,11 @@ typedef struct GLFWallocator
      *  reallocation function.
      */
     GLFWreallocatefun reallocate;
-    /*! The memory deallocation function.  See @ref GLFWdeallocatefun for details about
-     *  deallocation function.
-     */
-    GLFWdeallocatefun deallocate;
     /*! The user pointer for this custom allocator.  This value will be passed to the
      *  allocator functions.
      */
     void* user;
 } GLFWallocator;
-
 
 /*************************************************************************
  * GLFW API functions
@@ -2252,8 +2205,7 @@ GLFWAPI void glfwInitHint(int hint, int value);
  *  GLFW_INVALID_VALUE and the init allocator will be unchanged.
  *
  *  The functions in the allocator must fulfil a number of requirements.  See the
- *  documentation for @ref GLFWallocatefun, @ref GLFWreallocatefun and @ref
- *  GLFWdeallocatefun for details.
+ *  documentation for @ref GLFWallocatefun and @ref GLFWreallocatefun for details.
  *
  *  @param[in] allocator The allocator to use at the next initialization, or
  *  `NULL` to use the default one.

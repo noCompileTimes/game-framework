@@ -170,7 +170,6 @@ enum
    STBRP_HEURISTIC_Skyline_BF_sortHeight
 };
 
-
 //////////////////////////////////////////////////////////////////////////////
 //
 // the details of the following structures don't matter to you, but they must

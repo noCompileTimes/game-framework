@@ -59,13 +59,10 @@ static BOOL CALLBACK monitorCallback(HMONITOR handle,
 
 // Create monitor from an adapter and (optionally) a display
 //
-static _GLFWmonitor* createMonitor(DISPLAY_DEVICEW* adapter,
-                                   DISPLAY_DEVICEW* display)
+static _GLFWmonitor* createMonitor(DISPLAY_DEVICEW* adapter, DISPLAY_DEVICEW* display)
 {
-    _GLFWmonitor* monitor;
     int widthMM, heightMM;
     char* name;
-    HDC dc;
     DEVMODEW dm;
     RECT rect;
 
@@ -80,7 +77,7 @@ static _GLFWmonitor* createMonitor(DISPLAY_DEVICEW* adapter,
     dm.dmSize = sizeof(dm);
     EnumDisplaySettingsW(adapter->DeviceName, ENUM_CURRENT_SETTINGS, &dm);
 
-    dc = CreateDCW(L"DISPLAY", adapter->DeviceName, NULL, NULL);
+    HDC dc = CreateDCW(L"DISPLAY", adapter->DeviceName, NULL, NULL);
 
     if (IsWindows8Point1OrGreater())
     {
@@ -95,8 +92,8 @@ static _GLFWmonitor* createMonitor(DISPLAY_DEVICEW* adapter,
 
     DeleteDC(dc);
 
-    monitor = _glfwAllocMonitor(name, widthMM, heightMM);
-    _glfw_free(name);
+    _GLFWmonitor* monitor = _glfwAllocMonitor(name, widthMM, heightMM);
+    free(name);
 
     if (adapter->StateFlags & DISPLAY_DEVICE_MODESPRUNED)
         monitor->win32.modesPruned = GLFW_TRUE;
@@ -197,7 +194,7 @@ void _glfwPollMonitorsWin32(void)
             monitor = createMonitor(&adapter, &display);
             if (!monitor)
             {
-                _glfw_free(disconnected);
+                free(disconnected);
                 return;
             }
 
@@ -227,7 +224,7 @@ void _glfwPollMonitorsWin32(void)
             monitor = createMonitor(&adapter, NULL);
             if (!monitor)
             {
-                _glfw_free(disconnected);
+                free(disconnected);
                 return;
             }
 
@@ -241,7 +238,7 @@ void _glfwPollMonitorsWin32(void)
             _glfwInputMonitor(disconnected[i], GLFW_DISCONNECTED, 0);
     }
 
-    _glfw_free(disconnected);
+    free(disconnected);
 }
 
 // Change the current video mode
