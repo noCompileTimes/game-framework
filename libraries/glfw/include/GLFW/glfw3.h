@@ -1005,24 +1005,6 @@ extern "C" {
  *  [attribute](@ref GLFW_CLIENT_API_attrib).
  */
 #define GLFW_CLIENT_API             0x00022001
-/*! @brief Context client API major version hint and attribute.
- *
- *  Context client API major version [hint](@ref GLFW_CONTEXT_VERSION_MAJOR_hint)
- *  and [attribute](@ref GLFW_CONTEXT_VERSION_MAJOR_attrib).
- */
-#define GLFW_CONTEXT_VERSION_MAJOR  0x00022002
-/*! @brief Context client API minor version hint and attribute.
- *
- *  Context client API minor version [hint](@ref GLFW_CONTEXT_VERSION_MINOR_hint)
- *  and [attribute](@ref GLFW_CONTEXT_VERSION_MINOR_attrib).
- */
-#define GLFW_CONTEXT_VERSION_MINOR  0x00022003
-/*! @brief Context client API revision number attribute.
- *
- *  Context client API revision number
- *  [attribute](@ref GLFW_CONTEXT_REVISION_attrib).
- */
-#define GLFW_CONTEXT_REVISION       0x00022004
 /*! @brief Context robustness hint and attribute.
  *
  *  Context client API revision number [hint](@ref GLFW_CONTEXT_ROBUSTNESS_hint)

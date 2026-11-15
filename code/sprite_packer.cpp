@@ -46,7 +46,7 @@ auto SpritePacker::init() -> void
     // so their placement in the atlas is arbitrary (the result is still correct, the txt keeps the file name order)
     // TODO if we want a predictable visual order in the atlas, define STBRP_SORT (in stb.c) with a stable sort
     const auto all_packed = stbrp_pack_rects(&stbrp_context, _rectangles.data(), rectangles_count);
-    printf("Packing status: %s\n\n", all_packed ? "All packed successfully!" : "Some rectangles did not fit.");
+    std::println("{} {}", _folder, all_packed ? "packed successfully" : "few rectangles did not fit.");
 
     for (auto& rectangle : _rectangles)
     {
@@ -81,7 +81,7 @@ auto SpritePacker::init() -> void
         }
         else
         {
-            printf("Rect FAILED to pack [Size: %dx%d]\n", _rectangles[i].w, _rectangles[i].h);
+            std::println("Rect FAILED to pack [Size: {}x{}]", _rectangles[i].w, _rectangles[i].h);
         }
     }
 }
