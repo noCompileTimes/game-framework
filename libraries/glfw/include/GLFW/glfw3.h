@@ -3912,44 +3912,6 @@ GLFWAPI GLFWmonitor* glfwGetWindowMonitor(GLFWwindow* window);
  */
 GLFWAPI void glfwSetWindowMonitor(GLFWwindow* window, GLFWmonitor* monitor, int xpos, int ypos, int width, int height, int refreshRate);
 
-/*! @brief Returns an attribute of the specified window.
- *
- *  This function returns the value of an attribute of the specified window or
- *  its OpenGL or OpenGL ES context.
- *
- *  @param[in] window The window to query.
- *  @param[in] attrib The [window attribute](@ref window_attribs) whose value to
- *  return.
- *  @return The value of the attribute, or zero if an
- *  [error](@ref error_handling) occurred.
- *
- *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED, @ref
- *  GLFW_INVALID_ENUM and @ref GLFW_PLATFORM_ERROR.
- *
- *  @remark Framebuffer related hints are not window attributes.  See @ref
- *  window_attribs_fb for more information.
- *
- *  @remark Zero is a valid value for many window and context related
- *  attributes so you cannot use a return value of zero as an indication of
- *  errors.  However, this function should not fail as long as it is passed
- *  valid arguments and the library has been [initialized](@ref intro_init).
- *
- *  @remark __Wayland:__ Checking whether a window is iconified is not currently
- *  part of any common Wayland protocol, so the @ref GLFW_ICONIFIED attribute
- *  cannot be implemented and is always `GLFW_FALSE`.
- *
- *  @thread_safety This function must only be called from the main thread.
- *
- *  @sa @ref window_attribs
- *  @sa @ref glfwSetWindowAttrib
- *
- *  @since Added in version 3.0.  Replaces `glfwGetWindowParam` and
- *  `glfwGetGLVersion`.
- *
- *  @ingroup window
- */
-GLFWAPI int glfwGetWindowAttrib(GLFWwindow* window, int attrib);
-
 /*! @brief Sets an attribute of the specified window.
  *
  *  This function sets the value of an attribute of the specified window.
