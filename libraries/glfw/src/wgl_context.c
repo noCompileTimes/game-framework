@@ -530,38 +530,17 @@ GLFWbool _glfwCreateContextWGL(_GLFWwindow* window,
         return GLFW_FALSE;
     }
 
-    if (ctxconfig->client == GLFW_OPENGL_API)
+    // Contexts are always created with the core profile, which needs both extensions
+    if (!_glfw.wgl.ARB_create_context || !_glfw.wgl.ARB_create_context_profile)
     {
-        if (ctxconfig->profile)
-        {
-            if (!_glfw.wgl.ARB_create_context_profile)
-            {
-                _glfwInputError(GLFW_VERSION_UNAVAILABLE,
-                                "WGL: OpenGL profile requested but WGL_ARB_create_context_profile is unavailable");
-                return GLFW_FALSE;
-            }
-        }
-    }
-    else
-    {
-        if (!_glfw.wgl.ARB_create_context ||
-            !_glfw.wgl.ARB_create_context_profile)
-        {
-            _glfwInputError(GLFW_API_UNAVAILABLE,
-                            "WGL: OpenGL ES requested but WGL_ARB_create_context_es2_profile is unavailable");
-            return GLFW_FALSE;
-        }
+        _glfwInputError(GLFW_VERSION_UNAVAILABLE,
+                        "WGL: Core profile context requested but WGL_ARB_create_context_profile is unavailable");
+        return GLFW_FALSE;
     }
 
-    if (_glfw.wgl.ARB_create_context)
     {
-        int index = 0, mask = 0, flags = 0;
-
-        if (ctxconfig->client == GLFW_OPENGL_API)
-        {
-            if (ctxconfig->profile == GLFW_OPENGL_CORE_PROFILE)
-                mask |= WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
-        }
+        int index = 0, flags = 0;
+        const int mask = WGL_CONTEXT_CORE_PROFILE_BIT_ARB;
 
         if (ctxconfig->debug)
             flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
@@ -608,21 +587,14 @@ GLFWbool _glfwCreateContextWGL(_GLFWwindow* window,
                 SET_ATTRIB(WGL_CONTEXT_OPENGL_NO_ERROR_ARB, true);
         }
 
-        // NOTE: Only request an explicitly versioned context when necessary, as
-        //       explicitly requesting version 1.0 does not always return the
-        //       highest version supported by the driver
-        if (ctxconfig->major != 1 || ctxconfig->minor != 0)
-        {
-            SET_ATTRIB(WGL_CONTEXT_MAJOR_VERSION_ARB, ctxconfig->major);
-            SET_ATTRIB(WGL_CONTEXT_MINOR_VERSION_ARB, ctxconfig->minor);
-        }
+        // Core profile contexts are always 3.2 or above, so the version is always requested explicitly
+        SET_ATTRIB(WGL_CONTEXT_MAJOR_VERSION_ARB, ctxconfig->major);
+        SET_ATTRIB(WGL_CONTEXT_MINOR_VERSION_ARB, ctxconfig->minor);
 
         if (flags)
             SET_ATTRIB(WGL_CONTEXT_FLAGS_ARB, flags);
 
-        if (mask)
-            SET_ATTRIB(WGL_CONTEXT_PROFILE_MASK_ARB, mask);
-
+        SET_ATTRIB(WGL_CONTEXT_PROFILE_MASK_ARB, mask);
         SET_ATTRIB(0, 0);
 
         window->context.wgl.handle =
@@ -673,26 +645,6 @@ GLFWbool _glfwCreateContextWGL(_GLFWwindow* window,
             }
 
             return GLFW_FALSE;
-        }
-    }
-    else
-    {
-        window->context.wgl.handle = wglCreateContext(window->context.wgl.dc);
-        if (!window->context.wgl.handle)
-        {
-            _glfwInputErrorWin32(GLFW_VERSION_UNAVAILABLE,
-                                 "WGL: Failed to create OpenGL context");
-            return GLFW_FALSE;
-        }
-
-        if (share)
-        {
-            if (!wglShareLists(share, window->context.wgl.handle))
-            {
-                _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,
-                                     "WGL: Failed to enable sharing with specified OpenGL context");
-                return GLFW_FALSE;
-            }
         }
     }
 

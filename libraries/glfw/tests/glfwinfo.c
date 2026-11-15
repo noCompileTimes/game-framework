@@ -48,9 +48,6 @@
 #define API_NAME_EGL        "egl"
 #define API_NAME_OSMESA     "osmesa"
 
-#define PROFILE_NAME_CORE   "core"
-#define PROFILE_NAME_COMPAT "compat"
-
 #define STRATEGY_NAME_NONE  "none"
 #define STRATEGY_NAME_LOSE  "lose"
 
@@ -101,9 +98,6 @@ static void usage(void)
                                         "client API version\n");
     printf("  -n, --minor=MINOR         the minor number of the required "
                                         "client API version\n");
-    printf("  -p, --profile=PROFILE     the OpenGL profile to use ("
-                                        PROFILE_NAME_CORE " or "
-                                        PROFILE_NAME_COMPAT ")\n");
     printf("  -s, --robustness=STRATEGY the robustness strategy to use ("
                                         STRATEGY_NAME_NONE " or "
                                         STRATEGY_NAME_LOSE ")\n");
@@ -185,19 +179,9 @@ static const char* get_api_name(int api)
 static const char* get_profile_name_gl(GLint mask)
 {
     if (mask & GL_CONTEXT_COMPATIBILITY_PROFILE_BIT)
-        return PROFILE_NAME_COMPAT;
+        return "compat";
     if (mask & GL_CONTEXT_CORE_PROFILE_BIT)
-        return PROFILE_NAME_CORE;
-
-    return "unknown";
-}
-
-static const char* get_profile_name_glfw(int profile)
-{
-    if (profile == GLFW_OPENGL_COMPAT_PROFILE)
-        return PROFILE_NAME_COMPAT;
-    if (profile == GLFW_OPENGL_CORE_PROFILE)
-        return PROFILE_NAME_CORE;
+        return "core";
 
     return "unknown";
 }
@@ -356,15 +340,14 @@ int main(int argc, char** argv)
     // These duplicate the defaults for each hint
     int platform = GLFW_ANY_PLATFORM;
     int client_api = GLFW_OPENGL_API;
-    int context_major = 1;
-    int context_minor = 0;
+    int context_major = 4;
+    int context_minor = 5;
     int context_release = GLFW_ANY_RELEASE_BEHAVIOR;
     int context_creation_api = GLFW_NATIVE_CONTEXT_API;
     int context_robustness = GLFW_NO_ROBUSTNESS;
     bool context_debug = false;
     bool context_no_error = false;
     bool opengl_forward = false;
-    int opengl_profile = GLFW_OPENGL_ANY_PROFILE;
     int fb_red_bits = 8;
     int fb_green_bits = 8;
     int fb_blue_bits = 8;
@@ -386,7 +369,7 @@ int main(int argc, char** argv)
 
     enum { PLATFORM, CLIENT, CONTEXT, BEHAVIOR, DEBUG_CONTEXT, FORWARD, HELP,
            EXTENSIONS, LAYERS,
-           MAJOR, MINOR, PROFILE, ROBUSTNESS, VERSION,
+           MAJOR, MINOR, ROBUSTNESS, VERSION,
            REDBITS, GREENBITS, BLUEBITS, ALPHABITS, DEPTHBITS, STENCILBITS,
            ACCUMREDBITS, ACCUMGREENBITS, ACCUMBLUEBITS, ACCUMALPHABITS,
            AUXBUFFERS, SAMPLES, STEREO, SRGB, SINGLEBUFFER, NOERROR_SRSLY,
@@ -404,7 +387,6 @@ int main(int argc, char** argv)
         { "list-layers",        0, NULL, LAYERS },
         { "major",              1, NULL, MAJOR },
         { "minor",              1, NULL, MINOR },
-        { "profile",            1, NULL, PROFILE },
         { "robustness",         1, NULL, ROBUSTNESS },
         { "version",            0, NULL, VERSION },
         { "red-bits",           1, NULL, REDBITS },
@@ -429,7 +411,7 @@ int main(int argc, char** argv)
         { NULL, 0, NULL, 0 }
     };
 
-    while ((ch = getopt_long(argc, argv, "a:b:c:dfhlm:n:p:s:v", options, NULL)) != -1)
+    while ((ch = getopt_long(argc, argv, "a:b:c:dfhlm:n:s:v", options, NULL)) != -1)
     {
         switch (ch)
         {
@@ -516,18 +498,6 @@ int main(int argc, char** argv)
             case 'n':
             case MINOR:
                 context_minor = atoi(optarg);
-                break;
-            case 'p':
-            case PROFILE:
-                if (strcasecmp(optarg, PROFILE_NAME_CORE) == 0)
-                    opengl_profile = GLFW_OPENGL_CORE_PROFILE;
-                else if (strcasecmp(optarg, PROFILE_NAME_COMPAT) == 0)
-                    opengl_profile = GLFW_OPENGL_COMPAT_PROFILE;
-                else
-                {
-                    usage();
-                    exit(EXIT_FAILURE);
-                }
                 break;
             case 's':
             case ROBUSTNESS:
@@ -691,7 +661,6 @@ int main(int argc, char** argv)
     glfwWindowHint(GLFW_CONTEXT_DEBUG, context_debug);
     glfwWindowHint(GLFW_CONTEXT_NO_ERROR, context_no_error);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, opengl_forward);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, opengl_profile);
 
     glfwWindowHint(GLFW_RED_BITS, fb_red_bits);
     glfwWindowHint(GLFW_BLUE_BITS, fb_blue_bits);
@@ -727,7 +696,6 @@ int main(int argc, char** argv)
         const int major = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MAJOR);
         const int minor = glfwGetWindowAttrib(window, GLFW_CONTEXT_VERSION_MINOR);
         const int revision = glfwGetWindowAttrib(window, GLFW_CONTEXT_REVISION);
-        const int profile = glfwGetWindowAttrib(window, GLFW_OPENGL_PROFILE);
 
         printf("%s context version string: \"%s\"\n",
                get_api_name(client),
@@ -780,10 +748,6 @@ int main(int argc, char** argv)
                        get_api_name(client),
                        mask,
                        get_profile_name_gl(mask));
-
-                printf("%s profile mask parsed by GLFW: %s\n",
-                       get_api_name(client),
-                       get_profile_name_glfw(profile));
             }
 
             if (GLAD_GL_ARB_robustness)
@@ -821,7 +785,7 @@ int main(int argc, char** argv)
 
         GLint redbits, greenbits, bluebits, alphabits, depthbits, stencilbits;
 
-        if (client == GLFW_OPENGL_API && profile == GLFW_OPENGL_CORE_PROFILE)
+        if (client == GLFW_OPENGL_API)
         {
             glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,
                                                   GL_BACK_LEFT,
@@ -870,21 +834,6 @@ int main(int argc, char** argv)
             glGetIntegerv(GL_SAMPLE_BUFFERS, &samplebuffers);
 
             printf(" samples: %u sample buffers: %u\n", samples, samplebuffers);
-        }
-
-        if (client == GLFW_OPENGL_API && profile != GLFW_OPENGL_CORE_PROFILE)
-        {
-            GLint accumredbits, accumgreenbits, accumbluebits, accumalphabits;
-            GLint auxbuffers;
-
-            glGetIntegerv(GL_ACCUM_RED_BITS, &accumredbits);
-            glGetIntegerv(GL_ACCUM_GREEN_BITS, &accumgreenbits);
-            glGetIntegerv(GL_ACCUM_BLUE_BITS, &accumbluebits);
-            glGetIntegerv(GL_ACCUM_ALPHA_BITS, &accumalphabits);
-            glGetIntegerv(GL_AUX_BUFFERS, &auxbuffers);
-
-            printf(" accum red: %u accum green: %u accum blue: %u accum alpha: %u aux buffers: %u\n",
-                   accumredbits, accumgreenbits, accumbluebits, accumalphabits, auxbuffers);
         }
 
         if (list_extensions)

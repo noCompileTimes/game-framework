@@ -1022,12 +1022,6 @@ extern "C" {
  *  This is an alias for compatibility with earlier versions.
  */
 #define GLFW_OPENGL_DEBUG_CONTEXT   GLFW_CONTEXT_DEBUG
-/*! @brief OpenGL profile hint and attribute.
- *
- *  OpenGL profile [hint](@ref GLFW_OPENGL_PROFILE_hint) and
- *  [attribute](@ref GLFW_OPENGL_PROFILE_attrib).
- */
-#define GLFW_OPENGL_PROFILE         0x00022008
 /*! @brief Context flush-on-release hint and attribute.
  *
  *  Context flush-on-release [hint](@ref GLFW_CONTEXT_RELEASE_BEHAVIOR_hint) and
@@ -1095,9 +1089,6 @@ extern "C" {
 #define GLFW_NO_ROBUSTNESS                   0
 #define GLFW_NO_RESET_NOTIFICATION  0x00031001
 #define GLFW_LOSE_CONTEXT_ON_RESET  0x00031002
-
-#define GLFW_OPENGL_ANY_PROFILE              0
-#define GLFW_OPENGL_CORE_PROFILE    0x00032001
 
 #define GLFW_CURSOR                  0x00033001
 #define GLFW_STICKY_KEYS             0x00033002
@@ -3060,12 +3051,6 @@ GLFWAPI void glfwWindowHintString(int hint, const char* value);
  *
  *  @remark __Win32:__ The context to share resources with must not be current on
  *  any other thread.
- *
- *  @remark __macOS:__ The OS only supports core profile contexts for OpenGL
- *  versions 3.2 and later.  Before creating an OpenGL context of version 3.2 or
- *  later you must set the [GLFW_OPENGL_PROFILE](@ref GLFW_OPENGL_PROFILE_hint)
- *  hint accordingly.  OpenGL 3.0 and 3.1 contexts are not supported at all
- *  on macOS.
  *
  *  @remark __macOS:__ The GLFW window has no icon, as it is not a document
  *  window, but the dock icon will be the same as the application bundle's icon.

@@ -74,65 +74,21 @@ GLFWbool _glfwIsValidContextConfig(const _GLFWctxconfig* ctxconfig)
         }
     }
 
-    if (ctxconfig->client == GLFW_OPENGL_API)
-    {
-        if ((ctxconfig->major < 1 || ctxconfig->minor < 0) ||
-            (ctxconfig->major == 1 && ctxconfig->minor > 5) ||
-            (ctxconfig->major == 2 && ctxconfig->minor > 1) ||
-            (ctxconfig->major == 3 && ctxconfig->minor > 3))
-        {
-            // OpenGL 1.0 is the smallest valid version
-            // OpenGL 1.x series ended with version 1.5
-            // OpenGL 2.x series ended with version 2.1
-            // OpenGL 3.x series ended with version 3.3
-            // For now, let everything else through
-
-            _glfwInputError(GLFW_INVALID_VALUE,
-                            "Invalid OpenGL version %i.%i",
-                            ctxconfig->major, ctxconfig->minor);
-            return GLFW_FALSE;
-        }
-
-        if (ctxconfig->profile)
-        {
-            if (ctxconfig->profile != GLFW_OPENGL_CORE_PROFILE)
-            {
-                _glfwInputError(GLFW_INVALID_ENUM, "Invalid OpenGL profile 0x%08X", ctxconfig->profile);
-                return GLFW_FALSE;
-            }
-
-            if (ctxconfig->major <= 2 ||
-                (ctxconfig->major == 3 && ctxconfig->minor < 2))
-            {
-                // Desktop OpenGL context profiles are only defined for version 3.2
-                // and above
-
-                _glfwInputError(GLFW_INVALID_VALUE,"Context profiles are only defined for OpenGL version 3.2 and above");
-                return GLFW_FALSE;
-            }
-        }
-    }
-
     if (ctxconfig->robustness)
     {
         if (ctxconfig->robustness != GLFW_NO_RESET_NOTIFICATION &&
             ctxconfig->robustness != GLFW_LOSE_CONTEXT_ON_RESET)
         {
-            _glfwInputError(GLFW_INVALID_ENUM,
-                            "Invalid context robustness mode 0x%08X",
-                            ctxconfig->robustness);
+            _glfwInputError(GLFW_INVALID_ENUM, "Invalid context robustness mode 0x%08X", ctxconfig->robustness);
             return GLFW_FALSE;
         }
     }
 
     if (ctxconfig->release)
     {
-        if (ctxconfig->release != GLFW_RELEASE_BEHAVIOR_NONE &&
-            ctxconfig->release != GLFW_RELEASE_BEHAVIOR_FLUSH)
+        if (ctxconfig->release != GLFW_RELEASE_BEHAVIOR_NONE && ctxconfig->release != GLFW_RELEASE_BEHAVIOR_FLUSH)
         {
-            _glfwInputError(GLFW_INVALID_ENUM,
-                            "Invalid context release behavior 0x%08X",
-                            ctxconfig->release);
+            _glfwInputError(GLFW_INVALID_ENUM, "Invalid context release behavior 0x%08X", ctxconfig->release);
             return GLFW_FALSE;
         }
     }
@@ -142,18 +98,17 @@ GLFWbool _glfwIsValidContextConfig(const _GLFWctxconfig* ctxconfig)
 
 // Chooses the framebuffer config that best matches the desired one
 //
-const _GLFWfbconfig* _glfwChooseFBConfig(const _GLFWfbconfig* desired,
-                                         const _GLFWfbconfig* alternatives, unsigned int count)
+const _GLFWfbconfig* _glfwChooseFBConfig(const _GLFWfbconfig* desired, const _GLFWfbconfig* alternatives, unsigned int count)
 {
     unsigned int missing, leastMissing = UINT_MAX;
     unsigned int colorDiff, leastColorDiff = UINT_MAX;
     unsigned int extraDiff, leastExtraDiff = UINT_MAX;
-    const _GLFWfbconfig* current;
+
     const _GLFWfbconfig* closest = NULL;
 
     for (unsigned int i = 0;  i < count;  i++)
     {
-        current = alternatives + i;
+        const _GLFWfbconfig* current = alternatives + i;
 
         if (desired->stereo && !current->stereo)
         {
@@ -434,17 +389,6 @@ GLFWbool _glfwRefreshContextAttribs(_GLFWwindow* window, const _GLFWctxconfig* c
 
             if (flags & GL_CONTEXT_FLAG_NO_ERROR_BIT_KHR)
                 window->context.noerror = GLFW_TRUE;
-        }
-
-        // Read back OpenGL context profile (OpenGL 3.2 and above)
-        if (window->context.major >= 4 ||
-            (window->context.major == 3 && window->context.minor >= 2))
-        {
-            GLint mask;
-            window->context.GetIntegerv(GL_CONTEXT_PROFILE_MASK, &mask);
-
-            if (mask & GL_CONTEXT_CORE_PROFILE_BIT)
-                window->context.profile = GLFW_OPENGL_CORE_PROFILE;
         }
 
         // Read back robustness strategy
