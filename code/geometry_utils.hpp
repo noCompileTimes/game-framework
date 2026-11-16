@@ -4,6 +4,7 @@
 
 #include "geometry.hpp"
 
+#include "sprite_pivot.hpp"
 #include "vertex_types.hpp"
 
 // TODO check if this flip_vertical parameter it makes what stbi_set_flip_vertically_on_load does for stb image on load
@@ -38,6 +39,7 @@ static auto create_sprite(const core::rect& position, const bool flip_vertical) 
 // atlas_width/height     -> the size of the whole atlas texture, in pixels
 // flip_vertical = true  -> for atlases stored bottom-up (e.g. SpritePacker::texture, rendered into a framebuffer)
 // flip_vertical = false -> for atlases loaded with stb_image (stored top-down)
+// TODO here we can drop the width  and height for the sprite? cause it can be computed from the rect min/max position?
 static auto create_sprite(const core::rect& position, const float x, const float y, const float width, const float height,
                           const float atlas_width, const float atlas_height, const bool flip_vertical) -> geometry<sprite_vertex, uint32_t>
 {
@@ -64,6 +66,25 @@ static auto create_sprite(const core::rect& position, const float x, const float
     };
 
     return geometry;
+}
+
+static auto create_sprite(const sprite_pivot pivot, const float x, const float y, const float width, const float height,
+                          const float atlas_width, const float atlas_height, const bool flip_vertical) -> geometry<sprite_vertex, uint32_t>
+{
+    switch (pivot)
+    {
+        case sprite_pivot::center:
+        {
+            const auto half_width = width / 2.0f;
+            const auto half_height = height / 2.0f;
+
+            return create_sprite({ -half_width, -half_height, half_width, half_height },
+                x, y, width, height, atlas_width, atlas_height, flip_vertical);
+        }
+        default:
+            return create_sprite({ 0.0f, 0.0f, width, height }, x, y,
+                width, height, atlas_width, atlas_height, flip_vertical);
+    }
 }
 
 static auto create_rectangle(const core::rect& position, const core::rgb& color) -> geometry<editor_vertex, uint32_t>

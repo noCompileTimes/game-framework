@@ -25,7 +25,7 @@
 #include "resources.hpp"
 #include "text.hpp"
 #include "camera.hpp"
-#include "sprite.hpp"
+#include "sprite_atlas.hpp"
 
 auto main() -> int32_t
 {
@@ -262,6 +262,7 @@ auto main() -> int32_t
 
     // atlas output - begin
 
+    // TODO maybe have this like in a separate "scene" or maybe when we press a key
     SpritePacker characters_packer { "textures/characters", 1024, 1024 };
     characters_packer.init();
     characters_packer.build(sprite_program_shader, sprite_sampler, camera_ubo, transform_ubo);
@@ -270,61 +271,11 @@ auto main() -> int32_t
     characters_faces_packer.init();
     characters_faces_packer.build(sprite_program_shader, sprite_sampler, camera_ubo, transform_ubo);
 
-    // atlas output - end
+    SpriteAtlas character_atlas;
+    character_atlas.init("textures/characters.txt");
 
-    // sprite atlas reading - begin
-
-    std::ifstream sprite_atlas_file { "textures/characters.txt" };
-
-    std::string texture_filename;
-    sprite_atlas_file >> texture_filename;
-
-    auto sprite_atlas_image = load_image(texture_filename);
-
-    uint32_t rectangles_count;
-    sprite_atlas_file >> rectangles_count;
-
-    std::vector<sprite> sprites;
-
-    geometry<sprite_vertex, uint32_t> sprites_geometry;
-
-    for (auto i = 0; i < rectangles_count; i++)
-    {
-        sprite sprite;
-        sprite_atlas_file >> sprite.x >> sprite.y >> sprite.w >> sprite.h;
-
-        sprites.emplace_back(sprite);
-
-        // TODO this can be made in another for loop after we are done with the reading? make sense?
-        sprites_geometry.append(create_sprite({ 0, 0, sprite.w, sprite.h },
-            sprite.x, sprite.y, sprite.w, sprite.h,
-            sprite_atlas_image.width, sprite_atlas_image.height, false));
-    }
-
-    graphics::opengl::Buffer sprites_vbo;
-    sprites_vbo.create();
-    sprites_vbo.storage(sizeof(sprite_vertex) * sprites_geometry.vertices.size(), sprites_geometry.vertices.data(), 0);
-
-    graphics::opengl::Buffer sprites_ebo;
-    sprites_ebo.create();
-    sprites_ebo.storage(sizeof(uint32_t) * sprites_geometry.elements.size(), sprites_geometry.elements.data(), 0);
-
-    graphics::opengl::VertexArray sprites_vao;
-    sprites_vao.create();
-
-    sprites_vao.attach_vertices(sprites_vbo, sizeof(sprite_vertex));
-    sprites_vao.attach_elements(sprites_ebo);
-
-    sprites_vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
-    sprites_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
-
-    graphics::opengl::Texture sprite_atlas_texture;
-    sprite_atlas_texture.type = GL_TEXTURE_2D;
-    sprite_atlas_texture.create();
-    sprite_atlas_texture.storage(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA8, 1);
-    sprite_atlas_texture.subdata(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA, 0, sprite_atlas_image.pixels);
-
-    // sprite atlas reading - end
+    SpriteAtlas characters_faces_atlas;
+    characters_faces_atlas.init("textures/characters_faces.txt");
 
     // atlas viewer - begin
 
@@ -549,12 +500,15 @@ auto main() -> int32_t
 
         // sprites drawing - begin
 
-        sprite_atlas_texture.bind(0);
-        sprites_vao.bind();
+        character_atlas.bind();
 
-        render_sprite(1550.0f, 450.0f, 41, false,  transform_ubo);
-        render_sprite(1495.0f, 536.0f, 44, false, transform_ubo);
-        render_sprite(1765.0f, 536.0f, 44, true, transform_ubo);
+        render_sprite(1550.0f, 450.0f, 0.0f, 41, false,  transform_ubo);
+        render_sprite(1449.0f, 495.0f, 90.0f, 44, false, transform_ubo);
+        render_sprite(1635.0f, 514.0f, -90.0f, 44, true, transform_ubo);
+
+        characters_faces_atlas.bind();
+
+        render_sprite(1550.0f, 453.0f, 0.0f, 6, false,  transform_ubo);
 
         // sprites drawing - end
 
@@ -589,7 +543,7 @@ auto main() -> int32_t
         transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
 
         material_ubo.subdata(0, sizeof(glm::vec3), &red_color);
-        render_text(text_vbo, "This is sample text");
+        render_text(text_vbo, "This is sample text"); // TODO accept a position for the render_text (which should have the transform_ubo as a parameter)
 
         text_matrix = translate(glm::mat4(1.0f), { 200.0f, 800.0f, 0.0f });
         text_matrix = scale(text_matrix, { 0.5f, 0.5f, 0.5f });

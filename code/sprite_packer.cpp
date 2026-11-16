@@ -80,7 +80,7 @@ auto SpritePacker::init() -> void
         {
             // TODO move this sprite atlas write into a separate function/class
             // TODO find a better/best way to write this in a file
-            output_file << _rectangles[i].x << " " << _rectangles[i].y << " " << _rectangles[i].w << " " << _rectangles[i].h << std::endl;
+            output_file << _rectangles[i].x << " " << _rectangles[i].y << " " << _rectangles[i].w << " " << _rectangles[i].h << " " << std::to_underlying(sprite_pivot::top_left) << std::endl;
 
             _geometry.append(create_sprite({ 0, 0,  static_cast<float>(_rectangles[i].w), static_cast<float>(_rectangles[i].h) }, false));
         }
