@@ -593,6 +593,8 @@ auto main() -> int32_t
 
 // VERSION 2
 
+// TODO - some way to edit an existing sprite atlas to adjust the sprite pivot and maybe who knows other characteristics
+
 // TODO - make a to_base function which wraps std::to_underlying
 
 // VERSION 1
