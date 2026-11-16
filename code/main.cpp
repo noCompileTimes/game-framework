@@ -502,13 +502,26 @@ auto main() -> int32_t
 
         character_atlas.bind();
 
+        // yellow - happy (yellow_body_circle, yellow_hand_thumb)
+        render_sprite(1550.0f, 210.0f, 0.0f, 50, false, transform_ubo);
+        render_sprite(1440.0f, 250.0f, -10.0f, 59, false, transform_ubo);
+        render_sprite(1660.0f, 250.0f, 10.0f, 59, true, transform_ubo);
+
+        // red - angry (red_body_rhombus, red_hand_closed)
         render_sprite(1550.0f, 450.0f, 0.0f, 41, false,  transform_ubo);
         render_sprite(1449.0f, 495.0f, 90.0f, 44, false, transform_ubo);
         render_sprite(1635.0f, 514.0f, -90.0f, 44, true, transform_ubo);
 
+        // blue - sad (blue_body_squircle, blue_hand_open)
+        render_sprite(1550.0f, 700.0f, 0.0f, 3, false, transform_ubo);
+        render_sprite(1460.0f, 768.0f, 170.0f, 5, false, transform_ubo);
+        render_sprite(1640.0f, 768.0f, -170.0f, 5, true, transform_ubo);
+
         characters_faces_atlas.bind();
 
-        render_sprite(1550.0f, 453.0f, 0.0f, 6, false,  transform_ubo);
+        render_sprite(1550.0f, 212.0f, 0.0f, 11, false, transform_ubo); // face_l - happy
+        render_sprite(1550.0f, 453.0f, 0.0f, 6, false,  transform_ubo);  // face_g - angry
+        render_sprite(1550.0f, 708.0f, 0.0f, 10, false, transform_ubo); // face_k - sad
 
         // sprites drawing - end
 

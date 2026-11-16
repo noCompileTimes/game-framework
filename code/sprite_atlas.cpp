@@ -34,7 +34,9 @@ auto SpriteAtlas::init(std::string_view filename) -> void
         sprites.emplace_back(sprite);
 
         // TODO this should be gone when we have a way to not override this everytime we are starting the app
-        if (i == 44 || i == 41 || i == 6)
+        // NOTE: this runs for every atlas, so an index here is centred in both characters and characters_faces
+        //       characters: 3, 5 (blue), 41, 44 (red), 50, 59 (yellow) | characters_faces: 6, 10, 11
+        if (i == 3 || i == 5 || i == 41 || i == 44 || i == 50 || i == 59 || i == 6 || i == 10 || i == 11)
         {
             pivot = static_cast<uint32_t>(sprite_pivot::center);
         }
