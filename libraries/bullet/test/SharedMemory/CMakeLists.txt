@@ -69,8 +69,6 @@ ENDIF()
 		../../examples/Utils/b3Clock.h
 		../../examples/Utils/ChromeTraceUtil.cpp
 		../../examples/Utils/ChromeTraceUtil.h
-		../../examples/Utils/RobotLoggingUtil.cpp
-		../../examples/Utils/RobotLoggingUtil.h
 		../../examples/SharedMemory/plugins/tinyRendererPlugin/tinyRendererPlugin.cpp
 		../../examples/SharedMemory/plugins/tinyRendererPlugin/TinyRendererVisualShapeConverter.cpp
 		../../examples/OpenGLWindow/SimpleCamera.cpp
@@ -93,9 +91,7 @@ ENDIF()
 		../../examples/Importers/ImportURDFDemo/UrdfParser.cpp
 		../../examples/Importers/ImportURDFDemo/urdfStringSplit.cpp
 		../../examples/Importers/ImportMeshUtility/b3ImportMeshUtility.cpp
-		../../examples/ThirdPartyLibs/stb_image/stb_image.cpp
-                        
-	)
+		../../examples/ThirdPartyLibs/stb_image/stb_image.cpp)
 
 ADD_TEST(Test_PhysicsClientServer_PASS Test_PhysicsClientServer)
 

@@ -1,4 +1,3 @@
-
 #include "BoxStack.h"
 
 #include "../CommonInterfaces/CommonGraphicsAppInterface.h"

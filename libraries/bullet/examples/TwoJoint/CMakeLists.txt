@@ -3,7 +3,6 @@ INCLUDE_DIRECTORIES(
 		${BULLET_PHYSICS_SOURCE_DIR}/src
 		${BULLET_PHYSICS_SOURCE_DIR}/examples
 		${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs
-		${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/enet/include
 		${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/clsocket/src
   )
 
@@ -64,8 +63,6 @@ SET(RobotSimulator_SRCS
 		../../examples/SharedMemory/PosixSharedMemory.h
 		../../examples/Utils/b3ResourcePath.cpp
 		../../examples/Utils/b3ResourcePath.h
-		../../examples/Utils/RobotLoggingUtil.cpp
-		../../examples/Utils/RobotLoggingUtil.h
 		../../examples/ThirdPartyLibs/tinyxml2/tinyxml2.cpp
 		../../examples/ThirdPartyLibs/Wavefront/tiny_obj_loader.cpp
 		../../examples/ThirdPartyLibs/Wavefront/tiny_obj_loader.h
@@ -118,28 +115,15 @@ IF(BUILD_ENET)
 		../../examples/SharedMemory/PhysicsClientUDP_C_API.cpp
 		../../examples/SharedMemory/PhysicsClientUDP.h		
 		../../examples/SharedMemory/PhysicsClientUDP_C_API.h
-		../../examples/ThirdPartyLibs/enet/win32.c
-		../../examples/ThirdPartyLibs/enet/unix.c
-		../../examples/ThirdPartyLibs/enet/callbacks.c
-		../../examples/ThirdPartyLibs/enet/compress.c
-		../../examples/ThirdPartyLibs/enet/host.c
-		../../examples/ThirdPartyLibs/enet/list.c
-		../../examples/ThirdPartyLibs/enet/packet.c
-		../../examples/ThirdPartyLibs/enet/peer.c
-		../../examples/ThirdPartyLibs/enet/protocol.c
 	)
 ENDIF(BUILD_ENET)
 
 IF(BUILD_CLSOCKET)
 	set(RobotSimulator_SRCS ${RobotSimulator_SRCS}
 		 ../../examples/SharedMemory/PhysicsClientTCP.cpp
-                 ../../examples/SharedMemory/PhysicsClientTCP.h
-                 ../../examples/SharedMemory/PhysicsClientTCP_C_API.cpp
-                 ../../examples/SharedMemory/PhysicsClientTCP_C_API.h
-		 ../../examples/ThirdPartyLibs/clsocket/src/SimpleSocket.cpp
-		 ../../examples/ThirdPartyLibs/clsocket/src/ActiveSocket.cpp
-		 ../../examples/ThirdPartyLibs/clsocket/src/PassiveSocket.cpp
-	)
+         ../../examples/SharedMemory/PhysicsClientTCP.h
+         ../../examples/SharedMemory/PhysicsClientTCP_C_API.cpp
+         ../../examples/SharedMemory/PhysicsClientTCP_C_API.h)
 ENDIF()
 
 

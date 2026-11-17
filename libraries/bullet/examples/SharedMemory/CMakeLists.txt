@@ -77,8 +77,6 @@ SharedMemoryCommands.h
 	../Importers/ImportMJCFDemo/BulletMJCFImporter.h
 	../Utils/b3ResourcePath.cpp
 	../Utils/b3Clock.cpp
-	../Utils/RobotLoggingUtil.cpp
-	../Utils/RobotLoggingUtil.h
 	../Utils/ChromeTraceUtil.cpp
 	../Utils/ChromeTraceUtil.h
 	../Importers/ImportURDFDemo/URDFImporterInterface.h
