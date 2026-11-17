@@ -235,7 +235,6 @@ typedef uint64_t                khronos_uint64_t;
 
 #endif
 
-
 /*
  * Types that are (so far) the same on all platforms
  */
