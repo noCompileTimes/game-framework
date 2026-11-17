@@ -167,12 +167,7 @@ set(GUEST_ARTICLES
 	8.guest/2022/7.area_lights/1.area_light
 	8.guest/2022/7.area_lights/2.multiple_area_lights)
 
-configure_file(configuration/root_directory.h.in configuration/root_directory.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/configuration)
-
-# first create relevant static libraries required for other projects
-add_library(STB_IMAGE "src/stb_image.cpp")
-set(LIBS ${LIBS} STB_IMAGE)
 
 macro(makeLink src dest target)
   add_custom_command(TARGET ${target} POST_BUILD COMMAND ${CMAKE_COMMAND} -E create_symlink ${src} ${dest}  DEPENDS  ${dest} COMMENT "mklink ${src} -> ${dest}")
@@ -197,7 +192,7 @@ function(create_project_from_sources chapter demo)
 		set(NAME "${chapter}__${demo}")
 	endif()
     add_executable(${NAME} ${SOURCE})
-    target_link_libraries(${NAME} ${LIBS})
+    target_link_libraries(${NAME} ${LIBS} stb freetype)
     if(MSVC)
 		target_compile_options(${NAME} PRIVATE /std:c++17 /MP)
         target_link_options(${NAME} PUBLIC /ignore:4099)
@@ -215,7 +210,6 @@ function(create_project_from_sources chapter demo)
     # copy shader files to build directory
     file(GLOB SHADERS
              "src/${chapter}/${demo}/*.vs"
-             # "src/${chapter}/${demo}/*.frag"
              "src/${chapter}/${demo}/*.fs"
              "src/${chapter}/${demo}/*.tcs"
              "src/${chapter}/${demo}/*.tes"
@@ -237,10 +231,6 @@ function(create_project_from_sources chapter demo)
             makeLink(${SHADER} ${CMAKE_CURRENT_SOURCE_DIR}/bin/${chapter}/${SHADERNAME} ${NAME})
         endif(WIN32)
     endforeach(SHADER)
-    # if compiling for visual studio, also use configure file for each project (specifically to set up working directory)
-    if(MSVC)
-        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/configuration/visualstudio.vcxproj.user.in ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.vcxproj.user @ONLY)
-    endif(MSVC)
 endfunction()
 
 # then create a project file per tutorial
