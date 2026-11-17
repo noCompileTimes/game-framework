@@ -608,7 +608,6 @@ auto main() -> int32_t
 // TODO - name the shader files as the variables - CLAUDE
 
 // TODO - check and understand why in some cases we need create_sprite with flip_vertically true and sometimes false
-// TODO - update all the years for license files 2025 - 2026 in modules and game framework (just in these, no other places)  - CLAUDE
 
 // TODO - remove glfwHideWindow from glfw and all the internal function related to this
 
