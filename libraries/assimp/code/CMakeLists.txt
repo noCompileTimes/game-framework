@@ -1084,17 +1084,8 @@ ELSE()
   endif()
 ENDIF()
 
-# stb
-IF(ASSIMP_HUNTER_ENABLED)
-  hunter_add_package(stb)
-  find_package(stb CONFIG REQUIRED)
-ELSE()
-  SET( stb_SRCS
-    ../contrib/stb/stb_image.h
-  )
-  INCLUDE_DIRECTORIES("../contrib")
-  SOURCE_GROUP( Contrib\\stb FILES ${stb_SRCS})
-ENDIF()
+# contrib root - was part of the removed bundled stb block, but other contrib libraries need it too (e.g. Open3DGC/... for glTF)
+INCLUDE_DIRECTORIES("../contrib")
 
 # VC2010 fixes
 if(MSVC10)
@@ -1181,6 +1172,10 @@ ENDIF()
 
 ADD_LIBRARY( assimp ${assimp_src} )
 ADD_LIBRARY(assimp::assimp ALIAS assimp)
+
+# stb_image comes from the framework's stb target (libraries/stb) instead of assimp's bundled contrib/stb copy
+# (plain signature on purpose: assimp uses the plain target_link_libraries form, and CMake does not allow mixing the two)
+TARGET_LINK_LIBRARIES(assimp stb)
 
 # Add or remove dllexport tags depending on the library type.
 IF (BUILD_SHARED_LIBS)

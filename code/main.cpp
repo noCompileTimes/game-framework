@@ -611,7 +611,6 @@ auto main() -> int32_t
 
 // TODO - remove glfwHideWindow from glfw and all the internal function related to this
 
-// TODO - check if the RoboticsLearning can be removed from bullet together with all the robotics stuff we will not ever use
 // TODO - check which modules we will not use at any time in the future in the stb nothings
 
 // TODO - remove unnecessary formats loading from stb_image also from stb_image_write
