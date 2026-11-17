@@ -1,11 +1,8 @@
-
 SET(SharedMemory_SRCS
 	plugins/collisionFilterPlugin/collisionFilterPlugin.cpp
 	plugins/collisionFilterPlugin/collisionFilterPlugin.h
 	plugins/pdControlPlugin/pdControlPlugin.cpp
 	plugins/pdControlPlugin/pdControlPlugin.h
-	b3RobotSimulatorClientAPI_NoDirect.cpp
-	b3RobotSimulatorClientAPI_NoDirect.h
 	IKTrajectoryHelper.cpp
 	IKTrajectoryHelper.h
 	PhysicsClient.cpp
@@ -51,7 +48,7 @@ SET(SharedMemory_SRCS
 	PhysicsServerCommandProcessor.h
 	plugins/tinyRendererPlugin/tinyRendererPlugin.cpp
 	plugins/tinyRendererPlugin/TinyRendererVisualShapeConverter.cpp
-SharedMemoryCommands.h
+    SharedMemoryCommands.h
 	SharedMemoryPublic.h
 	b3PluginManager.cpp
 	../TinyRenderer/geometry.cpp
@@ -92,29 +89,24 @@ SharedMemoryCommands.h
 	../Importers/ImportMeshUtility/b3ImportMeshUtility.cpp
 	../ThirdPartyLibs/stb_image/stb_image.cpp
 	../MultiThreading/b3ThreadSupportInterface.cpp
-	../MultiThreading/b3ThreadSupportInterface.h
-)
+	../MultiThreading/b3ThreadSupportInterface.h)
 
 INCLUDE_DIRECTORIES(
 	${BULLET_PHYSICS_SOURCE_DIR}/src
-	${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs
-)
+	${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs)
 
 IF (USE_SOFT_BODY_MULTI_BODY_DYNAMICS_WORLD)
 	LINK_LIBRARIES(BulletSoftBody)
 ENDIF()
 
-LINK_LIBRARIES(
- Bullet3Common BulletWorldImporter BulletFileLoader BulletInverseDynamicsUtils BulletInverseDynamics BulletDynamics BulletCollision LinearMath BussIK
-)
+LINK_LIBRARIES(Bullet3Common BulletWorldImporter BulletFileLoader BulletInverseDynamicsUtils BulletInverseDynamics BulletDynamics BulletCollision LinearMath BussIK)
 
 
 IF (WIN32)
         ADD_EXECUTABLE(App_PhysicsServer_SharedMemory
-                ${SharedMemory_SRCS}
-                main.cpp
+                ${SharedMemory_SRCS} main.cpp
                 ../MultiThreading/b3Win32ThreadSupport.cpp
-	              ../MultiThreading/b3Win32ThreadSupport.h
+                ../MultiThreading/b3Win32ThreadSupport.h
                 ${BULLET_PHYSICS_SOURCE_DIR}/build3/bullet.rc
         )
 ELSE(WIN32)
@@ -138,16 +130,11 @@ ELSE(WIN32)
         ENDIF(APPLE)
 ENDIF(WIN32)
 
-
-
-
 IF (INTERNAL_ADD_POSTFIX_EXECUTABLE_NAMES)
                         SET_TARGET_PROPERTIES(App_PhysicsServer_SharedMemory PROPERTIES  DEBUG_POSTFIX "_Debug")
                         SET_TARGET_PROPERTIES(App_PhysicsServer_SharedMemory PROPERTIES  MINSIZEREL_POSTFIX "_MinsizeRel")
                         SET_TARGET_PROPERTIES(App_PhysicsServer_SharedMemory PROPERTIES  RELWITHDEBINFO_POSTFIX "_RelWithDebugInfo")
 ENDIF(INTERNAL_ADD_POSTFIX_EXECUTABLE_NAMES)
-
-
 
 INCLUDE_DIRECTORIES(
 	${BULLET_PHYSICS_SOURCE_DIR}/src
@@ -157,11 +144,7 @@ INCLUDE_DIRECTORIES(
 
 ADD_DEFINITIONS(-DB3_USE_STANDALONE_EXAMPLE)
 
-LINK_LIBRARIES(
-	BulletSoftBody Bullet3Common BulletWorldImporter BulletInverseDynamicsUtils BulletInverseDynamics BulletDynamics BulletCollision LinearMath BussIK OpenGLWindow
-)
-
-
+LINK_LIBRARIES(BulletSoftBody Bullet3Common BulletWorldImporter BulletInverseDynamicsUtils BulletInverseDynamics BulletDynamics BulletCollision LinearMath BussIK OpenGLWindow)
 
 IF (WIN32)
  				ADD_DEFINITIONS(-DGLEW_STATIC)
@@ -235,14 +218,7 @@ INCLUDE_DIRECTORIES(
 	${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/openvr/samples/shared
 )
 
-
-
-LINK_LIBRARIES(
- Bullet3Common BulletWorldImporter BulletInverseDynamicsUtils BulletInverseDynamics BulletDynamics BulletCollision LinearMath BussIK openvr_api OpenGLWindow
-)
-
-
-
+LINK_LIBRARIES(Bullet3Common BulletWorldImporter BulletInverseDynamicsUtils BulletInverseDynamics BulletDynamics BulletCollision LinearMath BussIK openvr_api OpenGLWindow)
 
  				ADD_DEFINITIONS(-DGLEW_STATIC)
 				LINK_LIBRARIES( ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY} )
