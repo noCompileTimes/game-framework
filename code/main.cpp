@@ -597,6 +597,8 @@ auto main() -> int32_t
 
 // TODO - make a to_base function which wraps std::to_underlying
 
+// TODO - check why the hands on the yellow and blue are having some weird edges?
+
 // VERSION 1
 
 // TODO - use the range buffer binding

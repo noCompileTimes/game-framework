@@ -1,8 +1,6 @@
 add_subdirectory(glfw)
 add_subdirectory(glad)
 
-# assimp is used as a submodule, so it should not install/export its targets (they link our stb target, which is not exported)
-set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 add_subdirectory(assimp)
 add_subdirectory(stb)
 
