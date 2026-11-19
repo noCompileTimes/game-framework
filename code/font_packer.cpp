@@ -28,6 +28,9 @@ auto FontPacker::init(const std::vector<image_data>& images) -> void
 
 auto FontPacker::pack() -> void
 {
+    // TODO this seems like a common things between font_packer and sprite_packer
+    //      start from here
+
     stbrp_context stbrp_context;
 
     std::vector<stbrp_node> atlas_nodes(_width);
@@ -51,16 +54,20 @@ auto FontPacker::pack() -> void
     // images with the exact same size (ex: blue_hand_peace and green_hand_peace) are a tie for that sort and qsort is not stable,
     // so their placement in the atlas is arbitrary (the result is still correct, the txt keeps the file name order)
     // TODO if we want a predictable visual order in the atlas, define STBRP_SORT (in stb.c) with a stable sort
+
     const auto all_packed = stbrp_pack_rects(&stbrp_context, _rectangles.data(), rectangles_count);
     std::println("{} {}", _folder, all_packed ? "packed successfully" : "few rectangles did not fit.");
 
     for (auto& rectangle : _rectangles)
     {
-        rectangle.x += atlas_padding / 2;
+        rectangle.x += atlas_padding / 2; // TODO we should do a variable out of atlas_pading / 2? outside the loop? - same for sprite_packer
         rectangle.y += atlas_padding / 2;
         rectangle.w -= atlas_padding;
         rectangle.h -= atlas_padding;
     }
+
+    // TODO this seems like a common things between font_packer and sprite_packer
+    //      ends here
 
     std::ofstream output_file;
     output_file.open(std::string(_folder) + ".txt");
