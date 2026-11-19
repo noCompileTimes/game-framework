@@ -23,7 +23,7 @@
 #include "sprite_renderer.hpp"
 #include "geometry_utils.hpp"
 #include "resources.hpp"
-#include "text.hpp"
+#include "text_renderer.hpp"
 #include "camera.hpp"
 #include "sprite_atlas.hpp"
 
@@ -238,7 +238,9 @@ auto main() -> int32_t
 
     // fonts - begin
 
-    if (auto font_result = load_font("Antonio-Bold.ttf"); font_result != 0)
+    Font default_font;
+
+    if (auto font_result = default_font.load("Antonio-Bold.ttf"); font_result != 0)
     {
         return font_result;
     }
@@ -299,6 +301,10 @@ auto main() -> int32_t
     atlas_viewer_geometry_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
 
     // atlas viewer - end
+
+    SpritePacker packer { "textures/font", 512, 512 };
+    packer.init(default_font.images);
+    packer.build(sprite_program_shader, sprite_sampler, camera_ubo, transform_ubo);
 
     graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
 
@@ -556,14 +562,14 @@ auto main() -> int32_t
         transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
 
         material_ubo.subdata(0, sizeof(glm::vec3), &red_color);
-        render_text(text_vbo, "This is sample text"); // TODO accept a position for the render_text (which should have the transform_ubo as a parameter)
+        render_text(default_font, text_vbo, "This is sample text"); // TODO accept a position for the render_text (which should have the transform_ubo as a parameter)
 
         text_matrix = translate(glm::mat4(1.0f), { 200.0f, 800.0f, 0.0f });
         text_matrix = scale(text_matrix, { 0.5f, 0.5f, 0.5f });
         transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
 
         material_ubo.subdata(0, sizeof(glm::vec3), &blue_color);
-        render_text(text_vbo, "This is a second sample text");
+        render_text(default_font, text_vbo, "This is a second sample text");
 
         window_manager.update();
     }
@@ -598,6 +604,15 @@ auto main() -> int32_t
 // TODO - make a to_base function which wraps std::to_underlying
 
 // TODO - check why the hands on the yellow and blue are having some weird edges? - some about the blending, I did not like the first solution proposed
+
+// TODO - maybe the part of preparing the images can be different for font atlas and sprite atlas, but the rendering/building of the atlas should be the same? maybe we can have a
+//        base atlas class or something? and in the base we draw the things in a generic way? and we just prepare the data in a more different way
+// TODO - for the above - maybe we should have separate things? maybe for the font we need more data to be saved in the file? some different filtering for the font when we will do outline and all that?
+
+// TODO - consider maybe doing the sprite atlas on cpu with memcpy maybe do some tests and see which one is faster
+//        maybe in this way we will just display a texture and a rectangle (lines) for each rectangle packed
+//        think on how to update he memory in the texture, all at once or some regions with subdata
+// TODO - make a SpriteAtlasViewer/FontViewr or maybe even TextureViewer class
 
 // VERSION 1
 
