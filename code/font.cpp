@@ -2,9 +2,6 @@
 
 #include "graphics/opengl/pipeline.hpp"
 
-#include <cstdlib>
-#include <cstring>
-
 auto Font::load(const std::string& filename) -> int32_t
 {
     FT_Library ft_library;
@@ -48,7 +45,7 @@ auto Font::load(const std::string& filename) -> int32_t
         graphics::opengl::Texture texture;
         texture.type = GL_TEXTURE_2D;
         texture.create();
-        texture.storage(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows, GL_R8, 1);
+        texture.storage(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows, GL_R8, 1); // TODO can we use direclty the alpha here?
         texture.subdata(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows, GL_RED, 0, ft_face->glyph->bitmap.buffer);
 
         text_character character;
@@ -69,7 +66,7 @@ auto Font::load(const std::string& filename) -> int32_t
 
         if (pixels != nullptr)
         {
-            for (int32_t row = 0; row < height; row++) // row by row: FreeType rows are `pitch` bytes apart, which can be more than width
+            for (auto row = 0; row < height; row++) // row by row: FreeType rows are `pitch` bytes apart, which can be more than width
             {
                 std::memcpy(pixels + static_cast<size_t>(row) * width, bitmap.buffer + static_cast<ptrdiff_t>(row) * bitmap.pitch, width);
             }

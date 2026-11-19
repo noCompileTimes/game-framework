@@ -17,3 +17,5 @@ void main()
 
     out_color = vec4(1.0, 1.0, 1.0, red) * vec4(albedo_color, 1.0);
 }
+
+// TODO we can use directly the last channel aka alpha?

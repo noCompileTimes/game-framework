@@ -26,6 +26,8 @@
 #include "text_renderer.hpp"
 #include "camera.hpp"
 #include "sprite_atlas.hpp"
+#include "font_packer.hpp"
+#include "font_atlas.hpp"
 
 auto main() -> int32_t
 {
@@ -302,9 +304,9 @@ auto main() -> int32_t
 
     // atlas viewer - end
 
-    SpritePacker packer { "textures/font", 512, 512 };
-    packer.init(default_font.images);
-    packer.build(sprite_program_shader, sprite_sampler, camera_ubo, transform_ubo);
+    FontPacker font_packer { "textures/font", 512, 512 };
+    font_packer.init(default_font.images);
+    font_packer.build(sprite_program_shader, sprite_sampler, camera_ubo, transform_ubo);
 
     graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
 
@@ -533,13 +535,16 @@ auto main() -> int32_t
 
         // atlas viewer - begin
 
+        // TODO draw both sprite atlases texture and the font atlases texture
+
         if (show_body)
         {
-            characters_packer.texture.bind(0);
+            characters_packer.texture.bind(0); // TODO here should not be the atlas texture?
         }
         else
         {
-            characters_faces_packer.texture.bind(0);
+            //characters_faces_packer.texture.bind(0);
+            font_packer.texture.bind(0); // TODO here should not be the atlas texture?
         }
 
         transform_ubo.subdata(0, sizeof(sprite_matrix), &sprite_matrix);
@@ -612,7 +617,9 @@ auto main() -> int32_t
 // TODO - consider maybe doing the sprite atlas on cpu with memcpy maybe do some tests and see which one is faster
 //        maybe in this way we will just display a texture and a rectangle (lines) for each rectangle packed
 //        think on how to update he memory in the texture, all at once or some regions with subdata
-// TODO - make a SpriteAtlasViewer/FontViewr or maybe even TextureViewer class
+// TODO - make a SpriteAtlasViewer/FontViewer or maybe even TextureViewer class
+
+// TODO - be sure that in all the modules and frameworks (currently just one) the cmake functions have the same order in all of the CMakeFile lists
 
 // VERSION 1
 

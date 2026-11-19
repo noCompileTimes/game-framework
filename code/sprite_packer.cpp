@@ -22,6 +22,11 @@ auto SpritePacker::init() -> void
 {
     _images = load_textures(_folder);
 
+    pack();
+}
+
+auto SpritePacker::pack() -> void
+{
     stbrp_context stbrp_context;
 
     std::vector<stbrp_node> atlas_nodes(_width);
@@ -94,8 +99,8 @@ auto SpritePacker::init() -> void
 auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const graphics::opengl::TextureSampler& sampler,
                          const graphics::opengl::Buffer& camera_ubo, const graphics::opengl::Buffer& transform_ubo) -> void
 {
-    const auto channels = 4;
-    const auto buffer_size = _width * _height * channels;
+    constexpr auto channels = 4;
+        const auto buffer_size = _width * _height * channels;
 
     // framebuffer - begin
 
@@ -173,11 +178,13 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
         auto rectangle_matrix = translate(parent_matrix, { rectangle.x, rectangle.y, 0.0f });
         transform_ubo.subdata(0, sizeof(glm::mat4), &rectangle_matrix);
 
+        const auto& image = _images[i];
+
         graphics::opengl::Texture rectangle_texture; // TODO cache this into a set/map to not recreate it everytime if is the same size
         rectangle_texture.type = GL_TEXTURE_2D;
         rectangle_texture.create();
         rectangle_texture.storage(rectangle.w, rectangle.h, GL_RGBA8, 1);
-        rectangle_texture.subdata(rectangle.w, rectangle.h, GL_RGBA, 0, _images[i].pixels);
+        rectangle_texture.subdata(rectangle.w, rectangle.h, GL_RGBA, 0, image.pixels);
         rectangle_texture.bind(0); // TODO use a constant here? like albedo?
 
         // TODO make a constant somewhere for this 6 to know about the elements of a sprite

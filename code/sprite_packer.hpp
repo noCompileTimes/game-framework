@@ -16,8 +16,8 @@ class SpritePacker
 public:
     SpritePacker(const std::string& folder, uint32_t width, uint32_t height);
 
-    auto init() -> void; // TODO maybe call this pack or packing? because it kind of does that
-    auto build(const graphics::opengl::ShaderProgram&  shader,   // TODO at some point use a resource/graphics manager to query for this shaders/samplers/uniform buffers
+    auto  init() -> void;
+    auto build(const graphics::opengl::ShaderProgram&  shader, // TODO at some point use a resource/graphics manager to query for this shaders/samplers/uniform buffers
                const graphics::opengl::TextureSampler& sampler,
                const graphics::opengl::Buffer& camera_ubo,
                const graphics::opengl::Buffer& transform_ubo) -> void;
@@ -26,6 +26,8 @@ public:
     graphics::opengl::Texture texture; // TODO when we will have a resource/graphics manager, this should be private
 
 private:
+    auto pack() -> void; // TODO maybe call this pack or packing? because it kind of does that
+
     geometry<sprite_vertex, uint32_t> _geometry;
 
     std::vector<image_data> _images;
