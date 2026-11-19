@@ -33,7 +33,6 @@
 #define WINDOW_WIDTH  1920
 #define WINDOW_HEIGHT 1080
 
-
 class Water : public OgldevBaseApp2
 {
 public:
@@ -45,11 +44,9 @@ public:
         m_dirLight.AmbientIntensity = 1.5f;
     }
 
-
     virtual ~Water()
     {
     }
-
 
     void Init()
     {
@@ -66,7 +63,7 @@ public:
         if (!m_waterTech.Init()) {
             exit(1);
         }
-		
+
         glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
     }
 
@@ -74,7 +71,7 @@ public:
     virtual void RenderSceneCB(float dt)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
         glm::mat4 VP = m_pGameCamera->GetVPMatrix();
 
         Matrix4f m;
@@ -108,7 +105,7 @@ public:
 
     void InitInfiniteGrid()
     {
-        m_infiniteGrid.Init(); 
+        m_infiniteGrid.Init();
     }
 
     void InitRenderer()
@@ -127,7 +124,6 @@ public:
     WaterTechnique m_waterTech;
     float m_time = 0.0f;
 };
-
 
 int main(int argc, char** argv)
 {
