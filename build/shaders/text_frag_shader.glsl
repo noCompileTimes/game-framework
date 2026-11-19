@@ -13,9 +13,7 @@ layout (binding = 2, std140) uniform material_ubo
 
 void main()
 {
-    float red = texture(u_albedo_texture, in_texcoord).r; // TODO maybe call it alpha?
+    float value = texture(u_albedo_texture, in_texcoord).r;
 
-    out_color = vec4(1.0, 1.0, 1.0, red) * vec4(albedo_color, 1.0);
+      out_color = vec4(1.0, 1.0, 1.0, value) * vec4(albedo_color, 1.0);
 }
-
-// TODO we can use directly the last channel aka alpha?

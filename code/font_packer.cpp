@@ -198,7 +198,6 @@ auto FontPacker::build(const graphics::opengl::ShaderProgram& shader, const grap
 
     graphics::opengl::Pipeline::pixel_store(GL_UNPACK_ALIGNMENT, 4);
 
-    // TODO can we use direclty the alpha here?
     graphics::opengl::Commands::read_pixels(0, 0, _width, _height, GL_RED, GL_UNSIGNED_BYTE, buffer_size);
 
     if (const auto* pixels = static_cast<uint8_t*>(framebuffer_pbo.map(0, buffer_size, GL_MAP_READ_BIT)))
