@@ -1,8 +1,9 @@
 #pragma once
 
 #include "font.hpp"
+#include "font_atlas.hpp"
 
-static auto render_text(const Font& font, const graphics::opengl::Buffer& vbo, std::string text) -> void
+static auto render_text(const FontAtlas& font_atlas, const Font& font, std::string text) -> void
 {
     auto x = 0.0f;
 
@@ -15,7 +16,7 @@ static auto render_text(const Font& font, const graphics::opengl::Buffer& vbo, s
             continue;
         }
 
-        auto [texture, size, bearing, advance] = character->second;
+        /*auto [texture, size, bearing, advance] = character->second;
 
         // the baseline sits at the font ascender, so the text anchor (0, 0) is the top-left corner instead of the baseline
         const auto y = static_cast<float>(font.ascender);
@@ -35,15 +36,17 @@ static auto render_text(const Font& font, const graphics::opengl::Buffer& vbo, s
             { xpos,     ypos,       0.0f, 0.0f },
             { xpos + w, ypos + h,   1.0f, 1.0f },
             { xpos + w, ypos,       1.0f, 0.0f }
-        };
+        };*/
 
-        texture.bind(0);
+        //vbo.subdata(0, sizeof(vertices), vertices);
 
-        vbo.subdata(0, sizeof(vertices), vertices);
+        auto index = character->second.index;
 
-        graphics::opengl::Commands::draw_vertices(GL_TRIANGLES, 0, 6);
+        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, index * 6, 6); // the atlas vao is indexed (4 vertices + 6 elements per glyph)
 
-        x += advance >> 6;
+        //x += advance >> 6;
+
+        index++;
     }
 }
 

@@ -247,21 +247,6 @@ auto main() -> int32_t
         return font_result;
     }
 
-    graphics::opengl::Buffer text_vbo;
-    text_vbo.create();
-    text_vbo.storage(1000 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT); // TODO here the buffer is to big?
-
-    //graphics::opengl::Buffer text_ebo;
-    //text_ebo.create();
-    //text_vbo.storage(1000 * sizeof(uint32_t), nullptr, GL_DYNAMIC_STORAGE_BIT);
-
-    graphics::opengl::VertexArray text_vao;
-    text_vao.create();
-    text_vao.attach_vertices(text_vbo, sizeof(text_vertex));
-
-    text_vao.attach_attribute({ 0, offsetof(text_vertex, position), 2, GL_FLOAT, 0 });
-    text_vao.attach_attribute({ 1, offsetof(text_vertex, texcoord), 2, GL_FLOAT, 0 });
-
     // fonts - end
 
     // atlas output - begin
@@ -307,6 +292,9 @@ auto main() -> int32_t
     FontPacker font_packer { "textures/font", 512, 512 };
     font_packer.init(default_font.images);
     font_packer.build(sprite_program_shader, sprite_sampler, camera_ubo, transform_ubo);
+
+    FontAtlas font_atlas;
+    font_atlas.init("textures/font.txt");
 
     graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
 
@@ -561,20 +549,20 @@ auto main() -> int32_t
 
         text_program_shader.bind();
 
-        text_vao.bind();
+        font_atlas.bind();
 
         text_matrix = translate(glm::mat4(1.0f), { 200.0f, 700.0f, 0.0f });
         transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
 
         material_ubo.subdata(0, sizeof(glm::vec3), &red_color);
-        render_text(default_font, text_vbo, "This is sample text"); // TODO accept a position for the render_text (which should have the transform_ubo as a parameter)
+        render_text(font_atlas, default_font, "This is sample text"); // TODO accept a position for the render_text (which should have the transform_ubo as a parameter)
 
         text_matrix = translate(glm::mat4(1.0f), { 200.0f, 800.0f, 0.0f });
         text_matrix = scale(text_matrix, { 0.5f, 0.5f, 0.5f });
         transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
 
         material_ubo.subdata(0, sizeof(glm::vec3), &blue_color);
-        render_text(default_font, text_vbo, "This is a second sample text");
+        render_text(font_atlas, default_font, "This is a second sample text");
 
         window_manager.update();
     }

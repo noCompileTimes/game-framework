@@ -1,7 +1,5 @@
 #include "font.hpp"
 
-#include "graphics/opengl/pipeline.hpp"
-
 auto Font::load(const std::string& filename) -> int32_t
 {
     FT_Library ft_library;
@@ -22,7 +20,7 @@ auto Font::load(const std::string& filename) -> int32_t
 
     ascender = static_cast<int32_t>(ft_face->size->metrics.ascender >> 6); // 26.6 fixed point to pixels
 
-    graphics::opengl::Pipeline::pixel_store(GL_UNPACK_ALIGNMENT, 1);
+    uint32_t index = 0;
 
     for (unsigned char c = 0; c < 128; c++)
     {
@@ -42,17 +40,11 @@ auto Font::load(const std::string& filename) -> int32_t
             continue;
         }
 
-        graphics::opengl::Texture texture;
-        texture.type = GL_TEXTURE_2D;
-        texture.create();
-        texture.storage(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows, GL_R8, 1);
-        texture.subdata(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows, GL_RED, 0, ft_face->glyph->bitmap.buffer);
-
         text_character character;
-        character.texture = texture;
         character.size    = glm::ivec2(ft_face->glyph->bitmap.width, ft_face->glyph->bitmap.rows);
         character.bearing = glm::ivec2(ft_face->glyph->bitmap_left, ft_face->glyph->bitmap_top);
         character.advance = static_cast<unsigned int>(ft_face->glyph->advance.x);
+        character.index   = index;
 
         characters.insert(std::make_pair(c, character));
 
@@ -73,9 +65,9 @@ auto Font::load(const std::string& filename) -> int32_t
         }
 
         images.emplace_back(image_data { width, height, 1, pixels });
-    }
 
-    graphics::opengl::Pipeline::pixel_store(GL_UNPACK_ALIGNMENT, 4);
+        index++;
+    }
 
     FT_Done_Face(ft_face);
     FT_Done_FreeType(ft_library);
