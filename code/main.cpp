@@ -305,8 +305,14 @@ auto main() -> int32_t
         .text = "This is a second sample text",
     };
 
+    Text text_03
+    {
+        .text = "This is a third sample text",
+    };
+
     text_01.build(default_font, font_atlas);
     text_02.build(default_font, font_atlas);
+    text_03.build(default_font, font_atlas);
 
     graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
 
@@ -315,6 +321,7 @@ auto main() -> int32_t
     graphics::opengl::Pipeline::blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     glm::vec3  red_color { 1.0f, 0.0f, 0.0f };
+    glm::vec3 green_color { 0.0f, 1.0f, 0.0f };
     glm::vec3 blue_color { 0.0f, 0.0f, 1.0f };
 
     auto default_texture_width  = 1;
@@ -561,11 +568,21 @@ auto main() -> int32_t
 
         font_atlas.bind();
 
-        material_ubo.upload(0, sizeof(glm::vec3), &red_color);
-        render_text(text_01, 200.0f, 700.0f, 1.0f, transform_ubo);
+        // the text sizes are at scale 1, so they are multiplied by the scale the text is drawn with
+        constexpr auto text_01_x     = 200.0f;
+        constexpr auto text_01_y     = 700.0f;
+        constexpr auto text_01_scale = 1.0f;
 
+        material_ubo.upload(0, sizeof(glm::vec3), &red_color);
+        render_text(text_01, text_01_x, text_01_y, text_01_scale, transform_ubo);
+
+        // right after text_01
         material_ubo.upload(0, sizeof(glm::vec3), &blue_color);
-        render_text(text_02, 200.0f, 800.0f, 0.5f, transform_ubo);
+        render_text(text_02, text_01_x + text_01.width * text_01_scale, text_01_y, 0.5f, transform_ubo);
+
+        // right below text_01
+        material_ubo.upload(0, sizeof(glm::vec3), &green_color);
+        render_text(text_03, text_01_x, text_01_y + text_01.height * text_01_scale, 1.0f, transform_ubo);
 
         window_manager.update();
     }
@@ -594,6 +611,8 @@ auto main() -> int32_t
 }
 
 // VERSION 2
+
+// TODO - ask for a code review on the font, font_atlas, font_packer, text, text_renderer - basically what is about the text implementation
 
 // TODO - some way to edit an existing sprite atlas to adjust the sprite pivot and maybe who knows other characteristics
 

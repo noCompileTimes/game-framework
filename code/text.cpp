@@ -10,6 +10,11 @@ auto Text::build(const Font& font, FontAtlas& font_atlas) -> void
 
     geometry<sprite_vertex, uint32_t> sprites_geometry;
 
+    // the size is measured from the text anchor (0, 0), the top-left corner, to the right / lowest pixel of its glyphs
+    // so a small gap after the corner is included (e.g. the left bearing of f, or no tall letter in the text)
+    auto max_x = 0.0f;
+    auto max_y = 0.0f;
+
     for (std::string::const_iterator c = text.begin(); c != text.end(); ++c)
     {
         const auto character = font.characters.find(*c);
@@ -39,8 +44,17 @@ auto Text::build(const Font& font, FontAtlas& font_atlas) -> void
         sprites_geometry.append(create_sprite(position, sprite.x, sprite.y, sprite.w, sprite.h,
             static_cast<float>(font_atlas.width), static_cast<float>(font_atlas.height), false)); // false: the font png is loaded top-down
 
+        if (w > 0 && h > 0) // the space has no pixels, it only advances x
+        {
+            max_x = std::max(max_x, position.max.x);
+            max_y = std::max(max_y, position.max.y);
+        }
+
         x += static_cast<float>(advance >> 6); // 26.6 fixed point to pixels
     }
+
+    width  = max_x;
+    height = max_y;
 
     if (const auto text_start = font_atlas.add(sprites_geometry))
     {
