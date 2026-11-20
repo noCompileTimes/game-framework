@@ -19,7 +19,7 @@ inline auto render_sprite(const float x, const float y, const float angle, const
         current_sprite_matrix = scale(current_sprite_matrix, glm::vec3 { -1.0f, 1.0f, 1.0f });
     }
 
-    transform_ubo.subdata(0, sizeof(glm::mat4), &current_sprite_matrix);
+    transform_ubo.upload(0, sizeof(glm::mat4), &current_sprite_matrix);
 
     graphics::opengl::Commands::draw_elements(GL_TRIANGLES, index * 6, 6);
 }

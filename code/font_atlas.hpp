@@ -3,11 +3,15 @@
 #include "graphics/opengl/vertex_array.hpp"
 #include "graphics/opengl/texture.hpp"
 
+#include "sprite.hpp"
+
 class FontAtlas
 {
 public:
     auto init(std::string_view filename) -> void;
     auto bind() const -> void;
+
+    std::vector<sprite> sprites;
 
 private:
     graphics::opengl::Texture _texture;

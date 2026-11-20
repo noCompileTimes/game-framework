@@ -28,9 +28,7 @@ auto FontAtlas::init(std::string_view filename) -> void
     uint32_t rectangles_count { }; // initialized: if the read fails we draw nothing instead of looping over garbage
     sprite_atlas_file >> rectangles_count;
 
-    std::vector<sprite> sprites;
-
-    geometry<sprite_vertex, uint32_t> sprites_geometry;
+    //geometry<sprite_vertex, uint32_t> sprites_geometry;
 
     for (auto i = 0; i < rectangles_count; i++)
     {
@@ -40,17 +38,19 @@ auto FontAtlas::init(std::string_view filename) -> void
         sprites.emplace_back(sprite);
 
         // TODO this can be made in another for loop after we are done with the reading? make sense?
-        sprites_geometry.append(create_sprite(sprite_pivot::top_left, sprite.x, sprite.y, sprite.w, sprite.h,
-            sprite_atlas_image.width, sprite_atlas_image.height, false));
+        //sprites_geometry.append(create_sprite(sprite_pivot::top_left, sprite.x, sprite.y, sprite.w, sprite.h,
+        //    sprite_atlas_image.width, sprite_atlas_image.height, false));
     }
+
+    constexpr auto magic_number = 10000;
 
     graphics::opengl::Buffer sprites_vbo; // TODO keep a private reference to them, maybe destroy it at some point in a release function
     sprites_vbo.create();
-    sprites_vbo.storage(sizeof(sprite_vertex) * sprites_geometry.vertices.size(), sprites_geometry.vertices.data(), 0);
+    sprites_vbo.allocate(sizeof(sprite_vertex) * magic_number, nullptr, 0);
 
     graphics::opengl::Buffer sprites_ebo; // TODO keep a private reference to them, maybe destroy it at some point in a release function
     sprites_ebo.create();
-    sprites_ebo.storage(sizeof(uint32_t) * sprites_geometry.elements.size(), sprites_geometry.elements.data(), 0);
+    sprites_ebo.allocate(sizeof(uint32_t) * magic_number, nullptr, 0);
 
     _vao.create();
 
@@ -64,8 +64,8 @@ auto FontAtlas::init(std::string_view filename) -> void
 
     _texture.type = GL_TEXTURE_2D;
     _texture.create();
-    _texture.storage(sprite_atlas_image.width, sprite_atlas_image.height, GL_R8, 1);
-    _texture.subdata(sprite_atlas_image.width, sprite_atlas_image.height, GL_RED, 0, sprite_atlas_image.pixels);
+    _texture.allocate(sprite_atlas_image.width, sprite_atlas_image.height, GL_R8, 1);
+    _texture.upload(sprite_atlas_image.width, sprite_atlas_image.height, GL_RED, 0, sprite_atlas_image.pixels);
 
     graphics::opengl::Pipeline::pixel_store(GL_UNPACK_ALIGNMENT, 4);
 }

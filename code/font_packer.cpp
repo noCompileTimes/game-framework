@@ -114,11 +114,11 @@ auto FontPacker::build(const graphics::opengl::ShaderProgram& shader, const grap
 
     texture.type = GL_TEXTURE_2D;
     texture.create();
-    texture.storage(_width, _height, GL_R8, 1);
+    texture.allocate(_width, _height, GL_R8, 1);
 
     //graphics::opengl::Renderbuffer renderbuffer;
     //renderbuffer.create();
-    //renderbuffer.storage(atlas_width, atlas_height, GL_DEPTH_COMPONENT24);
+    //renderbuffer.allocate(atlas_width, atlas_height, GL_DEPTH_COMPONENT24);
 
     graphics::opengl::Framebuffer framebuffer;
     framebuffer.create();
@@ -129,18 +129,18 @@ auto FontPacker::build(const graphics::opengl::ShaderProgram& shader, const grap
 
     graphics::opengl::Buffer framebuffer_pbo;
     framebuffer_pbo.create();
-    framebuffer_pbo.storage(buffer_size, nullptr, GL_MAP_READ_BIT);
+    framebuffer_pbo.allocate(buffer_size, nullptr, GL_MAP_READ_BIT);
     framebuffer_pbo.bind(GL_PIXEL_PACK_BUFFER);
 
     // sprites
 
     graphics::opengl::Buffer sprites_vbo;
     sprites_vbo.create();
-    sprites_vbo.storage(sizeof(sprite_vertex) * _geometry.vertices.size(), _geometry.vertices.data(), 0);
+    sprites_vbo.allocate(sizeof(sprite_vertex) * _geometry.vertices.size(), _geometry.vertices.data(), 0);
 
     graphics::opengl::Buffer sprites_ebo;
     sprites_ebo.create();
-    sprites_ebo.storage(sizeof(uint32_t) * _geometry.elements.size(), _geometry.elements.data(), 0);
+    sprites_ebo.allocate(sizeof(uint32_t) * _geometry.elements.size(), _geometry.elements.data(), 0);
 
     graphics::opengl::VertexArray sprites_vao;
     sprites_vao.create();
@@ -167,7 +167,7 @@ auto FontPacker::build(const graphics::opengl::ShaderProgram& shader, const grap
     sprite_camera_data.view       = glm::mat4(1.0f);
     sprite_camera_data.projection = glm::ortho(0.0f, static_cast<float>(_width), static_cast<float>(_height), 0.0f, 0.0f, 1.0f);
 
-    camera_ubo.subdata(0, sizeof(data::camera), &sprite_camera_data);
+    camera_ubo.upload(0, sizeof(data::camera), &sprite_camera_data);
 
     shader.bind();
     // TODO use a dedicated GL_NEAREST sampler for the packing pass - the shared sprite sampler is GL_LINEAR, which is only
@@ -186,15 +186,15 @@ auto FontPacker::build(const graphics::opengl::ShaderProgram& shader, const grap
         auto parent_matrix = translate(glm::mat4(1.0f), { 0.0, 0.0, 0 });
 
         auto rectangle_matrix = translate(parent_matrix, { rectangle.x, rectangle.y, 0.0f });
-        transform_ubo.subdata(0, sizeof(glm::mat4), &rectangle_matrix);
+        transform_ubo.upload(0, sizeof(glm::mat4), &rectangle_matrix);
 
         const auto& image = _images[i];
 
         graphics::opengl::Texture rectangle_texture; // TODO cache this into a set/map to not recreate it everytime if is the same size
         rectangle_texture.type = GL_TEXTURE_2D;
         rectangle_texture.create();
-        rectangle_texture.storage(rectangle.w, rectangle.h, GL_R8, 1);
-        rectangle_texture.subdata(rectangle.w, rectangle.h, GL_RED, 0, image.pixels);
+        rectangle_texture.allocate(rectangle.w, rectangle.h, GL_R8, 1);
+        rectangle_texture.upload(rectangle.w, rectangle.h, GL_RED, 0, image.pixels);
         rectangle_texture.bind(0); // TODO use a constant here? like albedo?
 
         // TODO make a constant somewhere for this 6 to know about the elements of a sprite

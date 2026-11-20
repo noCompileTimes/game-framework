@@ -48,11 +48,11 @@ auto SpriteAtlas::init(std::string_view filename) -> void
 
     graphics::opengl::Buffer sprites_vbo; // TODO keep a private reference to them, maybe destroy it at some point in a release function
     sprites_vbo.create();
-    sprites_vbo.storage(sizeof(sprite_vertex) * sprites_geometry.vertices.size(), sprites_geometry.vertices.data(), 0);
+    sprites_vbo.allocate(sizeof(sprite_vertex) * sprites_geometry.vertices.size(), sprites_geometry.vertices.data(), 0);
 
     graphics::opengl::Buffer sprites_ebo; // TODO keep a private reference to them, maybe destroy it at some point in a release function
     sprites_ebo.create();
-    sprites_ebo.storage(sizeof(uint32_t) * sprites_geometry.elements.size(), sprites_geometry.elements.data(), 0);
+    sprites_ebo.allocate(sizeof(uint32_t) * sprites_geometry.elements.size(), sprites_geometry.elements.data(), 0);
 
     _vao.create();
 
@@ -64,8 +64,8 @@ auto SpriteAtlas::init(std::string_view filename) -> void
 
     _texture.type = GL_TEXTURE_2D;
     _texture.create();
-    _texture.storage(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA8, 1);
-    _texture.subdata(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA, 0, sprite_atlas_image.pixels);
+    _texture.allocate(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA8, 1);
+    _texture.upload(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA, 0, sprite_atlas_image.pixels);
 }
 
 auto SpriteAtlas::bind() const -> void

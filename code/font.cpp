@@ -64,7 +64,7 @@ auto Font::load(const std::string& filename) -> int32_t
             }
         }
 
-        images.emplace_back(image_data { width, height, 1, pixels });
+        images.emplace_back(image_data { .width = width, .height = height, .channels = 1, .pixels = pixels });
 
         index++;
     }

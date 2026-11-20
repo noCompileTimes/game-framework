@@ -38,7 +38,7 @@ static auto render_text(const FontAtlas& font_atlas, const Font& font, std::stri
             { xpos + w, ypos,       1.0f, 0.0f }
         };*/
 
-        //vbo.subdata(0, sizeof(vertices), vertices);
+        //vbo.upload(0, sizeof(vertices), vertices);
 
         auto index = character->second.index;
 

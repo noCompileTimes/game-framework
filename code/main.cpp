@@ -136,11 +136,11 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer cube_geometry_vbo;
     cube_geometry_vbo.create();
-    cube_geometry_vbo.storage(sizeof(model_vertex) * cube_geometry_vertices.size(), cube_geometry_vertices.data(), 0);
+    cube_geometry_vbo.allocate(sizeof(model_vertex) * cube_geometry_vertices.size(), cube_geometry_vertices.data(), 0);
 
     graphics::opengl::Buffer cube_geometry_ebo;
     cube_geometry_ebo.create();
-    cube_geometry_ebo.storage(sizeof(uint32_t) * cube_geometry_elements.size(), cube_geometry_elements.data(), 0);
+    cube_geometry_ebo.allocate(sizeof(uint32_t) * cube_geometry_elements.size(), cube_geometry_elements.data(), 0);
 
     graphics::opengl::VertexArray cube_geometry_vao;
     cube_geometry_vao.create();
@@ -156,11 +156,11 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer sphere_geometry_vbo;
     sphere_geometry_vbo.create();
-    sphere_geometry_vbo.storage(sizeof(model_vertex) * sphere_geometry_vertices.size(), sphere_geometry_vertices.data(), 0);
+    sphere_geometry_vbo.allocate(sizeof(model_vertex) * sphere_geometry_vertices.size(), sphere_geometry_vertices.data(), 0);
 
     graphics::opengl::Buffer sphere_geometry_ebo;
     sphere_geometry_ebo.create();
-    sphere_geometry_ebo.storage(sizeof(uint32_t) * sphere_geometry_elements.size(), sphere_geometry_elements.data(), 0);
+    sphere_geometry_ebo.allocate(sizeof(uint32_t) * sphere_geometry_elements.size(), sphere_geometry_elements.data(), 0);
 
     graphics::opengl::VertexArray sphere_geometry_vao;
     sphere_geometry_vao.create();
@@ -183,7 +183,7 @@ auto main() -> int32_t
     graphics::opengl::Buffer camera_ubo;
     camera_ubo.create();
     camera_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::camera));
-    camera_ubo.storage(sizeof(data::camera), &model_camera_data, GL_DYNAMIC_STORAGE_BIT);
+    camera_ubo.allocate(sizeof(data::camera), &model_camera_data, GL_DYNAMIC_STORAGE_BIT);
 
     glm::mat4 model_matrix { 1.0f };
     glm::mat4 sprite_matrix { 1.0f };
@@ -191,12 +191,12 @@ auto main() -> int32_t
     graphics::opengl::Buffer transform_ubo;
     transform_ubo.create();
     transform_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::transform));
-    transform_ubo.storage(sizeof(data::transform), &model_matrix, GL_DYNAMIC_STORAGE_BIT);
+    transform_ubo.allocate(sizeof(data::transform), &model_matrix, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::Buffer material_ubo;
     material_ubo.create();
     material_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::material));
-    material_ubo.storage(sizeof(data::material), nullptr, GL_DYNAMIC_STORAGE_BIT);
+    material_ubo.allocate(sizeof(data::material), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     data::light default_light
     {
@@ -208,7 +208,7 @@ auto main() -> int32_t
     graphics::opengl::Buffer light_ubo;
     light_ubo.create();
     light_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::light));
-    light_ubo.storage(sizeof(data::light), &default_light, GL_DYNAMIC_STORAGE_BIT);
+    light_ubo.allocate(sizeof(data::light), &default_light, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::TextureSampler text_sampler;
     text_sampler.create();
@@ -235,19 +235,8 @@ auto main() -> int32_t
     pavement_texture.type = GL_TEXTURE_2D;
     pavement_texture.create();
 
-    pavement_texture.storage(pavement_image.width, pavement_image.height, GL_RGB8, 1);
-    pavement_texture.subdata(pavement_image.width, pavement_image.height, GL_RGB, 0, pavement_image.pixels);
-
-    // fonts - begin
-
-    Font default_font;
-
-    if (auto font_result = default_font.load("Antonio-Bold.ttf"); font_result != 0)
-    {
-        return font_result;
-    }
-
-    // fonts - end
+    pavement_texture.allocate(pavement_image.width, pavement_image.height, GL_RGB8, 1);
+    pavement_texture.upload(pavement_image.width, pavement_image.height, GL_RGB, 0, pavement_image.pixels);
 
     // atlas output - begin
 
@@ -272,11 +261,11 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer atlas_viewer_geometry_vbo;
     atlas_viewer_geometry_vbo.create();
-    atlas_viewer_geometry_vbo.storage(sizeof(sprite_vertex) * atlas_viewer_vertices.size(), atlas_viewer_vertices.data(), 0);
+    atlas_viewer_geometry_vbo.allocate(sizeof(sprite_vertex) * atlas_viewer_vertices.size(), atlas_viewer_vertices.data(), 0);
 
     graphics::opengl::Buffer atlas_viewer_geometry_ebo;
     atlas_viewer_geometry_ebo.create();
-    atlas_viewer_geometry_ebo.storage(sizeof(uint32_t) * atlas_viewer_elements.size(), atlas_viewer_elements.data(), 0);
+    atlas_viewer_geometry_ebo.allocate(sizeof(uint32_t) * atlas_viewer_elements.size(), atlas_viewer_elements.data(), 0);
 
     graphics::opengl::VertexArray atlas_viewer_geometry_vao;
     atlas_viewer_geometry_vao.create();
@@ -288,6 +277,13 @@ auto main() -> int32_t
     atlas_viewer_geometry_vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
 
     // atlas viewer - end
+
+    Font default_font;
+
+    if (auto font_result = default_font.load("Antonio-Bold.ttf"); font_result != 0)
+    {
+        return font_result;
+    }
 
     FontPacker font_packer { "textures/font", 512, 512 };
     font_packer.init(default_font.images);
@@ -316,8 +312,8 @@ auto main() -> int32_t
     default_texture.type = GL_TEXTURE_2D;
     default_texture.create();
 
-    default_texture.storage(default_texture_width, default_texture_height, GL_RGB8, 1);
-    default_texture.subdata(default_texture_width, default_texture_height, GL_RGB, 0, default_pixels);
+    default_texture.allocate(default_texture_width, default_texture_height, GL_RGB8, 1);
+    default_texture.upload(default_texture_width, default_texture_height, GL_RGB, 0, default_pixels);
 
     // physics begin
 
@@ -340,7 +336,7 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer debug_vbo;
     debug_vbo.create();
-    debug_vbo.storage(sizeof(editor_vertex) * debug_vertices_capacity, nullptr, GL_DYNAMIC_STORAGE_BIT);
+    debug_vbo.allocate(sizeof(editor_vertex) * debug_vertices_capacity, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::VertexArray debug_vao;
     debug_vao.create();
@@ -438,9 +434,9 @@ auto main() -> int32_t
         // models
 
         model_camera_data.projection = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
-        camera_ubo.subdata(0, sizeof(data::camera), &model_camera_data);
+        camera_ubo.upload(0, sizeof(data::camera), &model_camera_data);
 
-        transform_ubo.subdata(0, sizeof(model_matrix), &model_matrix);
+        transform_ubo.upload(0, sizeof(model_matrix), &model_matrix);
 
         bt_object_transform.setFromOpenGLMatrix(&model_matrix[0].x);
 
@@ -451,7 +447,7 @@ auto main() -> int32_t
         // clamp to the buffer capacity so we never write past the end of debug_vbo
         const auto debug_vertices_count = std::min<size_t>(physics.debug()->vertices.size(), debug_vertices_capacity);
 
-        debug_vbo.subdata(0, sizeof(core::vec3) * debug_vertices_count, physics.debug()->vertices.data());
+        debug_vbo.upload(0, sizeof(core::vec3) * debug_vertices_count, physics.debug()->vertices.data());
 
         model_program_shader.bind();
 
@@ -475,7 +471,7 @@ auto main() -> int32_t
         basic_program_shader.bind();
 
         glm::mat4 collider_matrix { 1.0f };
-        transform_ubo.subdata(0, sizeof(collider_matrix), &collider_matrix);
+        transform_ubo.upload(0, sizeof(collider_matrix), &collider_matrix);
 
         debug_vao.bind();
 
@@ -490,7 +486,7 @@ auto main() -> int32_t
         // sprites
 
         sprite_camera_data.projection = glm::ortho(0.0f, static_cast<float>(window_width), static_cast<float>(window_height), 0.0f, 0.0f, 1.0f);
-        camera_ubo.subdata(0, sizeof(data::camera), &sprite_camera_data);
+        camera_ubo.upload(0, sizeof(data::camera), &sprite_camera_data);
 
         sprite_program_shader.bind();
 
@@ -535,7 +531,7 @@ auto main() -> int32_t
             font_packer.texture.bind(0); // TODO here should not be the atlas texture?
         }
 
-        transform_ubo.subdata(0, sizeof(sprite_matrix), &sprite_matrix);
+        transform_ubo.upload(0, sizeof(sprite_matrix), &sprite_matrix);
 
         atlas_viewer_geometry_vao.bind();
 
@@ -552,16 +548,16 @@ auto main() -> int32_t
         font_atlas.bind();
 
         text_matrix = translate(glm::mat4(1.0f), { 200.0f, 700.0f, 0.0f });
-        transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
+        transform_ubo.upload(0, sizeof(text_matrix), &text_matrix);
 
-        material_ubo.subdata(0, sizeof(glm::vec3), &red_color);
+        material_ubo.upload(0, sizeof(glm::vec3), &red_color);
         render_text(font_atlas, default_font, "This is sample text"); // TODO accept a position for the render_text (which should have the transform_ubo as a parameter)
 
         text_matrix = translate(glm::mat4(1.0f), { 200.0f, 800.0f, 0.0f });
         text_matrix = scale(text_matrix, { 0.5f, 0.5f, 0.5f });
-        transform_ubo.subdata(0, sizeof(text_matrix), &text_matrix);
+        transform_ubo.upload(0, sizeof(text_matrix), &text_matrix);
 
-        material_ubo.subdata(0, sizeof(glm::vec3), &blue_color);
+        material_ubo.upload(0, sizeof(glm::vec3), &blue_color);
         render_text(font_atlas, default_font, "This is a second sample text");
 
         window_manager.update();
@@ -604,7 +600,7 @@ auto main() -> int32_t
 
 // TODO - consider maybe doing the sprite atlas on cpu with memcpy maybe do some tests and see which one is faster
 //        maybe in this way we will just display a texture and a rectangle (lines) for each rectangle packed
-//        think on how to update he memory in the texture, all at once or some regions with subdata
+//        think on how to update he memory in the texture, all at once or some regions with upload
 // TODO - make a SpriteAtlasViewer/FontViewer or maybe even TextureViewer class
 
 // TODO - be sure that in all the modules and frameworks (currently just one) the cmake functions have the same order in all of the CMakeFile lists
