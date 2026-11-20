@@ -51,8 +51,8 @@ auto FontPacker::pack() -> void
     }
 
     // stbrp_pack_rects places the rectangles sorted by height then width (and gives them back in our order after),
-    // images with the exact same size (ex: blue_hand_peace and green_hand_peace) are a tie for that sort and qsort is not stable,
-    // so their placement in the atlas is arbitrary (the result is still correct, the txt keeps the file name order)
+    // glyphs with the exact same size (ex: n and u in many fonts) are a tie for that sort and qsort is not stable,
+    // so their placement in the atlas is arbitrary (the result is still correct, the txt keeps the character order)
     // TODO if we want a predictable visual order in the atlas, define STBRP_SORT (in stb.c) with a stable sort
 
     const auto all_packed = stbrp_pack_rects(&stbrp_context, _rectangles.data(), rectangles_count);
@@ -71,7 +71,6 @@ auto FontPacker::pack() -> void
 
     std::ofstream output_file;
     output_file.open(std::string(_folder) + ".txt");
-    // TODO have the extension as sprites
 
     // TODO maybe strip the "textures/" part from it
     output_file << _folder + "_atlas.png" << std::endl;
@@ -82,16 +81,16 @@ auto FontPacker::pack() -> void
     // when turning a rect into UVs, the v axis depends on which texture you sample:
     //  - the png loaded with stbi_load (no vertical flip): row 0 is the top, so
     //      u0 = x / W, u1 = (x + w) / W, v_top = y / H, v_bottom = (y + h) / H
-    //  - SpritePacker::texture (rendered by build()): the top of the atlas sits at v = 1 (opengl bottom-up), so
+    //  - FontPacker::texture (rendered by build()): the top of the atlas sits at v = 1 (opengl bottom-up), so
     //      u0 = x / W, u1 = (x + w) / W, v_top = 1 - y / H, v_bottom = 1 - (y + h) / H
     //    this is why the atlas viewer in main uses create_sprite(..., true)
-    // mixing these up draws the sprites upside down (and takes the wrong rows from the atlas)
+    // mixing these up draws the glyphs upside down (and takes the wrong rows from the atlas)
 
     for (auto i = 0; i < rectangles_count; ++i)
     {
         if (_rectangles[i].was_packed)
         {
-            // TODO move this sprite atlas write into a separate function/class
+            // TODO move this font atlas write into a separate function/class
             // TODO find a better/best way to write this in a file
             output_file << _rectangles[i].x << " " << _rectangles[i].y << " " << _rectangles[i].w << " " << _rectangles[i].h << std::endl;
 
@@ -132,7 +131,7 @@ auto FontPacker::build(const graphics::opengl::ShaderProgram& shader, const grap
     framebuffer_pbo.allocate(buffer_size, nullptr, GL_MAP_READ_BIT);
     framebuffer_pbo.bind(GL_PIXEL_PACK_BUFFER);
 
-    // sprites
+    // glyph quads
 
     graphics::opengl::Buffer sprites_vbo;
     sprites_vbo.create();
@@ -215,10 +214,8 @@ auto FontPacker::build(const graphics::opengl::ShaderProgram& shader, const grap
         framebuffer_pbo.unmap();
     }
 
-    for (const auto& image : _images)
-    {
-        stbi_image_free(image.pixels);
-    }
+    // the glyph pixels are only borrowed from the font (Font::release_images frees them), just drop our copies of the pointers
+    _images.clear();
 
     // TODO when we will have a resource/graphics manager maybe reuse these instead of delete? maybe it will save some time or something else
 
@@ -229,5 +226,3 @@ auto FontPacker::build(const graphics::opengl::ShaderProgram& shader, const grap
     framebuffer_pbo.destroy();
     framebuffer.destroy();
 }
-
-// TODO remove the stbi_image_free from stbi_image and just use the default there, no custom allocator

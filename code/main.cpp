@@ -28,6 +28,7 @@
 #include "sprite_atlas.hpp"
 #include "font_packer.hpp"
 #include "font_atlas.hpp"
+#include "text.hpp"
 
 auto main() -> int32_t
 {
@@ -289,8 +290,23 @@ auto main() -> int32_t
     font_packer.init(default_font.images);
     font_packer.build(sprite_program_shader, sprite_sampler, camera_ubo, transform_ubo);
 
+    default_font.release_images();
+
     FontAtlas font_atlas;
     font_atlas.init("textures/font.txt");
+
+    Text text_01
+    {
+        .text = "This is sample text",
+    };
+
+    Text text_02
+    {
+        .text = "This is a second sample text",
+    };
+
+    text_01.build(default_font, font_atlas);
+    text_02.build(default_font, font_atlas);
 
     graphics::opengl::Commands::clear(0.5f, 0.5f, 0.5f, 1.0f);
 
@@ -300,8 +316,6 @@ auto main() -> int32_t
 
     glm::vec3  red_color { 1.0f, 0.0f, 0.0f };
     glm::vec3 blue_color { 0.0f, 0.0f, 1.0f };
-
-    glm::mat4 text_matrix { 1.0f };
 
     auto default_texture_width  = 1;
     auto default_texture_height = 1;
@@ -547,18 +561,11 @@ auto main() -> int32_t
 
         font_atlas.bind();
 
-        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 700.0f, 0.0f });
-        transform_ubo.upload(0, sizeof(text_matrix), &text_matrix);
-
         material_ubo.upload(0, sizeof(glm::vec3), &red_color);
-        render_text(font_atlas, default_font, "This is sample text"); // TODO accept a position for the render_text (which should have the transform_ubo as a parameter)
-
-        text_matrix = translate(glm::mat4(1.0f), { 200.0f, 800.0f, 0.0f });
-        text_matrix = scale(text_matrix, { 0.5f, 0.5f, 0.5f });
-        transform_ubo.upload(0, sizeof(text_matrix), &text_matrix);
+        render_text(text_01, 200.0f, 700.0f, 1.0f, transform_ubo);
 
         material_ubo.upload(0, sizeof(glm::vec3), &blue_color);
-        render_text(font_atlas, default_font, "This is a second sample text");
+        render_text(text_02, 200.0f, 800.0f, 0.5f, transform_ubo);
 
         window_manager.update();
     }

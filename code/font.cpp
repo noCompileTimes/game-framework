@@ -18,7 +18,7 @@ auto Font::load(const std::string& filename) -> int32_t
 
     FT_Set_Pixel_Sizes(ft_face, 0, 48);
 
-    ascender = static_cast<int32_t>(ft_face->size->metrics.ascender >> 6); // 26.6 fixed point to pixels
+    baseline = 0;
 
     uint32_t index = 0;
 
@@ -48,12 +48,14 @@ auto Font::load(const std::string& filename) -> int32_t
 
         characters.insert(std::make_pair(c, character));
 
+        baseline = std::max(baseline, character.bearing.y);
+
         const auto& bitmap = ft_face->glyph->bitmap;
         const auto width  = static_cast<int32_t>(bitmap.width);
         const auto height = static_cast<int32_t>(bitmap.rows);
 
         // copy the glyph out of FreeType's glyph slot: bitmap.buffer is overwritten by the next FT_Load_Char and freed by FT_Done_Face
-        // malloc so it is released like the other image_data pixels (SpritePacker frees them with stbi_image_free, which is free)
+        // malloc'ed, the font owns them and frees them in release_images()
         auto* pixels = static_cast<uint8_t*>(std::malloc(static_cast<size_t>(width) * static_cast<size_t>(height)));
 
         if (pixels != nullptr)
@@ -73,4 +75,14 @@ auto Font::load(const std::string& filename) -> int32_t
     FT_Done_FreeType(ft_library);
 
     return 0;
+}
+
+auto Font::release_images() -> void
+{
+    for (const auto& image : images)
+    {
+        std::free(image.pixels);
+    }
+
+    images.clear();
 }

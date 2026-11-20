@@ -9,7 +9,6 @@
 #include "graphics/opengl/texture_sampler.hpp"
 #include "graphics/opengl/buffer.hpp"
 
-// TODO maybe call it SpriteAtlasPacker? - check the english
 // TODO maybe at some point this can be extended from a tool class
 class FontPacker
 {
@@ -22,11 +21,11 @@ public:
                const graphics::opengl::Buffer& camera_ubo,
                const graphics::opengl::Buffer& transform_ubo) -> void;
 
-    // top of the atlas is at v = 1 (flipped compared to the png/txt) - see the uv comment in init()
+    // top of the atlas is at v = 1 (flipped compared to the png/txt) - see the uv comment in pack()
     graphics::opengl::Texture texture; // TODO when we will have a resource/graphics manager, this should be private
 
 private:
-    auto pack() -> void; // TODO maybe call this pack or packing? because it kind of does that
+    auto pack() -> void;
 
     geometry<sprite_vertex, uint32_t> _geometry;
 
@@ -39,7 +38,7 @@ private:
     uint32_t _height;
 };
 
-// TODO maybe the drawing can be in another class? like SpriteAtlasPackerDrawer? think of it
+// TODO maybe the drawing can be in another class? shared with SpritePacker? think of it
 
 // TODO lets be sure always that width equals height - we always want square textures - better for performance
 // TODO maybe if we can also have them as power of two? - hope I used the right terms

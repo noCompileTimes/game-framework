@@ -1,54 +1,33 @@
 #pragma once
 
-#include "font.hpp"
-#include "font_atlas.hpp"
+#include "text.hpp"
 
-static auto render_text(const FontAtlas& font_atlas, const Font& font, std::string text) -> void
+#include "graphics/opengl/buffer.hpp"
+#include "graphics/opengl/commands.hpp"
+
+// the glyph quads were baked by Text::build into the font atlas buffers, so a whole text is one draw call
+// x, y  -> the top-left corner of the text on the screen, in pixels
+// scale -> uniform, 1.0 is the size the font was loaded with (48px)
+// the font atlas must be bound before (FontAtlas::bind)
+// TODO when we will have a resources/graphics manager drop the transform_ubo as parameter
+// TODO add rotation (like render_sprite) when we need it
+inline auto render_text(const Text& text, const float x, const float y, const float scale, const graphics::opengl::Buffer& transform_ubo) -> void
 {
-    auto x = 0.0f;
-
-    for (std::string::const_iterator c = text.begin(); c != text.end(); ++c)
+    if (text.count == 0)
     {
-        const auto character = font.characters.find(*c);
-
-        if (character == font.characters.end()) // not in the font (Font::load skips the characters the font has no glyph for)
-        {
-            continue;
-        }
-
-        /*auto [texture, size, bearing, advance] = character->second;
-
-        // the baseline sits at the font ascender, so the text anchor (0, 0) is the top-left corner instead of the baseline
-        const auto y = static_cast<float>(font.ascender);
-
-        const auto xpos = x + bearing.x;
-        const auto ypos = y - bearing.y;
-
-        const auto w = size.x;
-        const auto h = size.y;
-
-        const float vertices[6][4]
-        {
-            { xpos,     ypos,       0.0f, 0.0f },
-            { xpos,     ypos + h,   0.0f, 1.0f },
-            { xpos + w, ypos + h,   1.0f, 1.0f },
-
-            { xpos,     ypos,       0.0f, 0.0f },
-            { xpos + w, ypos + h,   1.0f, 1.0f },
-            { xpos + w, ypos,       1.0f, 0.0f }
-        };*/
-
-        //vbo.upload(0, sizeof(vertices), vertices);
-
-        auto index = character->second.index;
-
-        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, index * 6, 6); // the atlas vao is indexed (4 vertices + 6 elements per glyph)
-
-        //x += advance >> 6;
-
-        index++;
+        return;
     }
-}
 
-// TODO - fix the text with top left "anchor", it seems that it has some padding/margin on top of the text
-// TODO - optimization | put all the characters inside the vertex buffer object
+    glm::mat4 text_matrix { 1.0f };
+
+    text_matrix = translate(text_matrix, glm::vec3 { x, y, 0.0f });
+
+    if (scale != 1.0f)
+    {
+        text_matrix = glm::scale(text_matrix, glm::vec3 { scale, scale, 1.0f });
+    }
+
+    transform_ubo.upload(0, sizeof(glm::mat4), &text_matrix);
+
+    graphics::opengl::Commands::draw_elements(GL_TRIANGLES, static_cast<int32_t>(text.start), static_cast<int32_t>(text.count));
+}
