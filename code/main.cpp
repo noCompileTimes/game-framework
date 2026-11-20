@@ -570,7 +570,7 @@ auto main() -> int32_t
 
         // the text sizes are at scale 1, so they are multiplied by the scale the text is drawn with
         constexpr auto text_01_x     = 200.0f;
-        constexpr auto text_01_y     = 700.0f;
+        constexpr auto text_01_y     = 800.0f;
         constexpr auto text_01_scale = 1.0f;
 
         material_ubo.upload(0, sizeof(glm::vec3), &red_color);
