@@ -1,22 +1,27 @@
 #pragma once
 
+#include "core/aabb.hpp"
 #include "core/rect.hpp"
 
 #include "vertex_types.hpp"
 
 #include "geometry.hpp"
 
-static auto create_rectangle(const core::rect& position, const core::rgb& color) -> geometry<editor_vertex, uint32_t>
+[[nodiscard, maybe_unused]]
+static auto create_rectangle(const core::rect& bounds, const core::rgb& color) -> geometry<editor_vertex, uint32_t>
 {
-    geometry<editor_vertex, uint32_t> geometry
+    constexpr auto default_z = 0.0f; // TODO maybe this can be a constant somewhere?
+
+    return geometry<editor_vertex, uint32_t>
     {
         // TODO adding the 0.5f padding in here? makes sense? check with the claude about this 0.5f to be sure
+        //      not sure why I added this comment, maybe for the physics? to not overlapp on the current sprite if it is on top for debug?
         .vertices
         {
-            { { position.min.x, position.min.y, 0.0f }, color },
-            { { position.max.x, position.min.y, 0.0f }, color },
-            { { position.max.x, position.max.y, 0.0f }, color },
-            { { position.min.x, position.max.y, 0.0f }, color }
+            { { bounds.min.x, bounds.min.y, default_z }, color },
+            { { bounds.max.x, bounds.min.y, default_z }, color },
+            { { bounds.max.x, bounds.max.y, default_z }, color },
+            { { bounds.min.x, bounds.max.y, default_z }, color }
 
         },
         .elements
@@ -27,8 +32,20 @@ static auto create_rectangle(const core::rect& position, const core::rgb& color)
             3, 0
         }
     };
+}
 
-    return geometry;
+[[nodiscard, maybe_unused]]
+static auto create_cube(const core::aabb& bounds) -> geometry<editor_vertex, uint32_t>
+{
+    return geometry<editor_vertex, uint32_t>
+    {
+        .vertices
+        {
+        },
+        .elements
+        {
+        }
+    };
 }
 
 static auto load_geometry(const std::string_view filename) -> geometry<model_vertex, uint32_t>

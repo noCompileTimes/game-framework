@@ -10,19 +10,19 @@
 // TODO check if this flip_vertical parameter it makes what stbi_set_flip_vertically_on_load does for stb image on load
 //      flip_vertical = true  -> for textures stored bottom-up (e.g. framebuffer / render target textures)
 //      flip_vertical = false -> for textures loaded with stb_image (stored top-down)
-static auto create_sprite(const core::rect& position, const bool flip_vertical) -> geometry<sprite_vertex, uint32_t>
+static auto create_sprite(const core::rect& bounds, const bool flip_vertical) -> geometry<sprite_vertex, uint32_t>
 {
     const auto v_top    = flip_vertical ? 1.0f : 0.0f;
     const auto v_bottom = flip_vertical ? 0.0f : 1.0f;
 
-    geometry<sprite_vertex, uint32_t> geometry
+    return geometry<sprite_vertex, uint32_t>
     {
         .vertices
         {
-            { position.min, { 0.0f, v_top } },
-            { { position.max.x, position.min.y }, { 1.0f, v_top } },
-            {  position.max, { 1.0f, v_bottom } },
-            { { position.min.x, position.max.y }, { 0.0f, v_bottom } }
+            { bounds.min, { 0.0f, v_top } },
+            { { bounds.max.x, bounds.min.y }, { 1.0f, v_top } },
+            {  bounds.max, { 1.0f, v_bottom } },
+            { { bounds.min.x, bounds.max.y }, { 0.0f, v_bottom } }
         },
         .elements
         {
@@ -30,8 +30,6 @@ static auto create_sprite(const core::rect& position, const bool flip_vertical) 
             0, 3, 2
         }
     };
-
-    return geometry;
 }
 
 // same as above, but the uvs only cover one sprite of an atlas instead of the full texture
@@ -39,8 +37,8 @@ static auto create_sprite(const core::rect& position, const bool flip_vertical) 
 // atlas_width/height     -> the size of the whole atlas texture, in pixels
 // flip_vertical = true  -> for atlases stored bottom-up (e.g. SpritePacker::texture, rendered into a framebuffer)
 // flip_vertical = false -> for atlases loaded with stb_image (stored top-down)
-// TODO here we can drop the width  and height for the sprite? cause it can be computed from the rect min/max position?
-static auto create_sprite(const core::rect& position, const float x, const float y, const float width, const float height,
+// TODO here we can drop the width  and height for the sprite? cause it can be computed from the rect min/max bounds?
+static auto create_sprite(const core::rect& bounds, const float x, const float y, const float width, const float height,
                           const float atlas_width, const float atlas_height, const bool flip_vertical) -> geometry<sprite_vertex, uint32_t>
 {
     const auto u_left   = x / atlas_width;
@@ -49,14 +47,14 @@ static auto create_sprite(const core::rect& position, const float x, const float
     const auto v_top    = flip_vertical ? 1.0f - y / atlas_height            : y / atlas_height;
     const auto v_bottom = flip_vertical ? 1.0f - (y + height) / atlas_height : (y + height) / atlas_height;
 
-    geometry<sprite_vertex, uint32_t> geometry
+    return geometry<sprite_vertex, uint32_t>
     {
         .vertices
         {
-            { position.min, { u_left, v_top } },
-            { { position.max.x, position.min.y }, { u_right, v_top } },
-            {  position.max, { u_right, v_bottom } },
-            { { position.min.x, position.max.y }, { u_left, v_bottom } }
+            { bounds.min, { u_left, v_top } },
+            { { bounds.max.x, bounds.min.y }, { u_right, v_top } },
+            {  bounds.max, { u_right, v_bottom } },
+            { { bounds.min.x, bounds.max.y }, { u_left, v_bottom } }
         },
         .elements
         {
@@ -64,8 +62,6 @@ static auto create_sprite(const core::rect& position, const float x, const float
             0, 3, 2
         }
     };
-
-    return geometry;
 }
 
 static auto create_sprite(const sprite_pivot pivot, const float x, const float y, const float width, const float height,

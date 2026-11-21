@@ -36,16 +36,16 @@ auto Text::build(const Font& font, FontAtlas& font_atlas) -> void
         const auto& sprite = font_atlas.sprites[index];
 
         // the quad is placed already shifted (bearing + advance), the uvs pick the glyph from the atlas
-        const core::rect position { { xpos, ypos }, { xpos + w, ypos + h } };
+        const core::rect bounds { { xpos, ypos }, { xpos + w, ypos + h } };
 
         // TODO create_text_sprite? to handle the font sprites character with the right vertex type
-        sprites_geometry.append(create_sprite(position, sprite.x, sprite.y, sprite.w, sprite.h,
+        sprites_geometry.append(create_sprite(bounds, sprite.x, sprite.y, sprite.w, sprite.h,
             static_cast<float>(font_atlas.width), static_cast<float>(font_atlas.height), false)); // false: the font png is loaded top-down
 
         if (w > 0 && h > 0) // the space has no pixels, it only advances x
         {
-            max_x = std::max(max_x, position.max.x);
-            max_y = std::max(max_y, position.max.y);
+            max_x = std::max(max_x, bounds.max.x);
+            max_y = std::max(max_y, bounds.max.y);
         }
 
         x += static_cast<float>(advance >> 6); // 26.6 fixed point to pixels
