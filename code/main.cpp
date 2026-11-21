@@ -25,10 +25,12 @@
 #include "resources.hpp"
 #include "text_renderer.hpp"
 #include "camera.hpp"
+#include "character_entity.hpp"
 #include "sprite_atlas.hpp"
 #include "font_packer.hpp"
 #include "font_atlas.hpp"
 #include "text.hpp"
+#include "texture_binding.hpp"
 
 auto main() -> int32_t
 {
@@ -173,8 +175,28 @@ auto main() -> int32_t
     sphere_geometry_vao.attach_attribute({ 1, offsetof(model_vertex, normal), 3, GL_FLOAT, 0 });
     sphere_geometry_vao.attach_attribute({ 2, offsetof(model_vertex, texcoord), 2, GL_FLOAT, 0 });
 
+    const auto [plane_geometry_vertices, plane_geometry_elements] = load_geometry("models/plane.obj");
+
+    graphics::opengl::Buffer plane_geometry_vbo;
+    plane_geometry_vbo.create();
+    plane_geometry_vbo.allocate(sizeof(model_vertex) * plane_geometry_vertices.size(), plane_geometry_vertices.data(), 0);
+
+    graphics::opengl::Buffer plane_geometry_ebo;
+    plane_geometry_ebo.create();
+    plane_geometry_ebo.allocate(sizeof(uint32_t) * plane_geometry_elements.size(), plane_geometry_elements.data(), 0);
+
+    graphics::opengl::VertexArray plane_geometry_vao;
+    plane_geometry_vao.create();
+
+    plane_geometry_vao.attach_vertices(plane_geometry_vbo, sizeof(model_vertex));
+    plane_geometry_vao.attach_elements(plane_geometry_ebo);
+
+    plane_geometry_vao.attach_attribute({ 0, offsetof(model_vertex, position), 3, GL_FLOAT, 0 });
+    plane_geometry_vao.attach_attribute({ 1, offsetof(model_vertex, normal), 3, GL_FLOAT, 0 });
+    plane_geometry_vao.attach_attribute({ 2, offsetof(model_vertex, texcoord), 2, GL_FLOAT, 0 });
+
     static data::camera model_camera_data;
-    model_camera_data.view       = lookAt(glm::vec3 { 0.0f, 0.0f, 10.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
+    model_camera_data.view       = lookAt(glm::vec3 { 0.0f, 7.5f, 15.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
     model_camera_data.projection = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
 
     data::camera sprite_camera_data;
@@ -186,13 +208,16 @@ auto main() -> int32_t
     camera_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::camera));
     camera_ubo.allocate(sizeof(data::camera), &model_camera_data, GL_DYNAMIC_STORAGE_BIT);
 
-    glm::mat4 model_matrix { 1.0f };
-    glm::mat4 sprite_matrix { 1.0f };
+    glm::mat4 model_matrix  { 1.0f };
+    glm::mat4 plane_matrix  { 1.0f };
+    glm::mat4 sprite_matrix = translate(glm::mat4(1.0f), { 10.0f, 10.0f, 0.0f } );
+
+    constexpr glm::vec3 model_position { 0.0f, 1.5f, 0.0f };
 
     graphics::opengl::Buffer transform_ubo;
     transform_ubo.create();
     transform_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::transform));
-    transform_ubo.allocate(sizeof(data::transform), &model_matrix, GL_DYNAMIC_STORAGE_BIT);
+    transform_ubo.allocate(sizeof(data::transform), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     graphics::opengl::Buffer material_ubo;
     material_ubo.create();
@@ -368,6 +393,13 @@ auto main() -> int32_t
 
     // physics end
 
+    constexpr auto default_x_entity_position = 1700.0f;
+
+    // the position of the body, the hands and the face are drawn with an offset from it
+    character_entity red_entity    { .face_index =  6, .body_index = 41, .hand_index = 44, .x = default_x_entity_position, .y = 450.0f }; // angry (face_g, red_body_rhombus, red_hand_closed)
+    character_entity blue_entity   { .face_index = 10, .body_index =  3, .hand_index =  5, .x = default_x_entity_position, .y = 700.0f }; // sad (face_k, blue_body_squircle, blue_hand_open)
+    character_entity yellow_entity { .face_index = 11, .body_index = 50, .hand_index = 59, .x = default_x_entity_position, .y = 210.0f }; // happy (face_l, yellow_body_circle, yellow_hand_thumb)
+
     // input begin
 
     static auto show_cube = true;
@@ -438,8 +470,8 @@ auto main() -> int32_t
     {
         // update
 
-         model_matrix = rotate(glm::mat4(1.0), static_cast<float>(glfwGetTime()), glm::vec3{ 0.0f, 1.0f, 0.0f });
-        sprite_matrix = translate(glm::mat4(1.0f), { 10.0f, 10.0f, 0.0f } );
+        model_matrix = translate(glm::mat4(1.0f), model_position);
+        model_matrix = rotate(model_matrix, static_cast<float>(glfwGetTime()), glm::vec3{ 0.0f, 1.0f, 0.0f });
 
         // clearing
 
@@ -450,14 +482,12 @@ auto main() -> int32_t
 
         graphics::opengl::Pipeline::enable(GL_DEPTH_TEST);
 
-        model_sampler.bind(0);
+        model_sampler.bind(std::to_underlying(texture_binding::albedo));
 
         // models
 
         model_camera_data.projection = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
         camera_ubo.upload(0, sizeof(data::camera), &model_camera_data);
-
-        transform_ubo.upload(0, sizeof(model_matrix), &model_matrix);
 
         bt_object_transform.setFromOpenGLMatrix(&model_matrix[0].x);
 
@@ -472,9 +502,19 @@ auto main() -> int32_t
 
         model_program_shader.bind();
 
+        default_texture.bind(std::to_underlying(texture_binding::albedo));
+
+        transform_ubo.upload(0, sizeof(glm::mat4), &plane_matrix);
+
+        plane_geometry_vao.bind();
+
+        graphics::opengl::Commands::draw_elements(GL_TRIANGLES, 0, plane_geometry_elements.size());
+
+        transform_ubo.upload(0, sizeof(glm::mat4), &model_matrix);
+
         if (show_cube)
         {
-            pavement_texture.bind(0);
+            pavement_texture.bind(std::to_underlying(texture_binding::albedo));
 
             cube_geometry_vao.bind();
 
@@ -482,7 +522,7 @@ auto main() -> int32_t
         }
         else
         {
-            default_texture.bind(0);
+            default_texture.bind(std::to_underlying(texture_binding::albedo));
 
             sphere_geometry_vao.bind();
 
@@ -502,7 +542,7 @@ auto main() -> int32_t
 
         graphics::opengl::Pipeline::disable(GL_DEPTH_TEST);
 
-        sprite_sampler.bind(0);
+        sprite_sampler.bind(std::to_underlying(texture_binding::albedo));
 
         // sprites
 
@@ -516,25 +556,25 @@ auto main() -> int32_t
         character_atlas.bind();
 
         // yellow - happy (yellow_body_circle, yellow_hand_thumb)
-        render_sprite(1550.0f, 210.0f, 0.0f, 50, false, transform_ubo);
-        render_sprite(1440.0f, 250.0f, -10.0f, 59, false, transform_ubo);
-        render_sprite(1660.0f, 250.0f, 10.0f, 59, true, transform_ubo);
+        render_sprite(yellow_entity.x, yellow_entity.y, 0.0f, yellow_entity.body_index, false, transform_ubo);
+        render_sprite(yellow_entity.x - 110.0f, yellow_entity.y + 40.0f, -10.0f, yellow_entity.hand_index, false, transform_ubo);
+        render_sprite(yellow_entity.x + 110.0f, yellow_entity.y + 40.0f,  10.0f, yellow_entity.hand_index, true,  transform_ubo);
 
         // red - angry (red_body_rhombus, red_hand_closed)
-        render_sprite(1550.0f, 450.0f, 0.0f, 41, false,  transform_ubo);
-        render_sprite(1449.0f, 495.0f, 90.0f, 44, false, transform_ubo);
-        render_sprite(1635.0f, 514.0f, -90.0f, 44, true, transform_ubo);
+        render_sprite(red_entity.x, red_entity.y, 0.0f, red_entity.body_index, false, transform_ubo);
+        render_sprite(red_entity.x - 101.0f, red_entity.y + 45.0f,  90.0f, red_entity.hand_index, false, transform_ubo);
+        render_sprite(red_entity.x +  85.0f, red_entity.y + 64.0f, -90.0f, red_entity.hand_index, true,  transform_ubo);
 
         // blue - sad (blue_body_squircle, blue_hand_open)
-        render_sprite(1550.0f, 700.0f, 0.0f, 3, false, transform_ubo);
-        render_sprite(1460.0f, 768.0f, 170.0f, 5, false, transform_ubo);
-        render_sprite(1640.0f, 768.0f, -170.0f, 5, true, transform_ubo);
+        render_sprite(blue_entity.x, blue_entity.y, 0.0f, blue_entity.body_index, false, transform_ubo);
+        render_sprite(blue_entity.x - 90.0f, blue_entity.y + 68.0f,  170.0f, blue_entity.hand_index, false, transform_ubo);
+        render_sprite(blue_entity.x + 90.0f, blue_entity.y + 68.0f, -170.0f, blue_entity.hand_index, true,  transform_ubo);
 
         characters_faces_atlas.bind();
 
-        render_sprite(1550.0f, 212.0f, 0.0f, 11, false, transform_ubo); // face_l - happy
-        render_sprite(1550.0f, 453.0f, 0.0f, 6, false,  transform_ubo);  // face_g - angry
-        render_sprite(1550.0f, 708.0f, 0.0f, 10, false, transform_ubo); // face_k - sad
+        render_sprite(yellow_entity.x, yellow_entity.y + 2.0f, 0.0f, yellow_entity.face_index, false, transform_ubo); // face_l - happy
+        render_sprite(red_entity.x,    red_entity.y    + 3.0f, 0.0f, red_entity.face_index, false, transform_ubo); // face_g - angry
+        render_sprite(blue_entity.x,   blue_entity.y   + 8.0f, 0.0f, blue_entity.face_index, false, transform_ubo); // face_k - sad
 
         // sprites drawing - end
 
@@ -544,15 +584,15 @@ auto main() -> int32_t
 
         if (show_body)
         {
-            characters_packer.texture.bind(0); // TODO here should not be the atlas texture?
+            characters_packer.texture.bind(std::to_underlying(texture_binding::albedo)); // TODO here should not be the atlas texture?
         }
         else
         {
-            //characters_faces_packer.texture.bind(0);
-            font_packer.texture.bind(0); // TODO here should not be the atlas texture?
+            //characters_faces_packer.texture.bind(std::to_underlying(texture_binding::albedo));
+            font_packer.texture.bind(std::to_underlying(texture_binding::albedo)); // TODO here should not be the atlas texture?
         }
 
-        transform_ubo.upload(0, sizeof(sprite_matrix), &sprite_matrix);
+        transform_ubo.upload(0, sizeof(glm::mat4), &sprite_matrix);
 
         atlas_viewer_geometry_vao.bind();
 
@@ -562,15 +602,15 @@ auto main() -> int32_t
 
         // texts
 
-        text_sampler.bind(0);
+        text_sampler.bind(std::to_underlying(texture_binding::albedo));
 
         text_program_shader.bind();
 
         font_atlas.bind();
 
         // the text sizes are at scale 1, so they are multiplied by the scale the text is drawn with
-        constexpr auto text_01_x     = 200.0f;
-        constexpr auto text_01_y     = 800.0f;
+        constexpr auto text_01_x     = 100.0f;
+        constexpr auto text_01_y     = 890.0f;
         constexpr auto text_01_scale = 1.0f;
 
         material_ubo.upload(0, sizeof(glm::vec3), &red_color);
