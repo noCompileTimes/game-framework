@@ -1,8 +1,7 @@
 #include "sprite_atlas.hpp"
-#include "geometry.hpp"
-#include "geometry_utils.hpp"
-#include "vertex_types.hpp"
+#include "sprite_geometry.hpp"
 #include "sprite.hpp"
+
 #include "resources.hpp"
 
 // TODO refactor/improve it at some point

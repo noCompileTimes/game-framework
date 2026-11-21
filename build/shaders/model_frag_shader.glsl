@@ -21,12 +21,12 @@ void main()
     // TODO check more what is the normal way to do it here
 
     float ambient_factor = 0.1f;
-    vec3 ambient_color = ambient_factor * u_light.color;
+    vec3  ambient_color  = ambient_factor * u_light.color;
 
-    vec3 normal = normalize(in_normal);
-    vec3 light_direction = normalize(-u_light.source); // source is the direction the light travels, negate it to point towards the light
+    vec3 normal    = normalize(in_normal);
+    vec3 direction = normalize(-u_light.source); // source is the direction the light travels, negate it to point towards the light
 
-    float diffuse_factor = max(dot(normal, light_direction), 0.0);
+    float diffuse_factor = max(dot(normal, direction), 0.0);
     vec3  diffuse_color  = diffuse_factor * u_light.color * u_light.intensity;
 
     out_color = vec4(ambient_color + diffuse_color, 1.0) * texture(u_albedo_texture, in_texcoord);

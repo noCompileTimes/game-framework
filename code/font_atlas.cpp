@@ -1,8 +1,6 @@
 #include "font_atlas.hpp"
-#include "geometry.hpp"
 #include "geometry_utils.hpp"
-#include "vertex_types.hpp"
-#include "sprite.hpp"
+
 #include "resources.hpp"
 #include "graphics/opengl/pipeline.hpp"
 

@@ -1,8 +1,6 @@
 #include "text.hpp"
 
-#include "geometry.hpp"
-#include "geometry_utils.hpp"
-#include "vertex_types.hpp"
+#include "sprite_geometry.hpp"
 
 auto Text::build(const Font& font, FontAtlas& font_atlas) -> void
 {

@@ -21,6 +21,7 @@
 
 #include "sprite_packer.hpp"
 #include "sprite_renderer.hpp"
+#include "sprite_geometry.hpp"
 #include "geometry_utils.hpp"
 #include "resources.hpp"
 #include "text_renderer.hpp"
@@ -195,8 +196,10 @@ auto main() -> int32_t
     plane_geometry_vao.attach_attribute({ 1, offsetof(model_vertex, normal), 3, GL_FLOAT, 0 });
     plane_geometry_vao.attach_attribute({ 2, offsetof(model_vertex, texcoord), 2, GL_FLOAT, 0 });
 
+    glm::vec3 camera_position { 0.0f, 7.5f, 15.0f };
+
     static data::camera model_camera_data;
-    model_camera_data.view       = lookAt(glm::vec3 { 0.0f, 7.5f, 15.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
+    model_camera_data.view       = lookAt(camera_position, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
     model_camera_data.projection = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
 
     data::camera sprite_camera_data;

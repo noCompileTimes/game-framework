@@ -1,6 +1,6 @@
 #include "font_packer.hpp"
 #include "resources.hpp"
-#include "geometry_utils.hpp"
+#include "sprite_geometry.hpp"
 
 #include "graphics/opengl/framebuffer.hpp"
 #include "graphics/opengl/vertex_array.hpp"
