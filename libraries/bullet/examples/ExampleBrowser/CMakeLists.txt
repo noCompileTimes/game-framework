@@ -2,18 +2,15 @@
 INCLUDE_DIRECTORIES(
 	.
 	${BULLET_PHYSICS_SOURCE_DIR}/src
-	${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs
-)
+	${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs)
 
 FILE(GLOB GwenGUISupport_SRCS  "GwenGUISupport/*" )
 FILE(GLOB GwenGUISupport_HDRS  "GwenGUISupport/*" )
 
-
 IF (WIN32)
-        INCLUDE_DIRECTORIES(
-                ${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/glad
-        )
-				ADD_DEFINITIONS(-DGLEW_STATIC)
+        INCLUDE_DIRECTORIES(${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs/glad)
+
+        ADD_DEFINITIONS(-DGLEW_STATIC)
 ELSE(WIN32)
         IF(APPLE)
                 find_library(COCOA NAMES Cocoa)
@@ -78,15 +75,10 @@ INSTALL(TARGETS BulletExampleBrowserLib
 INCLUDE_DIRECTORIES(
         .
         ${BULLET_PHYSICS_SOURCE_DIR}/src
-	${BULLET_PHYSICS_SOURCE_DIR}/examples/SharedMemory
-        ${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs
-)
+	    ${BULLET_PHYSICS_SOURCE_DIR}/examples/SharedMemory
+        ${BULLET_PHYSICS_SOURCE_DIR}/examples/ThirdPartyLibs)
 
-
-LINK_LIBRARIES(
-        BulletExampleBrowserLib Bullet3Common BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamicsUtils BulletInverseDynamics LinearMath OpenGLWindow gwen BussIK
-)
-
+LINK_LIBRARIES(BulletExampleBrowserLib Bullet3Common BulletSoftBody BulletDynamics BulletCollision BulletInverseDynamicsUtils BulletInverseDynamics LinearMath OpenGLWindow gwen BussIK)
 
 add_definitions(-DINCLUDE_CLOTH_DEMOS)
 
@@ -193,8 +185,6 @@ SET(BulletExampleBrowser_SRCS
 	../InverseDynamics/InverseDynamicsExample.h
 	../InverseKinematics/InverseKinematicsExample.cpp
 	../InverseKinematics/InverseKinematicsExample.h
-	../ForkLift/ForkLiftDemo.cpp
-	../ForkLift/ForkLiftDemo.h
 	../MultiThreadedDemo/MultiThreadedDemo.cpp
 	../MultiThreadedDemo/MultiThreadedDemo.h
 	../MultiThreadedDemo/CommonRigidBodyMTBase.cpp
@@ -205,9 +195,6 @@ SET(BulletExampleBrowser_SRCS
 	../Tutorial/Tutorial.h
 	../Tutorial/Dof6ConstraintTutorial.cpp
 	../Tutorial/Dof6ConstraintTutorial.h
-	../Evolution/NN3DWalkers.cpp
-	../Evolution/NN3DWalkers.h
-	../Evolution/NN3DWalkersTimeWarpBase.h
 	../ExtendedTutorials/NewtonsRopeCradle.cpp
 	../ExtendedTutorials/NewtonsRopeCradle.h
 	../Collision/CollisionSdkC_Api.cpp
