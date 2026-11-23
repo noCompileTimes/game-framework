@@ -580,11 +580,14 @@ auto main() -> int32_t
 
         basic_program_shader.bind();
 
-        transform_ubo.upload(0, sizeof(glm::mat4), &debug_matrix);
+        if (show_cube)
+        {
+            transform_ubo.upload(0, sizeof(glm::mat4), &debug_matrix);
 
-        debug_vao.bind();
+            debug_vao.bind();
 
-        graphics::opengl::Commands::draw_vertices(GL_LINES, 0, static_cast<int32_t>(debug_vertices_count / 2));
+            graphics::opengl::Commands::draw_vertices(GL_LINES, 0, static_cast<int32_t>(debug_vertices_count / 2));
+        }
 
         transform_ubo.upload(0, sizeof(glm::mat4), &light_matrix);
 
