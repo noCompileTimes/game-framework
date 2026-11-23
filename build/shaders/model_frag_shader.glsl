@@ -22,8 +22,7 @@ layout (binding = 4, std140) uniform view_ubo
 
 void main()
 {
-    // TODO add a light color equal with this u_light.color * u_light.intensity in case we decide the intensity to be general for the light, not by diffuse or specual
-    // TODO check more what is the normal way to do it here
+    vec3 light_color = u_light.color * u_light.intensity;
 
     float ambient_factor = 0.1f;
     vec3  ambient_color  = ambient_factor * u_light.color;
@@ -33,17 +32,17 @@ void main()
     // TODO this should be called light_direction?
 
     float diffuse_factor = max(dot(normal, direction), 0.0);
-    vec3  diffuse_color  = diffuse_factor * u_light.color * u_light.intensity;
+    vec3  diffuse_color  = diffuse_factor * light_color;
 
-    // TODO this should be called specula_intensity?
+    // TODO this should be called specular_intensity?
     float specular_strength = 0.5;
     vec3 view_direction = normalize(u_view.position - in_position);
 
     // TODO maybe a better name | maybe reflection_direction?
     vec3  reflect_direction = reflect(-direction, normal);
 
-    float specular_factor = pow(max(dot(view_direction, reflect_direction), 0.0), 32);
-     vec3 specular_color  = specular_strength * specular_factor * u_light.color;
+    float specular_factor = diffuse_factor > 0.0 ? pow(max(dot(view_direction, reflect_direction), 0.0), 32.0) : 0.0;
+     vec3 specular_color  = specular_strength * specular_factor * light_color;
 
     vec3 albedo_texture_color = texture(u_albedo_texture, in_texcoord).rgb;
     out_color = vec4((ambient_color + diffuse_color) * albedo_texture_color + specular_color, 1.0);
