@@ -24,7 +24,7 @@ static auto create_rectangle(const core::rect& bounds, const core::rgb& color) -
             { { bounds.min.x, bounds.max.y, default_z }, color }
 
         },
-        .elements
+        .elements // TODO maybe use here some line structure to better define this?
         {
             0, 1,
             1, 2,
@@ -35,15 +35,38 @@ static auto create_rectangle(const core::rect& bounds, const core::rgb& color) -
 }
 
 [[nodiscard, maybe_unused]]
-static auto create_cube(const core::aabb& bounds) -> geometry<editor_vertex, uint32_t>
+static auto create_cube(const core::aabb& bounds, const core::rgb& color) -> geometry<editor_vertex, uint32_t>
 {
     return geometry<editor_vertex, uint32_t>
     {
         .vertices
         {
+            { { bounds.min.x, bounds.min.y, bounds.min.z }, color },
+            { { bounds.max.x, bounds.min.y, bounds.min.z }, color },
+            { { bounds.max.x, bounds.max.y, bounds.min.z }, color },
+            { { bounds.min.x, bounds.max.y, bounds.min.z }, color },
+
+            { { bounds.min.x, bounds.min.y, bounds.max.z }, color },
+            { { bounds.max.x, bounds.min.y, bounds.max.z }, color },
+            { { bounds.max.x, bounds.max.y, bounds.max.z }, color },
+            { { bounds.min.x, bounds.max.y, bounds.max.z }, color }
         },
-        .elements
+        .elements // TODO maybe use here some line structure to better define this?
         {
+            0, 1,
+            1, 2,
+            2, 3,
+            3, 0,
+
+            4, 5,
+            5, 6,
+            6, 7,
+            7, 4,
+
+            0, 4,
+            1, 5,
+            2, 6,
+            3, 7
         }
     };
 }

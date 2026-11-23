@@ -1,8 +1,8 @@
 #version 430
 
-layout (location = 0) in vec3 in_normal;
-layout (location = 1) in vec2 in_texcoord;
-layout (location = 2) in vec3 in_position; // TODO put it maybe the first to have the same as outputs from vertex stage
+layout (location = 0) in vec3 in_position;
+layout (location = 1) in vec3 in_normal;
+layout (location = 2) in vec2 in_texcoord;
 
 layout (location = 0) out vec4 out_color;
 
@@ -15,6 +15,11 @@ layout (binding = 3, std140) uniform light_ubo
     vec3  source;
 } u_light;
 
+layout (binding = 4, std140) uniform view_ubo
+{
+    vec3 position;
+} u_view;
+
 void main()
 {
     // TODO add a light color equal with this u_light.color * u_light.intensity in case we decide the intensity to be general for the light, not by diffuse or specual
@@ -25,11 +30,23 @@ void main()
 
     vec3 normal    = normalize(in_normal);
     vec3 direction = normalize(-u_light.source); // source is the direction the light travels, negate it to point towards the light
+    // TODO this should be called light_direction?
 
     float diffuse_factor = max(dot(normal, direction), 0.0);
     vec3  diffuse_color  = diffuse_factor * u_light.color * u_light.intensity;
 
-    out_color = vec4(ambient_color + diffuse_color, 1.0) * texture(u_albedo_texture, in_texcoord);
+    // TODO this should be called specula_intensity?
+    float specular_strength = 0.5;
+    vec3 view_direction = normalize(u_view.position - in_position);
+
+    // TODO maybe a better name | maybe reflection_direction?
+    vec3  reflect_direction = reflect(-direction, normal);
+
+    float specular_factor = pow(max(dot(view_direction, reflect_direction), 0.0), 32);
+     vec3 specular_color  = specular_strength * specular_factor * u_light.color;
+
+    vec3 albedo_texture_color = texture(u_albedo_texture, in_texcoord).rgb;
+    out_color = vec4((ambient_color + diffuse_color) * albedo_texture_color + specular_color, 1.0);
 }
 
 /*

@@ -10,7 +10,8 @@ namespace data
 
         // fragment stage
         material,
-        light
+        light,
+        view
     };
 }
 

@@ -18,6 +18,7 @@
 #include "data/transform.hpp"
 #include "data/material.hpp"
 #include "data/light.hpp"
+#include "data/view.hpp"
 
 #include "sprite_packer.hpp"
 #include "sprite_renderer.hpp"
@@ -202,30 +203,40 @@ auto main() -> int32_t
     model_camera_data.view       = lookAt(camera_position, glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 1.0f, 0.0f });
     model_camera_data.projection = glm::perspective(glm::radians(45.0f), static_cast<float>(window_width) / static_cast<float>(window_height), 0.3f, 100.0f);
 
+    data::view view_data { .position = camera_position };
+
     data::camera sprite_camera_data;
     sprite_camera_data.view       = glm::mat4(1.0f);
     sprite_camera_data.projection = glm::ortho(0.0f, static_cast<float>(window_width), static_cast<float>(window_height), 0.0f, 0.0f, 1.0f);
 
     graphics::opengl::Buffer camera_ubo;
     camera_ubo.create();
-    camera_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::camera));
     camera_ubo.allocate(sizeof(data::camera), &model_camera_data, GL_DYNAMIC_STORAGE_BIT);
+    camera_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::camera));
+
+    graphics::opengl::Buffer view_ubo;
+    view_ubo.create();
+    view_ubo.allocate(sizeof(data::view), &view_data, GL_DYNAMIC_STORAGE_BIT); // upload() it when the camera moves
+    view_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::view));
+
+    constexpr glm::vec3 model_position { 0.0f, 1.5f, 0.0f };
+    constexpr glm::vec3 light_position { 4.0f, 4.0f, 4.0f };
 
     glm::mat4 model_matrix  { 1.0f };
     glm::mat4 plane_matrix  { 1.0f };
     glm::mat4 sprite_matrix = translate(glm::mat4(1.0f), { 10.0f, 10.0f, 0.0f } );
-
-    constexpr glm::vec3 model_position { 0.0f, 1.5f, 0.0f };
+    glm::mat4  light_matrix = translate(glm::mat4(1.0f), light_position);
+    glm::mat4  debug_matrix { 1.0f };
 
     graphics::opengl::Buffer transform_ubo;
     transform_ubo.create();
-    transform_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::transform));
     transform_ubo.allocate(sizeof(data::transform), nullptr, GL_DYNAMIC_STORAGE_BIT);
+    transform_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::transform));
 
     graphics::opengl::Buffer material_ubo;
     material_ubo.create();
-    material_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::material));
     material_ubo.allocate(sizeof(data::material), nullptr, GL_DYNAMIC_STORAGE_BIT);
+    material_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::material));
 
     data::light default_light
     {
@@ -236,8 +247,8 @@ auto main() -> int32_t
 
     graphics::opengl::Buffer light_ubo;
     light_ubo.create();
-    light_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::light));
     light_ubo.allocate(sizeof(data::light), &default_light, GL_DYNAMIC_STORAGE_BIT);
+    light_ubo.bind(GL_UNIFORM_BUFFER, std::to_underlying(data::binding::light));
 
     graphics::opengl::TextureSampler text_sampler;
     text_sampler.create();
@@ -394,6 +405,41 @@ auto main() -> int32_t
     debug_vao.attach_attribute({ 0, offsetof(editor_vertex, position), 3, GL_FLOAT, 0 });
     debug_vao.attach_attribute({ 1, offsetof(editor_vertex, color), 3, GL_FLOAT, 0 });
 
+    constexpr auto light_default_value = 0.15f; // TODO propose a better name
+    constexpr core::aabb light_default_bounds
+    {
+        .min // TODO maybe use here some constructor which set all of them as this value?
+        {
+            -light_default_value,
+            -light_default_value,
+            -light_default_value
+        },
+        .max // TODO maybe use here some constructor which set all of them as this value?
+        {
+            light_default_value,
+            light_default_value,
+            light_default_value
+        }
+    };
+
+    auto [light_geometry_vertices, light_geometry_elements] = create_cube(light_default_bounds, { 0.0f, 0.0f, 1.0f });
+
+    graphics::opengl::Buffer light_vbo;
+    light_vbo.create();
+    light_vbo.allocate(sizeof(editor_vertex) * light_geometry_vertices.size(), light_geometry_vertices.data(), 0);
+
+    graphics::opengl::Buffer light_ebo;
+    light_ebo.create();
+    light_ebo.allocate(sizeof(uint32_t) * light_geometry_elements.size(), light_geometry_elements.data(), 0);
+
+    graphics::opengl::VertexArray light_vao;
+    light_vao.create();
+    light_vao.attach_vertices(light_vbo, sizeof(editor_vertex));
+    light_vao.attach_elements(light_ebo);
+
+    light_vao.attach_attribute({ 0, offsetof(editor_vertex, position), 3, GL_FLOAT, 0 });
+    light_vao.attach_attribute({ 1, offsetof(editor_vertex, color), 3, GL_FLOAT, 0 });
+
     // physics end
 
     constexpr auto default_x_entity_position = 1700.0f;
@@ -534,12 +580,17 @@ auto main() -> int32_t
 
         basic_program_shader.bind();
 
-        glm::mat4 collider_matrix { 1.0f };
-        transform_ubo.upload(0, sizeof(collider_matrix), &collider_matrix);
+        transform_ubo.upload(0, sizeof(glm::mat4), &debug_matrix);
 
         debug_vao.bind();
 
         graphics::opengl::Commands::draw_vertices(GL_LINES, 0, static_cast<int32_t>(debug_vertices_count / 2));
+
+        transform_ubo.upload(0, sizeof(glm::mat4), &light_matrix);
+
+        light_vao.bind();
+
+        graphics::opengl::Commands::draw_elements(GL_LINES, 0, light_geometry_elements.size());
 
         // 2D drawing
 
@@ -655,6 +706,11 @@ auto main() -> int32_t
 
 // VERSION 2
 
+// TODO - check if using function in glsl will break the performance? like for compute_direction_light, stuff like this
+
+// TODO - integrate the imguizmo to use the rotation/orientation tool for the light cube
+// TODO - based on the orientation of the cube compute also a direction for the light to be set for the shader
+
 // TODO - ask for a code review on the font, font_atlas, font_packer, text, text_renderer - basically what is about the text implementation
 
 // TODO - some way to edit an existing sprite atlas to adjust the sprite pivot and maybe who knows other characteristics
@@ -673,6 +729,17 @@ auto main() -> int32_t
 // TODO - make a SpriteAtlasViewer/FontViewer or maybe even TextureViewer class
 
 // TODO - be sure that in all the modules and frameworks (currently just one) the cmake functions have the same order in all of the CMakeFile lists
+
+// TODO - add the opengl debug output: glEnable(GL_DEBUG_OUTPUT) + glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS) + glDebugMessageCallback
+//        (glad already has glDebugMessageCallback/glDebugMessageControl), filter the notifications with glDebugMessageControl
+//        and create the glfw context as a debug context so the driver reports more - it catches errors like upload() on
+//        a buffer without GL_DYNAMIC_STORAGE_BIT (GL_INVALID_OPERATION) that otherwise fail silently
+
+// TODO - when there are many objects, put all the transforms in one buffer with a slot per object and bind a range per draw
+//        instead of the many small transform_ubo.upload() calls (each one makes the driver sync on the same buffer)
+//        the range offset must be a multiple of GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT (256 on this gpu, 64 or less on others),
+//        query it once with glGetIntegerv and round the slots up: slot i at i * align_up(sizeof(data::transform)), upload once per frame
+//        (the size has no alignment rule, ssbos have their own GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT)
 
 // VERSION 1
 
