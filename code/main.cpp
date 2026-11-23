@@ -704,6 +704,12 @@ auto main() -> int32_t
     return 0;
 }
 
+// VERSION 3
+
+// TODO - move the ambient and specular values from model_frag_shader to the material ubo (data::material + material_ubo, binding 2):
+//        ambient_factor (0.1), specular_intensity (0.5) and the shininess exponent (128.0) - they belong to the surface, not the light
+//        (keep the std140 layout in sync: data::material is alignas(16) with albedo_color as rgb, the new floats can fill the vec3 padding)
+
 // VERSION 2
 
 // TODO - check if using function in glsl will break the performance? like for compute_direction_light, stuff like this

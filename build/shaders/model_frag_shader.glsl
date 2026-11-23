@@ -27,25 +27,21 @@ void main()
     float ambient_factor = 0.1f;
     vec3  ambient_color  = ambient_factor * u_light.color;
 
-    vec3 normal    = normalize(in_normal);
-    vec3 direction = normalize(-u_light.source); // source is the direction the light travels, negate it to point towards the light
-    // TODO this should be called light_direction?
+    vec3 normal          = normalize(in_normal);
+    vec3 light_direction = normalize(-u_light.source); // source is the direction the light travels, negate it to point towards the light
 
-    float diffuse_factor = max(dot(normal, direction), 0.0);
+    float diffuse_factor = max(dot(normal, light_direction), 0.0);
     vec3  diffuse_color  = diffuse_factor * light_color;
 
-    // TODO this should be called specular_intensity?
-    float specular_strength = 0.5;
+    float specular_intensity = 0.5;
     vec3 view_direction = normalize(u_view.position - in_position);
 
-    // TODO maybe a better name | maybe reflection_direction?
-    vec3  reflect_direction = reflect(-direction, normal);
-
-    float specular_factor = diffuse_factor > 0.0 ? pow(max(dot(view_direction, reflect_direction), 0.0), 32.0) : 0.0;
-     vec3 specular_color  = specular_strength * specular_factor * light_color;
+     vec3  halfway_direction = normalize(light_direction + view_direction);
+    float specular_factor    = diffuse_factor > 0.0 ? pow(max(dot(normal, halfway_direction), 0.0), 128.0) : 0.0;
+     vec3 specular_color     = specular_intensity * specular_factor * light_color;
 
     vec3 albedo_texture_color = texture(u_albedo_texture, in_texcoord).rgb;
-    out_color = vec4((ambient_color + diffuse_color) * albedo_texture_color + specular_color, 1.0);
+     out_color = vec4((ambient_color + diffuse_color) * albedo_texture_color + specular_color, 1.0);
 }
 
 /*
