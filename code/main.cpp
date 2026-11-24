@@ -690,9 +690,9 @@ auto main() -> int32_t
     characters_faces_packer.texture.destroy();
     font_packer.texture.destroy();
 
-    // TODO add a release() to SpriteAtlas and FontAtlas that destroys their vao, texture, vbo and ebo (SpriteAtlas keeps
-    //      its vbo/ebo only as locals in init() for now, they need to become members) and call it here for
-    //      character_atlas, characters_faces_atlas and font_atlas
+           character_atlas.release();
+    characters_faces_atlas.release();
+                font_atlas.release();
 
       text_sampler.destroy();
      model_sampler.destroy();

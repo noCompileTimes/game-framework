@@ -11,7 +11,9 @@
 class FontAtlas
 {
 public:
-    auto init(std::string_view filename) -> void;
+    auto    init(std::string_view filename) -> void;
+    auto release() const -> void;
+
     auto bind() const -> void;
 
     // appends the glyph quads of one text into the shared vbo/ebo, returns the start (in elements) to draw it from, nullopt if the buffers are full
@@ -29,7 +31,7 @@ private:
     graphics::opengl::Texture _texture { GL_TEXTURE_2D };
     graphics::opengl::VertexArray _vao;
 
-    graphics::opengl::Buffer _vbo; // TODO destroy them at some point in a release function
+    graphics::opengl::Buffer _vbo;
     graphics::opengl::Buffer _ebo;
 
     // where the next text geometry is written in the shared buffers

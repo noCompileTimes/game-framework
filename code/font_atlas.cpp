@@ -62,6 +62,16 @@ auto FontAtlas::init(std::string_view filename) -> void
     graphics::opengl::Pipeline::pixel_store(GL_UNPACK_ALIGNMENT, 4);
 }
 
+auto FontAtlas::release() const -> void
+{
+        _vao.destroy();
+
+        _ebo.destroy();
+        _vbo.destroy();
+
+    _texture.destroy();
+}
+
 auto FontAtlas::bind() const -> void
 {
     _texture.bind(0);
