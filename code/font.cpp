@@ -13,6 +13,8 @@ auto Font::load(const std::string& filename) -> int32_t
 
     if (FT_New_Face(ft_library, filename.data(), 0, &ft_face))
     {
+        FT_Done_FreeType(ft_library);
+
         return -1;
     }
 

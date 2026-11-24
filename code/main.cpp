@@ -54,7 +54,7 @@ auto main() -> int32_t
 
     static auto window_is_running = true;
 
-    window_events->callbacks.on_resize = [&](const uint32_t width, const uint32_t height)
+    window_events->callbacks.on_resize = [&](const int32_t width, const int32_t height)
     {
         window_width  = width;
         window_height = height;
@@ -275,6 +275,8 @@ auto main() -> int32_t
     pavement_texture.allocate(pavement_image.width, pavement_image.height, GL_RGB8, 1);
     pavement_texture.upload(pavement_image.width, pavement_image.height, GL_RGB, 0, pavement_image.pixels);
 
+    stbi_image_free(pavement_image.pixels);
+
     // atlas output - begin
 
     // TODO maybe have this like in a separate "scene" or maybe when we press a key
@@ -356,9 +358,9 @@ auto main() -> int32_t
     graphics::opengl::Pipeline::enable(GL_BLEND);
     graphics::opengl::Pipeline::blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    glm::vec3  red_color { 1.0f, 0.0f, 0.0f };
+    glm::vec3   red_color { 1.0f, 0.0f, 0.0f };
     glm::vec3 green_color { 0.0f, 1.0f, 0.0f };
-    glm::vec3 blue_color { 0.0f, 0.0f, 1.0f };
+    glm::vec3  blue_color { 0.0f, 0.0f, 1.0f };
 
     auto default_texture_width  = 1;
     auto default_texture_height = 1;
@@ -540,10 +542,11 @@ auto main() -> int32_t
 
         physics.update();
 
+        // the physics debug stores a position and a color vec3 per vertex, so two of them make one editor_vertex
         // clamp to the buffer capacity so we never write past the end of debug_vbo
-        const auto debug_vertices_count = std::min<size_t>(physics.debug()->vertices.size(), debug_vertices_capacity);
+        const auto debug_vertices_count = std::min<size_t>(physics.debug()->vertices.size() / 2, debug_vertices_capacity);
 
-        debug_vbo.upload(0, sizeof(core::vec3) * debug_vertices_count, physics.debug()->vertices.data());
+        debug_vbo.upload(0, sizeof(editor_vertex) * debug_vertices_count, physics.debug()->vertices.data());
 
         model_program_shader.bind();
 
@@ -582,7 +585,7 @@ auto main() -> int32_t
 
             debug_vao.bind();
 
-            graphics::opengl::Commands::draw_vertices(GL_LINES, 0, static_cast<int32_t>(debug_vertices_count / 2));
+            graphics::opengl::Commands::draw_vertices(GL_LINES, 0, static_cast<int32_t>(debug_vertices_count));
         }
 
         transform_ubo.upload(0, sizeof(glm::mat4), &light_matrix);
@@ -681,24 +684,56 @@ auto main() -> int32_t
     }
 
     pavement_texture.destroy();
+     default_texture.destroy();
+
+    characters_packer.texture.destroy();
+    characters_faces_packer.texture.destroy();
+    font_packer.texture.destroy();
+
+    // TODO add a release() to SpriteAtlas and FontAtlas that destroys their vao, texture, vbo and ebo (SpriteAtlas keeps
+    //      its vbo/ebo only as locals in init() for now, they need to become members) and call it here for
+    //      character_atlas, characters_faces_atlas and font_atlas
 
       text_sampler.destroy();
      model_sampler.destroy();
     sprite_sampler.destroy();
 
-      cube_geometry_vao.destroy();
+            cube_geometry_vao.destroy();
+          sphere_geometry_vao.destroy();
+           plane_geometry_vao.destroy();
     atlas_viewer_geometry_vao.destroy();
+                    debug_vao.destroy();
+                    light_vao.destroy();
 
     cube_geometry_vbo.destroy();
     cube_geometry_ebo.destroy();
 
+    sphere_geometry_vbo.destroy();
+    sphere_geometry_ebo.destroy();
+
+    plane_geometry_vbo.destroy();
+    plane_geometry_ebo.destroy();
+
     atlas_viewer_geometry_vbo.destroy();
     atlas_viewer_geometry_ebo.destroy();
 
+    debug_vbo.destroy();
+
+    light_vbo.destroy();
+    light_ebo.destroy();
+
+       camera_ubo.destroy();
+         view_ubo.destroy();
+    transform_ubo.destroy();
+     material_ubo.destroy();
+        light_ubo.destroy();
+
     model_program_shader.destroy();
     sprite_program_shader.destroy();
+     basic_program_shader.destroy();
+      text_program_shader.destroy();
 
-    window->destroy();
+    window_manager.release();
 
     return 0;
 }

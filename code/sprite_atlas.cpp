@@ -11,15 +11,20 @@ auto SpriteAtlas::init(std::string_view filename) -> void
 {
     std::ifstream sprite_atlas_file { filename.data() };
 
+    if (!sprite_atlas_file)
+    {
+        std::println("Failed to open sprite atlas '{}'", filename);
+
+        return;
+    }
+
     std::string texture_filename;
     sprite_atlas_file >> texture_filename;
 
     const auto sprite_atlas_image = load_image(texture_filename);
 
-    uint32_t rectangles_count;
+    uint32_t rectangles_count { };
     sprite_atlas_file >> rectangles_count;
-
-    std::vector<sprite> sprites;
 
     geometry<sprite_vertex, uint32_t> sprites_geometry;
 
@@ -29,8 +34,6 @@ auto SpriteAtlas::init(std::string_view filename) -> void
 
         sprite sprite;
         sprite_atlas_file >> sprite.x >> sprite.y >> sprite.w >> sprite.h >> pivot;
-
-        sprites.emplace_back(sprite);
 
         // TODO this should be gone when we have a way to not override this everytime we are starting the app
         // NOTE: this runs for every atlas, so an index here is centred in both characters and characters_faces
@@ -64,6 +67,8 @@ auto SpriteAtlas::init(std::string_view filename) -> void
     _texture.create();
     _texture.allocate(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA8, 1);
     _texture.upload(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA, 0, sprite_atlas_image.pixels);
+
+    stbi_image_free(sprite_atlas_image.pixels);
 }
 
 auto SpriteAtlas::bind() const -> void

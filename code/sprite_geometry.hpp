@@ -10,7 +10,7 @@
 // TODO check if this flip_vertical parameter it makes what stbi_set_flip_vertically_on_load does for stb image on load
 //      flip_vertical = true  -> for textures stored bottom-up (e.g. framebuffer / render target textures)
 //      flip_vertical = false -> for textures loaded with stb_image (stored top-down)
-static auto create_sprite(const core::rect& bounds, const bool flip_vertical) -> geometry<sprite_vertex, uint32_t>
+inline auto create_sprite(const core::rect& bounds, const bool flip_vertical) -> geometry<sprite_vertex, uint32_t>
 {
     const auto v_top    = flip_vertical ? 1.0f : 0.0f;
     const auto v_bottom = flip_vertical ? 0.0f : 1.0f;
@@ -38,7 +38,7 @@ static auto create_sprite(const core::rect& bounds, const bool flip_vertical) ->
 // flip_vertical = true  -> for atlases stored bottom-up (e.g. SpritePacker::texture, rendered into a framebuffer)
 // flip_vertical = false -> for atlases loaded with stb_image (stored top-down)
 // TODO here we can drop the width  and height for the sprite? cause it can be computed from the rect min/max bounds?
-static auto create_sprite(const core::rect& bounds, const float x, const float y, const float width, const float height,
+inline auto create_sprite(const core::rect& bounds, const float x, const float y, const float width, const float height,
                           const float atlas_width, const float atlas_height, const bool flip_vertical) -> geometry<sprite_vertex, uint32_t>
 {
     const auto u_left   = x / atlas_width;
@@ -64,7 +64,7 @@ static auto create_sprite(const core::rect& bounds, const float x, const float y
     };
 }
 
-static auto create_sprite(const sprite_pivot pivot, const float x, const float y, const float width, const float height,
+inline auto create_sprite(const sprite_pivot pivot, const float x, const float y, const float width, const float height,
                           const float atlas_width, const float atlas_height, const bool flip_vertical) -> geometry<sprite_vertex, uint32_t>
 {
     switch (pivot)

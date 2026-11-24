@@ -8,7 +8,7 @@
 #include "geometry.hpp"
 
 [[nodiscard, maybe_unused]]
-static auto create_rectangle(const core::rect& bounds, const core::rgb& color) -> geometry<editor_vertex, uint32_t>
+inline auto create_rectangle(const core::rect& bounds, const core::rgb& color) -> geometry<editor_vertex, uint32_t>
 {
     constexpr auto default_z = 0.0f; // TODO maybe this can be a constant somewhere?
 
@@ -35,7 +35,7 @@ static auto create_rectangle(const core::rect& bounds, const core::rgb& color) -
 }
 
 [[nodiscard, maybe_unused]]
-static auto create_cube(const core::aabb& bounds, const core::rgb& color) -> geometry<editor_vertex, uint32_t>
+inline auto create_cube(const core::aabb& bounds, const core::rgb& color) -> geometry<editor_vertex, uint32_t>
 {
     return geometry<editor_vertex, uint32_t>
     {
@@ -71,7 +71,7 @@ static auto create_cube(const core::aabb& bounds, const core::rgb& color) -> geo
     };
 }
 
-static auto load_geometry(const std::string_view filename) -> geometry<model_vertex, uint32_t>
+inline auto load_geometry(const std::string_view filename) -> geometry<model_vertex, uint32_t>
 {
     Assimp::Importer importer;
 

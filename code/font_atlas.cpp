@@ -9,9 +9,9 @@
 // TODO maybe a better name? read/load/etc
 auto FontAtlas::init(std::string_view filename) -> void
 {
-    std::ifstream sprite_atlas_file { filename.data() };
+    std::ifstream font_atlas_file { filename.data() };
 
-    if (!sprite_atlas_file)
+    if (!font_atlas_file)
     {
         std::println("Failed to open font atlas '{}'", filename);
 
@@ -19,26 +19,26 @@ auto FontAtlas::init(std::string_view filename) -> void
     }
 
     std::string texture_filename;
-    sprite_atlas_file >> texture_filename;
+    font_atlas_file >> texture_filename;
 
-    const auto sprite_atlas_image = load_image(texture_filename);
+    const auto font_atlas_image = load_image(texture_filename);
 
-    width  = sprite_atlas_image.width;
-    height = sprite_atlas_image.height;
+    width  = font_atlas_image.width;
+    height = font_atlas_image.height;
 
     uint32_t rectangles_count { }; // initialized: if the read fails we draw nothing instead of looping over garbage
-    sprite_atlas_file >> rectangles_count;
+    font_atlas_file >> rectangles_count;
 
     for (auto i = 0; i < rectangles_count; i++)
     {
         sprite sprite;
-        sprite_atlas_file >> sprite.x >> sprite.y >> sprite.w >> sprite.h;
+        font_atlas_file >> sprite.x >> sprite.y >> sprite.w >> sprite.h;
 
         sprites.emplace_back(sprite);
     }
 
     _vbo.create();
-    _vbo.allocate(sizeof(sprite_vertex) * max_glyphs * 4, nullptr, GL_DYNAMIC_STORAGE_BIT);
+    _vbo.allocate(sizeof(text_vertex) * max_glyphs * 4, nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     _ebo.create();
     _ebo.allocate(sizeof(uint32_t) * max_glyphs * 6, nullptr, GL_DYNAMIC_STORAGE_BIT);
@@ -55,7 +55,9 @@ auto FontAtlas::init(std::string_view filename) -> void
 
     _texture.create();
     _texture.allocate(width, height, GL_R8, 1);
-    _texture.upload(width, height, GL_RED, 0, sprite_atlas_image.pixels);
+    _texture.upload(width, height, GL_RED, 0, font_atlas_image.pixels);
+
+    stbi_image_free(font_atlas_image.pixels);
 
     graphics::opengl::Pipeline::pixel_store(GL_UNPACK_ALIGNMENT, 4);
 }

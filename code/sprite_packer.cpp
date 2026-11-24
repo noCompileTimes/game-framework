@@ -81,18 +81,24 @@ auto SpritePacker::pack() -> void
 
     for (auto i = 0; i < rectangles_count; ++i)
     {
-        if (_rectangles[i].was_packed)
-        {
-            // TODO move this sprite atlas write into a separate function/class
-            // TODO find a better/best way to write this in a file
-            output_file << _rectangles[i].x << " " << _rectangles[i].y << " " << _rectangles[i].w << " " << _rectangles[i].h << " " << std::to_underlying(sprite_pivot::top_left) << std::endl;
+        auto& [w, h, x, y, was_packed] = _rectangles[i];
 
-            _geometry.append(create_sprite({ 0, 0,  static_cast<float>(_rectangles[i].w), static_cast<float>(_rectangles[i].h) }, false));
-        }
-        else
+        // a rect that did not fit keeps its line and quad as an empty rect, so the indexes of the next sprites do not shift
+        if (!was_packed)
         {
-            std::println("Rect FAILED to pack [Size: {}x{}]", _rectangles[i].w, _rectangles[i].h);
+            std::println("Rect FAILED to pack [Size: {}x{}]", w, h);
+
+            x = 0;
+            y = 0;
+            w = 0;
+            h = 0;
         }
+
+        // TODO move this sprite atlas write into a separate function/class
+        // TODO find a better/best way to write this in a file
+        output_file << x << " " << y << " " << w << " " << h << " " << std::to_underlying(sprite_pivot::top_left) << std::endl;
+
+        _geometry.append(create_sprite({ 0, 0,  static_cast<float>(w), static_cast<float>(h) }, false));
     }
 }
 
@@ -169,20 +175,25 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
 
     for (auto i = 0; i < _images.size(); i++)
     {
-        auto& rectangle = _rectangles[i];
+        auto& [w, h, x, y, was_packed] = _rectangles[i];
+
+        if (!was_packed) // nothing to draw, it is an empty rect in the txt (see pack())
+        {
+            continue;
+        }
 
         // TODO remove it if not needed later on
         auto parent_matrix = translate(glm::mat4(1.0f), { 0.0, 0.0, 0 });
 
-        auto rectangle_matrix = translate(parent_matrix, { rectangle.x, rectangle.y, 0.0f });
+        auto rectangle_matrix = translate(parent_matrix, { x, y, 0.0f });
         transform_ubo.upload(0, sizeof(glm::mat4), &rectangle_matrix);
 
         const auto& image = _images[i];
 
         graphics::opengl::Texture rectangle_texture { GL_TEXTURE_2D }; // TODO cache this into a set/map to not recreate it everytime if is the same size
         rectangle_texture.create();
-        rectangle_texture.allocate(rectangle.w, rectangle.h, GL_RGBA8, 1);
-        rectangle_texture.upload(rectangle.w, rectangle.h, GL_RGBA, 0, image.pixels);
+        rectangle_texture.allocate(w, h, GL_RGBA8, 1);
+        rectangle_texture.upload(w, h, GL_RGBA, 0, image.pixels);
         rectangle_texture.bind(0); // TODO use a constant here? like albedo?
 
         // TODO make a constant somewhere for this 6 to know about the elements of a sprite
@@ -205,6 +216,8 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
     {
         stbi_image_free(image.pixels);
     }
+
+    _images.clear();
 
     // TODO when we will have a resource/graphics manager maybe reuse these instead of delete? maybe it will save some time or something else
 

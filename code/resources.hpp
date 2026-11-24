@@ -2,7 +2,7 @@
 
 #include "image_data.hpp"
 
-static auto load_image(const std::string_view filename) -> image_data
+inline auto load_image(const std::string_view filename) -> image_data
 {
     image_data data { };
 
@@ -10,13 +10,13 @@ static auto load_image(const std::string_view filename) -> image_data
 
     if (data.pixels == nullptr)
     {
-        printf("Failed to load texture '%s': %s\n", filename.data(), stbi_failure_reason());
+        std::println("Failed to load texture '{}': {}", filename, stbi_failure_reason());
     }
 
     return data;
 }
 
-static auto load_images(const std::vector<std::string_view>& filenames) -> std::vector<image_data>
+inline auto load_images(const std::vector<std::string_view>& filenames) -> std::vector<image_data>
 {
     std::vector<image_data> data;
 
@@ -28,7 +28,7 @@ static auto load_images(const std::vector<std::string_view>& filenames) -> std::
     return data;
 }
 
-static auto load_textures(const std::string_view folder) -> std::vector<image_data>
+inline auto load_textures(const std::string_view folder) -> std::vector<image_data>
 {
     std::vector<std::filesystem::path> filenames;
 

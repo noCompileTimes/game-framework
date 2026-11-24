@@ -12,8 +12,6 @@ struct geometry
     std::vector<Vertex>  vertices;
     std::vector<Element> elements;
 
-    // TODO add some functions to be able to expend the geometry easy, something like an append
-
     auto append(const geometry& other) -> void
     {
         const auto offset = static_cast<Element>(vertices.size());
