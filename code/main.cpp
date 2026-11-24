@@ -67,38 +67,36 @@ auto main() -> int32_t
 
     gladLoadGL();
 
-    graphics::opengl::ShaderStage model_vertex_stage;
-    model_vertex_stage.create(GL_VERTEX_SHADER);
+    graphics::opengl::ShaderStage model_vertex_stage { GL_VERTEX_SHADER };
+    model_vertex_stage.create();
     model_vertex_stage.source(core::File::read("shaders/model_vert_shader.glsl"));
 
-    graphics::opengl::ShaderStage model_fragment_stage;
-    model_fragment_stage.type(GL_FRAGMENT_SHADER);
+    graphics::opengl::ShaderStage model_fragment_stage { GL_FRAGMENT_SHADER };
     model_fragment_stage.create();
     model_fragment_stage.source(core::File::read("shaders/model_frag_shader.glsl"));
 
-    graphics::opengl::ShaderStage sprite_vertex_stage;
-    sprite_vertex_stage.create(GL_VERTEX_SHADER);
+    graphics::opengl::ShaderStage sprite_vertex_stage { GL_VERTEX_SHADER };
+    sprite_vertex_stage.create();
     sprite_vertex_stage.source(core::File::read("shaders/sprite_vert_shader.glsl"));
 
-    graphics::opengl::ShaderStage sprite_fragment_stage;
-    sprite_fragment_stage.create(GL_FRAGMENT_SHADER);
+    graphics::opengl::ShaderStage sprite_fragment_stage { GL_FRAGMENT_SHADER };
+    sprite_fragment_stage.create();
     sprite_fragment_stage.source(core::File::read("shaders/sprite_frag_shader.glsl"));
 
-    graphics::opengl::ShaderStage basic_vertex_stage;
-    basic_vertex_stage.create(GL_VERTEX_SHADER);
+    graphics::opengl::ShaderStage basic_vertex_stage { GL_VERTEX_SHADER };
+    basic_vertex_stage.create();
     basic_vertex_stage.source(core::File::read("shaders/basic_vert_shader.glsl"));
 
-    graphics::opengl::ShaderStage basic_fragment_stage;
-    basic_fragment_stage.type(GL_FRAGMENT_SHADER);
+    graphics::opengl::ShaderStage basic_fragment_stage { GL_FRAGMENT_SHADER };
     basic_fragment_stage.create();
     basic_fragment_stage.source(core::File::read("shaders/basic_frag_shader.glsl"));
 
-    graphics::opengl::ShaderStage text_vertex_stage;
-    text_vertex_stage.create(GL_VERTEX_SHADER);
+    graphics::opengl::ShaderStage text_vertex_stage { GL_VERTEX_SHADER };
+    text_vertex_stage.create();
     text_vertex_stage.source(core::File::read("shaders/text_vert_shader.glsl"));
 
-    graphics::opengl::ShaderStage text_fragment_stage;
-    text_fragment_stage.create(GL_FRAGMENT_SHADER);
+    graphics::opengl::ShaderStage text_fragment_stage { GL_FRAGMENT_SHADER };
+    text_fragment_stage.create();
     text_fragment_stage.source(core::File::read("shaders/text_frag_shader.glsl"));
 
     graphics::opengl::ShaderProgram model_program_shader;
@@ -271,8 +269,7 @@ auto main() -> int32_t
 
     image_data pavement_image = load_image("textures/pavement_albedo.png");
 
-    graphics::opengl::Texture pavement_texture;
-    pavement_texture.type = GL_TEXTURE_2D;
+    graphics::opengl::Texture pavement_texture { GL_TEXTURE_2D };
     pavement_texture.create();
 
     pavement_texture.allocate(pavement_image.width, pavement_image.height, GL_RGB8, 1);
@@ -368,8 +365,7 @@ auto main() -> int32_t
 
     uint8_t default_pixels[3] { 255, 255, 255 };
 
-    graphics::opengl::Texture default_texture;
-    default_texture.type = GL_TEXTURE_2D;
+    graphics::opengl::Texture default_texture { GL_TEXTURE_2D };
     default_texture.create();
 
     default_texture.allocate(default_texture_width, default_texture_height, GL_RGB8, 1);
@@ -755,8 +751,6 @@ auto main() -> int32_t
 // TODO - use the range buffer binding
 
 // TODO - create a light opengl functions loader
-
-// TODO - decide which version to keep for shader stage type parameter | with the constructor or the function
 
 // TODO - name the shader files as the variables - CLAUDE
 

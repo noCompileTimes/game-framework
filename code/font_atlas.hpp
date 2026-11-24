@@ -26,7 +26,7 @@ public:
 private:
     static constexpr uint32_t max_glyphs = 2048; // for all the texts together, 4 vertices + 6 elements per glyph
 
-    graphics::opengl::Texture _texture;
+    graphics::opengl::Texture _texture { GL_TEXTURE_2D };
     graphics::opengl::VertexArray _vao;
 
     graphics::opengl::Buffer _vbo; // TODO destroy them at some point in a release function

@@ -104,7 +104,6 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
 
     // framebuffer - begin
 
-    texture.type = GL_TEXTURE_2D;
     texture.create();
     texture.allocate(_width, _height, GL_RGBA8, 1);
 
@@ -180,8 +179,7 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
 
         const auto& image = _images[i];
 
-        graphics::opengl::Texture rectangle_texture; // TODO cache this into a set/map to not recreate it everytime if is the same size
-        rectangle_texture.type = GL_TEXTURE_2D;
+        graphics::opengl::Texture rectangle_texture { GL_TEXTURE_2D }; // TODO cache this into a set/map to not recreate it everytime if is the same size
         rectangle_texture.create();
         rectangle_texture.allocate(rectangle.w, rectangle.h, GL_RGBA8, 1);
         rectangle_texture.upload(rectangle.w, rectangle.h, GL_RGBA, 0, image.pixels);

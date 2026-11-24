@@ -10,6 +10,6 @@ public:
     auto bind() const -> void; // TODO split this into bind_texture and bind_geometry (aka vao binding)?
 
 private:
-    graphics::opengl::Texture _texture;
+    graphics::opengl::Texture _texture { GL_TEXTURE_2D };
     graphics::opengl::VertexArray _vao;
 };

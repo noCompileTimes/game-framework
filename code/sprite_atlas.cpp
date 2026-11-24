@@ -61,7 +61,6 @@ auto SpriteAtlas::init(std::string_view filename) -> void
     _vao.attach_attribute({ 0, offsetof(sprite_vertex, position), 2, GL_FLOAT, 0 });
     _vao.attach_attribute({ 1, offsetof(sprite_vertex, texcoord), 2, GL_FLOAT, 0 });
 
-    _texture.type = GL_TEXTURE_2D;
     _texture.create();
     _texture.allocate(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA8, 1);
     _texture.upload(sprite_atlas_image.width, sprite_atlas_image.height, GL_RGBA, 0, sprite_atlas_image.pixels);

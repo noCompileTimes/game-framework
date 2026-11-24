@@ -53,7 +53,6 @@ auto FontAtlas::init(std::string_view filename) -> void
 
     graphics::opengl::Pipeline::pixel_store(GL_UNPACK_ALIGNMENT, 1);
 
-    _texture.type = GL_TEXTURE_2D;
     _texture.create();
     _texture.allocate(width, height, GL_R8, 1);
     _texture.upload(width, height, GL_RED, 0, sprite_atlas_image.pixels);
