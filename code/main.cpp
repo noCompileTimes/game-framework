@@ -356,6 +356,7 @@ auto main() -> int32_t
 
     graphics::opengl::Pipeline::enable(GL_MULTISAMPLE);
     graphics::opengl::Pipeline::enable(GL_BLEND);
+
     graphics::opengl::Pipeline::blend(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     glm::vec3   red_color { 1.0f, 0.0f, 0.0f };
@@ -744,9 +745,17 @@ auto main() -> int32_t
 //        ambient_factor (0.1), specular_intensity (0.5) and the shininess exponent (128.0) - they belong to the surface, not the light
 //        (keep the std140 layout in sync: data::material is alignas(16) with albedo_color as rgb, the new floats can fill the vec3 padding)
 
-// VERSION 2
+// TODO - common shader file for the shared blocks: camera_ubo (binding 0) and transform_ubo (binding 1) are copied in all 4 vertex
+//        shaders, u_albedo_texture (binding 0) in the model, sprite and text fragment shaders
+//        in the shaders: #extension GL_GOOGLE_include_directive : require + #include "common.glsl" (glslangValidator understands it)
+//        at runtime: a small loader next to core::File::read that replaces each #include "..." line with that file's contents
+//        and drops the #extension line (core opengl glsl has no #include)
+//        in the same change: move all 8 shaders from #version 430 to #version 450 (the #version line stays the first line of each
+//        shader, it cannot go in the include) and name the bindings in common.glsl - since glsl 4.40 a layout qualifier takes a
+//        constant, e.g. const int camera_binding = 0; layout (binding = camera_binding, std140) uniform camera_ubo
+//        (mirror data::binding: camera 0, transform 1, material 2, light 3, view 4 and texture_binding: albedo 0)
 
-// TODO - check if using function in glsl will break the performance? like for compute_direction_light, stuff like this
+// VERSION 2
 
 // TODO - integrate the imguizmo to use the rotation/orientation tool for the light cube
 // TODO - based on the orientation of the cube compute also a direction for the light to be set for the shader
