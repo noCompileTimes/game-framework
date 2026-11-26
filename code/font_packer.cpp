@@ -133,7 +133,7 @@ auto FontPacker::build(const graphics::opengl::ShaderProgram& shader, const grap
 
     graphics::opengl::Buffer framebuffer_pbo;
     framebuffer_pbo.create();
-    framebuffer_pbo.allocate(buffer_size, nullptr, GL_MAP_READ_BIT);
+    framebuffer_pbo.allocate(buffer_size, nullptr, GL_MAP_READ_BIT | GL_CLIENT_STORAGE_BIT);
     framebuffer_pbo.bind(GL_PIXEL_PACK_BUFFER);
 
     // glyph quads
@@ -186,7 +186,7 @@ auto FontPacker::build(const graphics::opengl::ShaderProgram& shader, const grap
     {
         auto& [w, h, x, y, was_packed] = _rectangles[i];
 
-        if (!was_packed)
+        if (!was_packed || w == 0 || h == 0)
         {
             continue;
         }

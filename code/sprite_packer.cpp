@@ -126,7 +126,7 @@ auto SpritePacker::build(const graphics::opengl::ShaderProgram& shader, const gr
 
     graphics::opengl::Buffer framebuffer_pbo;
     framebuffer_pbo.create();
-    framebuffer_pbo.allocate(buffer_size, nullptr, GL_MAP_READ_BIT);
+    framebuffer_pbo.allocate(buffer_size, nullptr, GL_MAP_READ_BIT | GL_CLIENT_STORAGE_BIT);
     framebuffer_pbo.bind(GL_PIXEL_PACK_BUFFER);
 
     // sprites

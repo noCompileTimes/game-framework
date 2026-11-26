@@ -66,8 +66,7 @@ auto main() -> int32_t
         window_is_running = false;
     };
 
-    // TODO - move it in a Functions class maybe?
-    gladLoadGL();
+    gladLoadGL(); // TODO - move it in a Functions class maybe?
 
     graphics::opengl::PipelineDebug::init();
 
