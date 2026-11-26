@@ -39,7 +39,7 @@ auto main() -> int32_t
 {
     constexpr core::window::configuration window_configuration
     {
-        "Game Framework", 1920, 1080, 4
+        "Game Framework", 1920, 1080, 4, GLFW_TRUE
     };
 
     const std::unique_ptr<core::base::WindowFactory> window_factory = std::make_unique<backends::glfw::WindowFactory>();
@@ -68,9 +68,12 @@ auto main() -> int32_t
 
     gladLoadGL(); // TODO - move it in a Functions class maybe?
 
-    graphics::opengl::PipelineDebug::init();
+    if (window_configuration.debug == GLFW_TRUE)
+    {
+        graphics::opengl::PipelineDebug::init();
 
-    graphics::opengl::PipelineDebug::disable(GL_DEBUG_SEVERITY_NOTIFICATION);
+        graphics::opengl::PipelineDebug::disable(GL_DEBUG_SEVERITY_NOTIFICATION);
+    }
 
     graphics::opengl::ShaderStage model_vertex_stage { GL_VERTEX_SHADER };
     model_vertex_stage.create();
