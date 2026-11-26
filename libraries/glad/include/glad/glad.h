@@ -267,7 +267,6 @@ typedef void (APIENTRY *GLDEBUGPROCAMD)(GLuint id,GLenum category,GLenum severit
 #define GL_ALPHA 0x1906
 #define GL_RGB 0x1907
 #define GL_RGBA 0x1908
-#define GL_POINT 0x1B00
 #define GL_LINE 0x1B01
 #define GL_FILL 0x1B02
 #define GL_KEEP 0x1E00

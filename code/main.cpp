@@ -12,6 +12,7 @@
 #include "graphics/opengl/shader_program.hpp"
 #include "graphics/opengl/texture_sampler.hpp"
 #include "graphics/opengl/framebuffer.hpp"
+#include "graphics/opengl/pipeline_debug.hpp"
 
 #include "data/binding.hpp"
 #include "data/camera.hpp"
@@ -452,6 +453,7 @@ auto main() -> int32_t
 
     static auto show_cube = true;
     static auto show_body = true;
+    static auto show_wire = false;
 
     glfwSetKeyCallback(std::any_cast<GLFWwindow*>(window->handle()), [](GLFWwindow*, const int32_t key, int32_t, const int32_t action, int32_t)
     {
@@ -477,6 +479,11 @@ auto main() -> int32_t
         if (key == GLFW_KEY_TAB && action == GLFW_PRESS)
         {
             show_body = !show_body;
+        }
+
+        if (key == GLFW_KEY_Q && action == GLFW_PRESS)
+        {
+            show_wire = !show_wire;
         }
     });
 
@@ -527,6 +534,11 @@ auto main() -> int32_t
         graphics::opengl::Commands::viewport(0, 0, window_width, window_height);
 
         // 3D drawing
+
+        if (show_wire)
+        {
+            graphics::opengl::PipelineDebug::polygon_mode(GL_LINE);
+        }
 
         graphics::opengl::Pipeline::enable(GL_DEPTH_TEST);
 
@@ -594,6 +606,9 @@ auto main() -> int32_t
         light_vao.bind();
 
         graphics::opengl::Commands::draw_elements(GL_LINES, 0, light_geometry_elements.size());
+
+        // TODO in the future find a better way, this should not be called every frame? if it is off the show_wire
+        graphics::opengl::PipelineDebug::polygon_mode(GL_FILL);
 
         // 2D drawing
 
@@ -808,6 +823,7 @@ auto main() -> int32_t
 
 // TODO - have this #define GL_COLOR_ATTACHMENT0 0x8CE0 as a variable representing the albedo?
 // TODO - remove everything (functions) related to GL_POINTS | we will never render points or something like this
+// TODO - remove every function related to lines, but not the GL_LINES, cause we will not need them at any point in time
 
 // TODO - resolve the flipping of the y from the ortho matrix (need to recheck all the sprites/fonts)
 
