@@ -2628,9 +2628,6 @@ GLAPI PFNGLDEBUGMESSAGEINSERTPROC glad_glDebugMessageInsert;
 typedef void (APIENTRYP PFNGLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC callback, const void *userParam);
 GLAPI PFNGLDEBUGMESSAGECALLBACKPROC glad_glDebugMessageCallback;
 #define glDebugMessageCallback glad_glDebugMessageCallback
-typedef GLuint (APIENTRYP PFNGLGETDEBUGMESSAGELOGPROC)(GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog);
-GLAPI PFNGLGETDEBUGMESSAGELOGPROC glad_glGetDebugMessageLog;
-#define glGetDebugMessageLog glad_glGetDebugMessageLog
 typedef void (APIENTRYP PFNGLPUSHDEBUGGROUPPROC)(GLenum source, GLuint id, GLsizei length, const GLchar *message);
 GLAPI PFNGLPUSHDEBUGGROUPPROC glad_glPushDebugGroup;
 #define glPushDebugGroup glad_glPushDebugGroup

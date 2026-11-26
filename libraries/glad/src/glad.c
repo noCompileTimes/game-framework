@@ -446,7 +446,6 @@ PFNGLGETBUFFERSUBDATAPROC glad_glGetBufferSubData = NULL;
 PFNGLGETCOMPRESSEDTEXIMAGEPROC glad_glGetCompressedTexImage = NULL;
 PFNGLGETCOMPRESSEDTEXTUREIMAGEPROC glad_glGetCompressedTextureImage = NULL;
 PFNGLGETCOMPRESSEDTEXTURESUBIMAGEPROC glad_glGetCompressedTextureSubImage = NULL;
-PFNGLGETDEBUGMESSAGELOGPROC glad_glGetDebugMessageLog = NULL;
 PFNGLGETDOUBLEI_VPROC glad_glGetDoublei_v = NULL;
 PFNGLGETDOUBLEVPROC glad_glGetDoublev = NULL;
 PFNGLGETERRORPROC glad_glGetError = NULL;
@@ -1228,7 +1227,6 @@ static void load_GL_VERSION_4_3(GLADloadproc load) {
 	glad_glDebugMessageControl = (PFNGLDEBUGMESSAGECONTROLPROC)load("glDebugMessageControl");
 	glad_glDebugMessageInsert = (PFNGLDEBUGMESSAGEINSERTPROC)load("glDebugMessageInsert");
 	glad_glDebugMessageCallback = (PFNGLDEBUGMESSAGECALLBACKPROC)load("glDebugMessageCallback");
-	glad_glGetDebugMessageLog = (PFNGLGETDEBUGMESSAGELOGPROC)load("glGetDebugMessageLog");
 	glad_glPushDebugGroup = (PFNGLPUSHDEBUGGROUPPROC)load("glPushDebugGroup");
 	glad_glPopDebugGroup = (PFNGLPOPDEBUGGROUPPROC)load("glPopDebugGroup");
 	glad_glObjectLabel = (PFNGLOBJECTLABELPROC)load("glObjectLabel");

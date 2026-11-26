@@ -174,10 +174,7 @@ void _glfwInputWindowMonitor(_GLFWwindow* window, _GLFWmonitor* monitor)
 //////                        GLFW public API                       //////
 //////////////////////////////////////////////////////////////////////////
 
-GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
-                                     const char* title,
-                                     GLFWmonitor* monitor,
-                                     GLFWwindow* share)
+GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share)
 {
     _GLFWfbconfig fbconfig;
     _GLFWctxconfig ctxconfig;
@@ -193,8 +190,7 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
     if (width <= 0 || height <= 0)
     {
         _glfwInputError(GLFW_INVALID_VALUE,
-                        "Invalid window size %ix%i",
-                        width, height);
+                        "Invalid window size %ix%i", width, height);
 
         return NULL;
     }
@@ -249,10 +245,8 @@ GLFWAPI GLFWwindow* glfwCreateWindow(int width, int height,
     return (GLFWwindow*) window;
 }
 
-void glfwDefaultWindowHints(void)
+void glfwDefaultWindowHints()
 {
-    _GLFW_REQUIRE_INIT();
-
     memset(&_glfw.hints.context, 0, sizeof(_glfw.hints.context));
     _glfw.hints.context.client = GLFW_OPENGL_API;
     _glfw.hints.context.source = GLFW_NATIVE_CONTEXT_API;

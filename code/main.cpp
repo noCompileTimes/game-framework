@@ -66,7 +66,12 @@ auto main() -> int32_t
         window_is_running = false;
     };
 
+    // TODO - move it in a Functions class maybe?
     gladLoadGL();
+
+    graphics::opengl::PipelineDebug::init();
+
+    graphics::opengl::PipelineDebug::disable(GL_DEBUG_SEVERITY_NOTIFICATION);
 
     graphics::opengl::ShaderStage model_vertex_stage { GL_VERTEX_SHADER };
     model_vertex_stage.create();
@@ -793,11 +798,6 @@ auto main() -> int32_t
 // TODO - make a SpriteAtlasViewer/FontViewer or maybe even TextureViewer class
 
 // TODO - be sure that in all the modules and frameworks (currently just one) the cmake functions have the same order in all of the CMakeFile lists
-
-// TODO - add the opengl debug output: glEnable(GL_DEBUG_OUTPUT) + glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS) + glDebugMessageCallback
-//        (glad already has glDebugMessageCallback/glDebugMessageControl), filter the notifications with glDebugMessageControl
-//        and create the glfw context as a debug context so the driver reports more - it catches errors like upload() on
-//        a buffer without GL_DYNAMIC_STORAGE_BIT (GL_INVALID_OPERATION) that otherwise fail silently
 
 // TODO - when there are many objects, put all the transforms in one buffer with a slot per object and bind a range per draw
 //        instead of the many small transform_ubo.upload() calls (each one makes the driver sync on the same buffer)

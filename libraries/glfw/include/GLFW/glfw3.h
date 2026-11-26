@@ -1017,11 +1017,6 @@ extern "C" {
  *  [attribute](@ref GLFW_CONTEXT_DEBUG_attrib).
  */
 #define GLFW_CONTEXT_DEBUG          0x00022007
-/*! @brief Legacy name for compatibility.
- *
- *  This is an alias for compatibility with earlier versions.
- */
-#define GLFW_OPENGL_DEBUG_CONTEXT   GLFW_CONTEXT_DEBUG
 /*! @brief Context flush-on-release hint and attribute.
  *
  *  Context flush-on-release [hint](@ref GLFW_CONTEXT_RELEASE_BEHAVIOR_hint) and
