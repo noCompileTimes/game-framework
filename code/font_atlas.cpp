@@ -78,17 +78,16 @@ auto FontAtlas::bind() const -> void
         _vao.bind();
 }
 
-auto FontAtlas::add(const geometry<sprite_vertex, uint32_t>& text_geometry) -> std::optional<uint32_t>
+auto FontAtlas::add(const geometry<sprite_vertex, uint32_t>& text_geometry) -> std::expected<uint32_t, std::string>
 {
     // TODO this could not be done with geometry append?
     const auto vertices_count = static_cast<uint32_t>(text_geometry.vertices.size());
     const auto elements_count = static_cast<uint32_t>(text_geometry.elements.size());
 
-    if (_vertex_count + vertices_count > max_glyphs * 4 || _element_count + elements_count > max_glyphs * 6)
+    if ( _vertex_count + vertices_count > max_glyphs * 4 ||
+        _element_count + elements_count > max_glyphs * 6)
     {
-        std::println("Font atlas buffers are full, the text was not added (max {} glyphs)", max_glyphs);
-
-        return std::nullopt;
+        return std::unexpected(std::format("Font atlas buffers are full, the text was not added (max {} glyphs)", max_glyphs));
     }
 
     // the text geometry elements start from 0, shift them to where its vertices land in the shared vbo

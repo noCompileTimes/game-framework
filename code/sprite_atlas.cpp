@@ -40,7 +40,7 @@ auto SpriteAtlas::init(std::string_view filename) -> void
         //       characters: 3, 5 (blue), 41, 44 (red), 50, 59 (yellow) | characters_faces: 6, 10, 11
         if (i == 3 || i == 5 || i == 41 || i == 44 || i == 50 || i == 59 || i == 6 || i == 10 || i == 11)
         {
-            pivot = static_cast<uint32_t>(sprite_pivot::center);
+            pivot = std::to_underlying(sprite_pivot::center);
         }
 
         // TODO this can be made in another for loop after we are done with the reading? make sense?

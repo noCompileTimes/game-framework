@@ -7,7 +7,7 @@
 class Font
 {
 public:
-    auto load(const std::string& filename) -> int32_t;
+    auto load(const std::string& filename) -> std::expected<void, std::string>;
 
     auto release_images() -> void;
 

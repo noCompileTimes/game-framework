@@ -59,4 +59,8 @@ auto Text::build(const Font& font, FontAtlas& font_atlas) -> void
         start = *text_start;
         count = static_cast<uint32_t>(sprites_geometry.elements.size());
     }
+    else
+    {
+        std::println("{}", text_start.error());
+    }
 }

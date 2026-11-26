@@ -327,9 +327,11 @@ auto main() -> int32_t
 
     Font default_font;
 
-    if (auto font_result = default_font.load("Antonio-Bold.ttf"); font_result != 0)
+    if (const auto result = default_font.load("Antonio-Bold.ttf"); !result)
     {
-        return font_result;
+        std::println("{}", result.error());
+
+        return -1;
     }
 
     FontPacker font_packer { "textures/font", 512, 512 };

@@ -1,12 +1,12 @@
 #include "font.hpp"
 
-auto Font::load(const std::string& filename) -> int32_t
+auto Font::load(const std::string& filename) -> std::expected<void, std::string>
 {
     FT_Library ft_library;
 
     if (FT_Init_FreeType(&ft_library))
     {
-        return -1;
+        return std::unexpected("FreeType could not be initialized");
     }
 
     FT_Face ft_face;
@@ -15,7 +15,7 @@ auto Font::load(const std::string& filename) -> int32_t
     {
         FT_Done_FreeType(ft_library);
 
-        return -1;
+        return std::unexpected(std::format("Font {} could not be loaded", filename));
     }
 
     FT_Set_Pixel_Sizes(ft_face, 0, 48);
@@ -76,7 +76,7 @@ auto Font::load(const std::string& filename) -> int32_t
     FT_Done_Face(ft_face);
     FT_Done_FreeType(ft_library);
 
-    return 0;
+    return { };
 }
 
 auto Font::release_images() -> void

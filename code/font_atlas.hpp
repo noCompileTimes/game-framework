@@ -16,9 +16,9 @@ public:
 
     auto bind() const -> void;
 
-    // appends the glyph quads of one text into the shared vbo/ebo, returns the start (in elements) to draw it from, nullopt if the buffers are full
+    // appends the glyph quads of one text into the shared vbo/ebo, returns the start (in elements) to draw it from, an error message if the buffers are full
     // TODO use text_vertex once create_sprite can build it (same layout as sprite_vertex for now)
-    auto add(const geometry<sprite_vertex, uint32_t>& text_geometry) -> std::optional<uint32_t>;
+    auto add(const geometry<sprite_vertex, uint32_t>& text_geometry) -> std::expected<uint32_t, std::string>;
 
     std::vector<sprite> sprites;
 
